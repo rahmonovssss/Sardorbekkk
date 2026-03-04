@@ -3,145 +3,206 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sardorbek Pro Quiz</title>
+    <title>Sardorbek Pro System</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
     <style>
         :root {
-            --bg: #0f172a; --card: #1e293b; --accent: #38bdf8;
-            --text: #f8fafc; --success: #22c55e; --warning: #f59e0b;
+            --primary: #6366f1; --secondary: #a855f7; --dark: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7); --text: #f8fafc;
         }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         body {
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            background-color: var(--bg); color: var(--text);
-            margin: 0; padding: 0; overflow-x: hidden;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: radial-gradient(circle at top right, #1e1b4b, #0f172a);
+            color: var(--text); margin: 0; min-height: 100vh; overflow-x: hidden;
         }
+
+        /* Sahifalar */
         .page {
-            display: none; min-height: 100vh; padding: 20px;
-            flex-direction: column; align-items: center; justify-content: center;
-            animation: fadeIn 0.5s ease;
+            display: none; min-height: 100vh; width: 100%;
+            padding: 20px; flex-direction: column; position: absolute;
+            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .active { display: flex; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .active { display: flex; animation: slideIn 0.5s forwards; }
+        @keyframes slideIn { from { opacity: 0; filter: blur(10px); transform: scale(0.95); } to { opacity: 1; filter: blur(0); transform: scale(1); } }
+
+        /* Shisha (Glassmorphism) Effekti */
+        .glass {
+            background: var(--card-bg); backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 24px;
+            padding: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        }
 
         /* Splash Screen */
-        #splash { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); }
-        .logo { font-size: 45px; font-weight: bold; color: var(--accent); text-shadow: 0 0 20px rgba(56, 189, 248, 0.5); }
-
-        /* Auth Form */
-        .card { background: var(--card); padding: 25px; border-radius: 20px; width: 100%; max-width: 400px; border: 1px solid #334155; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: white; }
-        button { width: 100%; padding: 15px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; }
-        .btn-primary { background: var(--accent); color: #000; }
-        .btn-outline { background: transparent; border: 1px solid var(--accent); color: var(--accent); }
-
-        /* Menu & Cards */
-        .subject-card {
-            background: var(--card); width: 100%; max-width: 400px;
-            padding: 20px; border-radius: 15px; margin-bottom: 15px;
-            display: flex; justify-content: space-between; align-items: center;
-            border: 1px solid #334155;
+        #splash { justify-content: center; align-items: center; background: #0f172a; z-index: 1000; }
+        .loader-ring {
+            width: 80px; height: 80px; border: 4px solid transparent;
+            border-top-color: var(--primary); border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Inputs & Buttons */
+        input {
+            width: 100%; background: rgba(15, 23, 42, 0.6); border: 1.5px solid #334155;
+            padding: 14px 20px; border-radius: 16px; color: white; margin: 10px 0;
+            transition: 0.3s; font-size: 16px;
+        }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(99, 102, 241, 0.3); }
+
+        .btn {
+            width: 100%; padding: 16px; border-radius: 16px; border: none;
+            font-weight: 700; cursor: pointer; transition: 0.3s;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        .btn-main { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; }
+        .btn-main:active { transform: scale(0.98); opacity: 0.9; }
+
+        /* Subject Cards */
+        .subject-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; margin-top: 20px; }
+        .sub-card {
+            background: var(--card-bg); padding: 20px; border-radius: 20px;
+            text-align: center; border: 1px solid rgba(255,255,255,0.05);
+            transition: 0.3s;
+        }
+        .sub-card i { font-size: 30px; margin-bottom: 10px; display: block; color: var(--primary); }
+        .sub-card:active { background: var(--primary); }
 
         /* Quiz UI */
-        .timer { font-size: 24px; color: var(--warning); font-weight: bold; margin-bottom: 10px; }
-        .q-box { font-size: 20px; margin: 20px 0; text-align: center; }
-        .option {
-            width: 100%; background: #334155; padding: 15px;
-            margin: 8px 0; border-radius: 10px; cursor: pointer;
+        .timer-bar {
+            width: 100%; height: 6px; background: #334155; border-radius: 3px;
+            margin: 20px 0; overflow: hidden;
         }
-        .option:active { background: var(--accent); color: #000; }
+        .progress { width: 100%; height: 100%; background: var(--primary); transition: 1s linear; }
+        .option {
+            background: rgba(51, 65, 85, 0.5); padding: 18px; margin: 12px 0;
+            border-radius: 16px; cursor: pointer; border: 1px solid transparent;
+        }
+        .option.correct { background: #10b981; border-color: #34d399; }
+        .option.wrong { background: #ef4444; border-color: #f87171; }
     </style>
 </head>
 <body>
 
     <div id="splash" class="page active">
-        <div class="logo">SARDORBEK</div>
-        <p>Yuklanmoqda...</p>
+        <div style="text-align:center">
+            <div class="loader-ring"></div>
+            <h1 style="margin-top:20px; letter-spacing:5px;">SARDORBEK</h1>
+            <p style="color: #64748b;">PREMIUM TEST SYSTEM</p>
+        </div>
     </div>
 
     <div id="auth" class="page">
-        <div class="card">
-            <h2>Kirish</h2>
-            <input type="email" id="email" placeholder="E-mail">
-            <input type="password" id="pass" placeholder="Parol">
-            <button class="btn-primary" onclick="showPage('mode')">KIRISH</button>
-            <button class="btn-outline">RO'YXATDAN O'TISH</button>
+        <div style="margin-top: 50px;">
+            <h1>Xush kelibsiz!</h1>
+            <p style="color:#94a3b8">Tizimga kirish uchun ma'lumotlarni kiriting</p>
+        </div>
+        <div class="glass" style="margin-top: 30px;">
+            <input type="email" placeholder="Email manzilingiz">
+            <input type="password" placeholder="Parolingiz">
+            <button class="btn btn-main" onclick="showPage('mode')">Kirish <i class="fas fa-arrow-right"></i></button>
         </div>
     </div>
 
     <div id="mode" class="page">
         <h2>Rejimni tanlang</h2>
-        <div class="subject-card" onclick="showPage('main')">
-            <span>🆓 BEPUL TESTLAR</span>
-            <button style="width:auto; margin:0" class="btn-primary">Kirish</button>
+        <div class="glass" onclick="showPage('main')" style="margin-bottom:20px; border-left: 5px solid #10b981;">
+            <h3 style="margin:0"><i class="fas fa-bolt" style="color:#10b981"></i> BEPUL REJIM</h3>
+            <p style="margin:5px 0 0 0; font-size:14px; color:#94a3b8">Cheklangan savollar to'plami</p>
         </div>
-        <div class="subject-card" style="border-color: var(--warning);" onclick="alert('Admin bilan bog\'laning!')">
-            <span>💰 PULLI TESTLAR</span>
-            <button style="width:auto; margin:0; background: var(--warning);" class="btn-primary">Sotib olish</button>
+        <div class="glass" onclick="alert('Admin bilan bog\'laning!')" style="border-left: 5px solid #f59e0b;">
+            <h3 style="margin:0"><i class="fas fa-crown" style="color:#f59e0b"></i> PREMIUM REJIM</h3>
+            <p style="margin:5px 0 0 0; font-size:14px; color:#94a3b8">Barcha fanlar va tahlillar ochiq</p>
         </div>
     </div>
 
     <div id="main" class="page">
-        <h2>Fanlar</h2>
-        <div class="subject-card" onclick="startQuiz('Matematika')"><span>🧮 Matematika</span></div>
-        <div class="subject-card" onclick="startQuiz('Tarix')"><span>📜 Tarix</span></div>
-        <div class="subject-card" onclick="startQuiz('Ona tili')"><span>📚 Ona tili</span></div>
-    </div>
+        <div style="display:flex; justify-content:space-between; align-items:center">
+            <div>
+                <h2 style="margin:0">Fanlar</h2>
+                <p style="color:#94a3b8; font-size:14px">O'zingizga mos yo'nalishni tanlang</p>
+            </div>
+            <div class="glass" style="padding:10px 15px; border-radius:15px">
+                <i class="fas fa-user text-primary"></i>
+            </div>
+        </div>
 
-    <div id="quiz" class="page">
-        <div class="timer" id="timer">90:00</div>
-        <div class="card">
-            <div id="q-count">Savol: 1/10</div>
-            <div class="q-box" id="q-text">Savol yuklanmoqda...</div>
-            <div id="options-box"></div>
+        <div class="subject-grid">
+            <div class="sub-card" onclick="startQuiz('Matematika')">
+                <i class="fas fa-calculator"></i>
+                <span>Matematika</span>
+            </div>
+            <div class="sub-card" onclick="startQuiz('Tarix')">
+                <i class="fas fa-landmark"></i>
+                <span>Tarix</span>
+            </div>
+            <div class="sub-card" onclick="startQuiz('Ona tili')">
+                <i class="fas fa-book"></i>
+                <span>Ona tili</span>
+            </div>
+            <div class="sub-card" onclick="startQuiz('Ingliz tili')">
+                <i class="fas fa-language"></i>
+                <span>Ingliz tili</span>
+            </div>
         </div>
     </div>
 
-    <div id="result" class="page">
-        <div class="card" style="text-align: center;">
-            <h1 style="color: var(--success)">Natija</h1>
-            <div id="score-text" style="font-size: 25px;">10 dan 8 to'g'ri</div>
-            <button class="btn-primary" onclick="showPage('main')">YANGI TEST</button>
+    <div id="quiz" class="page">
+        <div style="display:flex; justify-content:space-between; align-items:center">
+            <span id="q-count" style="font-weight:bold">Savol: 1/10</span>
+            <span id="timer-text" style="color:var(--secondary)">15:00</span>
+        </div>
+        <div class="timer-bar"><div class="progress" id="timer-progress"></div></div>
+        
+        <div class="glass" style="min-height: 150px; display:flex; align-items:center; justify-content:center; text-align:center">
+            <h3 id="q-text" style="margin:0">...</h3>
+        </div>
+
+        <div id="options-box" style="margin-top:20px"></div>
+    </div>
+
+    <div id="result" class="page" style="justify-content:center; align-items:center; text-align:center">
+        <div class="glass" style="width:100%">
+            <div style="font-size:60px; color:#10b981; margin-bottom:20px"><i class="fas fa-check-circle"></i></div>
+            <h1>Natijangiz</h1>
+            <div id="score-text" style="font-size:35px; font-weight:900; color:var(--primary)">0 / 0</div>
+            <p id="feedback" style="color:#94a3b8; margin-bottom:30px">Yaxshi natija!</p>
+            <button class="btn btn-main" onclick="showPage('main')">Asosiy menyuga qaytish</button>
         </div>
     </div>
 
     <script>
-        // Sahifalarni almashtirish funksiyasi
-        function showPage(pageId) {
+        function showPage(id) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(pageId).classList.add('active');
+            document.getElementById(id).classList.add('active');
         }
 
-        // Splashni 3 soniyadan keyin o'chirish
-        setTimeout(() => showPage('auth'), 3000);
+        // Splash Timer
+        setTimeout(() => showPage('auth'), 2500);
 
-        // Savollar bazasi
         const database = {
             "Matematika": [
-                {q: "5 + 7 = ?", opt: ["10", "12", "13", "11"], a: 1},
-                {q: "25 ning ildizi?", opt: ["4", "5", "6", "3"], a: 1}
+                {q: "Ildiz ostida 144 dan necha chiqadi?", opt: ["10", "12", "14", "16"], a: 1},
+                {q: "Uchburchak ichki burchaklari yig'indisi?", opt: ["90°", "180°", "270°", "360°"], a: 1}
             ],
             "Tarix": [
-                {q: "Amir Temur nechanchi yilda tug'ilgan?", opt: ["1336", "1342", "1405", "1299"], a: 0}
+                {q: "Amir Temur nechanchi yilda vafot etgan?", opt: ["1405", "1336", "1447", "1399"], a: 0}
             ]
         };
 
-        let currentSubject = "";
-        let currentIdx = 0;
-        let score = 0;
+        let currentSub = "", currentIdx = 0, score = 0;
 
         function startQuiz(sub) {
-            currentSubject = sub;
-            currentIdx = 0;
-            score = 0;
+            currentSub = sub; currentIdx = 0; score = 0;
             showPage('quiz');
             loadQuestion();
         }
 
         function loadQuestion() {
-            const data = database[currentSubject][currentIdx];
+            const data = database[currentSub][currentIdx];
             document.getElementById('q-text').innerText = data.q;
-            document.getElementById('q-count').innerText = `Savol: ${currentIdx + 1}/${database[currentSubject].length}`;
+            document.getElementById('q-count').innerText = `Savol: ${currentIdx + 1}/${database[currentSub].length}`;
             
             const box = document.getElementById('options-box');
             box.innerHTML = "";
@@ -149,24 +210,29 @@
                 const d = document.createElement('div');
                 d.className = "option";
                 d.innerText = o;
-                d.onclick = () => checkAnswer(i);
+                d.onclick = () => checkAnswer(i, d);
                 box.appendChild(d);
             });
         }
 
-        function checkAnswer(i) {
-            if(i === database[currentSubject][currentIdx].a) score++;
-            
-            currentIdx++;
-            if(currentIdx < database[currentSubject].length) {
-                loadQuestion();
+        function checkAnswer(i, el) {
+            const correct = database[currentSub][currentIdx].a;
+            if(i === correct) {
+                el.classList.add('correct');
+                score++;
             } else {
-                finishQuiz();
+                el.classList.add('wrong');
             }
+            
+            setTimeout(() => {
+                currentIdx++;
+                if(currentIdx < database[currentSub].length) loadQuestion();
+                else finish();
+            }, 600);
         }
 
-        function finishQuiz() {
-            document.getElementById('score-text').innerText = `${database[currentSubject].length} dan ${score} ta to'g'ri`;
+        function finish() {
+            document.getElementById('score-text').innerText = `${database[currentSub].length} dan ${score} ta`;
             showPage('result');
         }
     </script>
