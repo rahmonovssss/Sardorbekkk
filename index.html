@@ -3,237 +3,205 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sardorbek Pro System</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+    <title>Sardorbek Premium Quiz</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <style>
-        :root {
-            --primary: #6366f1; --secondary: #a855f7; --dark: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.7); --text: #f8fafc;
-        }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-        body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            background: radial-gradient(circle at top right, #1e1b4b, #0f172a);
-            color: var(--text); margin: 0; min-height: 100vh; overflow-x: hidden;
-        }
+        :root { --p: #2196F3; --bg: #1A2D4D; --card: #12233f; --text: #ffffff; }
+        body { font-family: sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; }
+        .page { display: none; min-height: 100vh; padding: 20px; box-sizing: border-box; }
+        .active { display: flex; flex-direction: column; }
+        
+        /* Splash Activity uslubi */
+        #splash-page { justify-content: center; align-items: center; background: #2196F3; }
+        .logo-text { font-size: 40px; font-weight: bold; border: 4px solid white; padding: 10px 25px; }
 
-        /* Sahifalar */
-        .page {
-            display: none; min-height: 100vh; width: 100%;
-            padding: 20px; flex-direction: column; position: absolute;
-            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .active { display: flex; animation: slideIn 0.5s forwards; }
-        @keyframes slideIn { from { opacity: 0; filter: blur(10px); transform: scale(0.95); } to { opacity: 1; filter: blur(0); transform: scale(1); } }
+        /* Login & Register uslubi (activity_register.xml ga o'xshash) */
+        .input-group { background: #f0f4f8; padding: 25px; border-radius: 20px; color: #333; margin-top: 20px; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #ccc; }
+        .btn { width: 100%; padding: 15px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
+        .btn-blue { background: #007AFF; color: white; margin-bottom: 10px; }
+        .btn-white { background: white; color: #007AFF; border: 1px solid #007AFF; }
 
-        /* Shisha (Glassmorphism) Effekti */
-        .glass {
-            background: var(--card-bg); backdrop-filter: blur(12px);
-            border: 1px solid rgba(255,255,255,0.1); border-radius: 24px;
-            padding: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-        }
+        /* ChooseMode uslubi */
+        .mode-btn { padding: 20px; margin: 10px 0; border-radius: 15px; font-size: 18px; text-align: center; font-weight: bold; }
+        .premium { background: #FFC107; color: #1A2D4D; }
+        .free { background: #4CAF50; color: white; }
 
-        /* Splash Screen */
-        #splash { justify-content: center; align-items: center; background: #0f172a; z-index: 1000; }
-        .loader-ring {
-            width: 80px; height: 80px; border: 4px solid transparent;
-            border-top-color: var(--primary); border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* Inputs & Buttons */
-        input {
-            width: 100%; background: rgba(15, 23, 42, 0.6); border: 1.5px solid #334155;
-            padding: 14px 20px; border-radius: 16px; color: white; margin: 10px 0;
-            transition: 0.3s; font-size: 16px;
-        }
-        input:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(99, 102, 241, 0.3); }
-
-        .btn {
-            width: 100%; padding: 16px; border-radius: 16px; border: none;
-            font-weight: 700; cursor: pointer; transition: 0.3s;
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-            text-transform: uppercase; letter-spacing: 1px;
-        }
-        .btn-main { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; }
-        .btn-main:active { transform: scale(0.98); opacity: 0.9; }
-
-        /* Subject Cards */
-        .subject-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; margin-top: 20px; }
-        .sub-card {
-            background: var(--card-bg); padding: 20px; border-radius: 20px;
-            text-align: center; border: 1px solid rgba(255,255,255,0.05);
-            transition: 0.3s;
-        }
-        .sub-card i { font-size: 30px; margin-bottom: 10px; display: block; color: var(--primary); }
-        .sub-card:active { background: var(--primary); }
-
-        /* Quiz UI */
-        .timer-bar {
-            width: 100%; height: 6px; background: #334155; border-radius: 3px;
-            margin: 20px 0; overflow: hidden;
-        }
-        .progress { width: 100%; height: 100%; background: var(--primary); transition: 1s linear; }
-        .option {
-            background: rgba(51, 65, 85, 0.5); padding: 18px; margin: 12px 0;
-            border-radius: 16px; cursor: pointer; border: 1px solid transparent;
-        }
-        .option.correct { background: #10b981; border-color: #34d399; }
-        .option.wrong { background: #ef4444; border-color: #f87171; }
+        /* Quiz Activity uslubi */
+        .timer-box { font-size: 20px; color: #FFEB3B; text-align: right; margin-bottom: 10px; }
+        .progress-bar { width: 100%; height: 10px; background: #333; border-radius: 5px; overflow: hidden; }
+        .progress-fill { height: 100%; background: #FFEB3B; width: 100%; transition: 1s linear; }
+        .q-card { background: rgba(255,255,255,0.1); padding: 20px; border-radius: 15px; margin: 20px 0; font-size: 20px; }
+        .opt { background: #007AFF; padding: 15px; margin: 10px 0; border-radius: 10px; cursor: pointer; transition: 0.2s; }
+        .opt:active { transform: scale(0.95); background: #0056b3; }
     </style>
 </head>
 <body>
 
-    <div id="splash" class="page active">
-        <div style="text-align:center">
-            <div class="loader-ring"></div>
-            <h1 style="margin-top:20px; letter-spacing:5px;">SARDORBEK</h1>
-            <p style="color: #64748b;">PREMIUM TEST SYSTEM</p>
+    <div id="splash-page" class="page active">
+        <div class="logo-text">SARDORBEK</div>
+        <p style="margin-top: 20px;">Yuklanmoqda...</p>
+    </div>
+
+    <div id="auth-page" class="page">
+        <h2 style="text-align: center; margin-top: 50px;">Kirish / Ro'yxatdan O'tish</h2>
+        <div class="input-group">
+            <input type="email" id="email" placeholder="E-mail">
+            <input type="password" id="pass" placeholder="Parol">
+            <button class="btn btn-blue" onclick="handleAuth('login')">KIRISH</button>
+            <button class="btn btn-white" onclick="handleAuth('reg')">RO'YXATDAN O'TISH</button>
         </div>
     </div>
 
-    <div id="auth" class="page">
-        <div style="margin-top: 50px;">
-            <h1>Xush kelibsiz!</h1>
-            <p style="color:#94a3b8">Tizimga kirish uchun ma'lumotlarni kiriting</p>
-        </div>
-        <div class="glass" style="margin-top: 30px;">
-            <input type="email" placeholder="Email manzilingiz">
-            <input type="password" placeholder="Parolingiz">
-            <button class="btn btn-main" onclick="showPage('mode')">Kirish <i class="fas fa-arrow-right"></i></button>
-        </div>
+    <div id="mode-page" class="page">
+        <div style="background: #12233f; padding: 10px; text-align: center; border-radius: 10px;" id="user-id">ID: Yuklanmoqda...</div>
+        <h2 style="text-align: center; margin: 30px 0;">Test turini tanlang</h2>
+        <div class="mode-btn premium" onclick="requestPremium()">💰 PULLI TESTLAR 🏆</div>
+        <div class="mode-btn free" onclick="openMain('Bepul')">🆓 BEPUL TESTLAR</div>
+        <div class="mode-btn btn-blue" onclick="alert('Xabarlar yuklanmoqda...')">📩 XABARLARIM</div>
     </div>
 
-    <div id="mode" class="page">
-        <h2>Rejimni tanlang</h2>
-        <div class="glass" onclick="showPage('main')" style="margin-bottom:20px; border-left: 5px solid #10b981;">
-            <h3 style="margin:0"><i class="fas fa-bolt" style="color:#10b981"></i> BEPUL REJIM</h3>
-            <p style="margin:5px 0 0 0; font-size:14px; color:#94a3b8">Cheklangan savollar to'plami</p>
-        </div>
-        <div class="glass" onclick="alert('Admin bilan bog\'laning!')" style="border-left: 5px solid #f59e0b;">
-            <h3 style="margin:0"><i class="fas fa-crown" style="color:#f59e0b"></i> PREMIUM REJIM</h3>
-            <p style="margin:5px 0 0 0; font-size:14px; color:#94a3b8">Barcha fanlar va tahlillar ochiq</p>
-        </div>
+    <div id="main-page" class="page">
+        <h2 style="text-align: center;">Fanlar</h2>
+        <div class="opt" onclick="startQuiz('Matematika')">Matematika</div>
+        <div class="opt" onclick="startQuiz('Tarix')">Tarix</div>
+        <div class="opt" onclick="startQuiz('Ona tili')">Ona tili</div>
+        <div class="opt" onclick="startQuiz('Biologiya')">Biologiya</div>
     </div>
 
-    <div id="main" class="page">
-        <div style="display:flex; justify-content:space-between; align-items:center">
-            <div>
-                <h2 style="margin:0">Fanlar</h2>
-                <p style="color:#94a3b8; font-size:14px">O'zingizga mos yo'nalishni tanlang</p>
-            </div>
-            <div class="glass" style="padding:10px 15px; border-radius:15px">
-                <i class="fas fa-user text-primary"></i>
-            </div>
-        </div>
-
-        <div class="subject-grid">
-            <div class="sub-card" onclick="startQuiz('Matematika')">
-                <i class="fas fa-calculator"></i>
-                <span>Matematika</span>
-            </div>
-            <div class="sub-card" onclick="startQuiz('Tarix')">
-                <i class="fas fa-landmark"></i>
-                <span>Tarix</span>
-            </div>
-            <div class="sub-card" onclick="startQuiz('Ona tili')">
-                <i class="fas fa-book"></i>
-                <span>Ona tili</span>
-            </div>
-            <div class="sub-card" onclick="startQuiz('Ingliz tili')">
-                <i class="fas fa-language"></i>
-                <span>Ingliz tili</span>
-            </div>
-        </div>
+    <div id="quiz-page" class="page">
+        <div class="timer-box" id="timer">90:00</div>
+        <div class="progress-bar"><div id="p-fill" class="progress-fill"></div></div>
+        <div id="q-count" style="margin-top: 10px;">Savol: 1/10</div>
+        <div class="q-card" id="q-text">Savol yuklanmoqda...</div>
+        <div id="options-container"></div>
     </div>
 
-    <div id="quiz" class="page">
-        <div style="display:flex; justify-content:space-between; align-items:center">
-            <span id="q-count" style="font-weight:bold">Savol: 1/10</span>
-            <span id="timer-text" style="color:var(--secondary)">15:00</span>
-        </div>
-        <div class="timer-bar"><div class="progress" id="timer-progress"></div></div>
-        
-        <div class="glass" style="min-height: 150px; display:flex; align-items:center; justify-content:center; text-align:center">
-            <h3 id="q-text" style="margin:0">...</h3>
-        </div>
-
-        <div id="options-box" style="margin-top:20px"></div>
-    </div>
-
-    <div id="result" class="page" style="justify-content:center; align-items:center; text-align:center">
-        <div class="glass" style="width:100%">
-            <div style="font-size:60px; color:#10b981; margin-bottom:20px"><i class="fas fa-check-circle"></i></div>
-            <h1>Natijangiz</h1>
-            <div id="score-text" style="font-size:35px; font-weight:900; color:var(--primary)">0 / 0</div>
-            <p id="feedback" style="color:#94a3b8; margin-bottom:30px">Yaxshi natija!</p>
-            <button class="btn btn-main" onclick="showPage('main')">Asosiy menyuga qaytish</button>
-        </div>
+    <div id="result-page" class="page" style="text-align: center; justify-content: center;">
+        <h1 style="color: #FFEB3B;">Natija</h1>
+        <div id="final-score" style="font-size: 30px; margin: 20px 0;">0 / 0</div>
+        <button class="btn btn-blue" onclick="location.reload()">YANGI TEST</button>
     </div>
 
     <script>
+        // FIREBASE KONFIGURATSIYASI (Sizning QuizActivity.java dagi ma'lumotlaringiz)
+        const firebaseConfig = {
+            databaseURL: "https://quiz-app-3692d-default-rtdb.firebaseio.com",
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const auth = firebase.auth();
+
+        let currentSubject = "";
+        let questions = [];
+        let currentIdx = 0;
+        let score = 0;
+        let timeLeft = 90 * 60;
+
+        // Sahifalarni boshqarish
         function showPage(id) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById(id).classList.add('active');
         }
 
-        // Splash Timer
-        setTimeout(() => showPage('auth'), 2500);
+        // 1. Splash logic
+        setTimeout(() => {
+            auth.onAuthStateChanged(user => {
+                if (user) {
+                    document.getElementById('user-id').innerText = "ID: " + user.uid.substring(0,5);
+                    showPage('mode-page');
+                } else {
+                    showPage('auth-page');
+                }
+            });
+        }, 3000);
 
-        const database = {
-            "Matematika": [
-                {q: "Ildiz ostida 144 dan necha chiqadi?", opt: ["10", "12", "14", "16"], a: 1},
-                {q: "Uchburchak ichki burchaklari yig'indisi?", opt: ["90°", "180°", "270°", "360°"], a: 1}
-            ],
-            "Tarix": [
-                {q: "Amir Temur nechanchi yilda vafot etgan?", opt: ["1405", "1336", "1447", "1399"], a: 0}
-            ]
-        };
-
-        let currentSub = "", currentIdx = 0, score = 0;
-
-        function startQuiz(sub) {
-            currentSub = sub; currentIdx = 0; score = 0;
-            showPage('quiz');
-            loadQuestion();
+        // 2. Auth logic
+        function handleAuth(type) {
+            const e = document.getElementById('email').value;
+            const p = document.getElementById('pass').value;
+            if(!e || !p) return alert("To'ldiring!");
+            
+            if(type === 'reg') {
+                auth.createUserWithEmailAndPassword(e, p).catch(err => alert(err.message));
+            } else {
+                auth.signInWithEmailAndPassword(e, p).catch(err => alert(err.message));
+            }
         }
 
-        function loadQuestion() {
-            const data = database[currentSub][currentIdx];
-            document.getElementById('q-text').innerText = data.q;
-            document.getElementById('q-count').innerText = `Savol: ${currentIdx + 1}/${database[currentSub].length}`;
+        // 3. Mode logic
+        function requestPremium() {
+            const user = auth.currentUser;
+            db.ref('payments_pending/' + user.uid.substring(0,5)).set({
+                firebaseId: user.uid,
+                status: "pending_admin_review",
+                timestamp: Date.now()
+            }).then(() => alert("Admin panelga so'rov yuborildi!"));
+        }
+
+        function openMain(mode) {
+            showPage('main-page');
+        }
+
+        // 4. Quiz logic (QuizActivity.java dagi kabi Firebase'dan savol olish)
+        function startQuiz(sub) {
+            currentSubject = sub;
+            showPage('quiz-page');
             
-            const box = document.getElementById('options-box');
-            box.innerHTML = "";
-            data.opt.forEach((o, i) => {
-                const d = document.createElement('div');
-                d.className = "option";
-                d.innerText = o;
-                d.onclick = () => checkAnswer(i, d);
-                box.appendChild(d);
+            db.ref('Savollar/' + sub).once('value', snapshot => {
+                const data = snapshot.val();
+                questions = Object.values(data);
+                questions = questions.sort(() => 0.5 - Math.random()); // Shuffle
+                loadQuestion();
+                startTimer();
             });
         }
 
-        function checkAnswer(i, el) {
-            const correct = database[currentSub][currentIdx].a;
-            if(i === correct) {
-                el.classList.add('correct');
-                score++;
-            } else {
-                el.classList.add('wrong');
-            }
+        function loadQuestion() {
+            if(currentIdx >= questions.length) return finishQuiz();
+            const q = questions[currentIdx];
+            document.getElementById('q-text').innerText = q.savol || q.question;
+            document.getElementById('q-count').innerText = `Savol: ${currentIdx + 1}/${questions.length}`;
             
-            setTimeout(() => {
-                currentIdx++;
-                if(currentIdx < database[currentSub].length) loadQuestion();
-                else finish();
-            }, 600);
+            const container = document.getElementById('options-container');
+            container.innerHTML = "";
+            const variants = ['A', 'B', 'C', 'D'];
+            variants.forEach(v => {
+                const btn = document.createElement('div');
+                btn.className = 'opt';
+                btn.innerText = q['variant' + v] || q[v.toLowerCase()];
+                btn.onclick = () => {
+                    if(v === q.javob) score++;
+                    currentIdx++;
+                    loadQuestion();
+                };
+                container.appendChild(btn);
+            });
         }
 
-        function finish() {
-            document.getElementById('score-text').innerText = `${database[currentSub].length} dan ${score} ta`;
-            showPage('result');
+        function startTimer() {
+            const timerInt = setInterval(() => {
+                timeLeft--;
+                let m = Math.floor(timeLeft / 60);
+                let s = timeLeft % 60;
+                document.getElementById('timer').innerText = `${m}:${s < 10 ? '0'+s : s}`;
+                document.getElementById('p-fill').style.width = (timeLeft / (90*60) * 100) + "%";
+                if(timeLeft <= 0) { clearInterval(timerInt); finishQuiz(); }
+            }, 1000);
+        }
+
+        function finishQuiz() {
+            document.getElementById('final-score').innerText = `${questions.length} dan ${score} ta to'g'ri`;
+            showPage('result-page');
+            
+            // Natijani Firebase'ga yuborish (ResultActivity.java kabi)
+            const user = auth.currentUser;
+            db.ref('UserResults/' + user.uid.substring(0,5)).update({
+                [currentSubject]: score,
+                timestamp: Date.now()
+            });
         }
     </script>
 </body>
