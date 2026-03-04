@@ -1,149 +1,174 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>DTM 90 Test Bot</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<style>
-  :root { --bg: #121920; --card: #1c2329; --accent: #00b4d8; --border: #2d3842; --text: #ffffff; }
-  body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; }
-  .header { text-align: center; margin-bottom: 20px; font-size: 20px; font-weight: bold; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
-  .card { background: var(--card); padding: 15px; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 15px; }
-  .field-label { font-size: 14px; color: #aeb9c2; margin-bottom: 5px; display: block; text-align: left; }
-  input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid var(--border); background: #0d1217; color: white; font-size: 16px; box-sizing: border-box; }
-  .btn { background: var(--accent); color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; }
-  
-  table { width: 100%; border-collapse: collapse; margin-top: 15px; background: var(--card); }
-  th, td { border: 1px solid var(--border); padding: 10px 5px; text-align: center; }
-  th { background: #252e37; font-size: 14px; position: sticky; top: 40px; z-index: 10; }
-  
-  .opt-grid { display: flex; justify-content: center; gap: 12px; }
-  .opt-item { position: relative; width: 24px; height: 24px; }
-  .opt-item input { position: absolute; opacity: 0; cursor: pointer; width: 100%; height: 100%; margin: 0; z-index: 2; }
-  .checkmark { position: absolute; top: 0; left: 0; height: 22px; width: 22px; background: transparent; border: 2px solid #55606a; border-radius: 50%; z-index: 1; }
-  .opt-item input:checked ~ .checkmark { background: var(--accent); border-color: var(--accent); }
-  .opt-item input:checked ~ .checkmark::after { content: ""; position: absolute; width: 8px; height: 8px; background: white; border-radius: 50%; top: 7px; left: 7px; }
-  
-  .timer { position: sticky; top: 0; background: #e63946; padding: 8px; text-align: center; font-weight: bold; border-radius: 5px; z-index: 100; margin-bottom: 10px; }
-  .unanswered { background: rgba(230, 57, 70, 0.15) !important; }
-  .q-num { font-weight: bold; color: #aeb9c2; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sardorbek Pro Quiz</title>
+    <style>
+        :root {
+            --bg: #0f172a; --card: #1e293b; --accent: #38bdf8;
+            --text: #f8fafc; --success: #22c55e; --warning: #f59e0b;
+        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg); color: var(--text);
+            margin: 0; padding: 0; overflow-x: hidden;
+        }
+        .page {
+            display: none; min-height: 100vh; padding: 20px;
+            flex-direction: column; align-items: center; justify-content: center;
+            animation: fadeIn 0.5s ease;
+        }
+        .active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Splash Screen */
+        #splash { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); }
+        .logo { font-size: 45px; font-weight: bold; color: var(--accent); text-shadow: 0 0 20px rgba(56, 189, 248, 0.5); }
+
+        /* Auth Form */
+        .card { background: var(--card); padding: 25px; border-radius: 20px; width: 100%; max-width: 400px; border: 1px solid #334155; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: white; }
+        button { width: 100%; padding: 15px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; }
+        .btn-primary { background: var(--accent); color: #000; }
+        .btn-outline { background: transparent; border: 1px solid var(--accent); color: var(--accent); }
+
+        /* Menu & Cards */
+        .subject-card {
+            background: var(--card); width: 100%; max-width: 400px;
+            padding: 20px; border-radius: 15px; margin-bottom: 15px;
+            display: flex; justify-content: space-between; align-items: center;
+            border: 1px solid #334155;
+        }
+
+        /* Quiz UI */
+        .timer { font-size: 24px; color: var(--warning); font-weight: bold; margin-bottom: 10px; }
+        .q-box { font-size: 20px; margin: 20px 0; text-align: center; }
+        .option {
+            width: 100%; background: #334155; padding: 15px;
+            margin: 8px 0; border-radius: 10px; cursor: pointer;
+        }
+        .option:active { background: var(--accent); color: #000; }
+    </style>
 </head>
 <body>
 
-<div id="main-container">
-  <div class="header" id="title">DTM 90 Testlar</div>
-  
-  <div id="init-area" class="card">
-    <span class="field-label">Test kodi</span>
-    <input type="number" id="test_code" placeholder="Kodni kiriting..." />
-    <button class="btn" onclick="startTest()">TESTNI BOSHLASH</button>
-  </div>
-
-  <div id="test-area" style="display: none;">
-    <div id="timer" class="timer">03:00:00</div>
-    
-    <div id="questions_table"></div>
-
-    <div style="margin: 20px 0;">
-      <button class="btn" id="submit_btn" onclick="processData()">YUBORISH</button>
+    <div id="splash" class="page active">
+        <div class="logo">SARDORBEK</div>
+        <p>Yuklanmoqda...</p>
     </div>
-  </div>
-</div>
 
-<script>
-const tg = window.Telegram.WebApp;
-tg.expand();
+    <div id="auth" class="page">
+        <div class="card">
+            <h2>Kirish</h2>
+            <input type="email" id="email" placeholder="E-mail">
+            <input type="password" id="pass" placeholder="Parol">
+            <button class="btn-primary" onclick="showPage('mode')">KIRISH</button>
+            <button class="btn-outline">RO'YXATDAN O'TISH</button>
+        </div>
+    </div>
 
-const TOTAL_QUESTIONS = 90;
-const VARIANTS = ['A', 'B', 'C', 'D'];
+    <div id="mode" class="page">
+        <h2>Rejimni tanlang</h2>
+        <div class="subject-card" onclick="showPage('main')">
+            <span>🆓 BEPUL TESTLAR</span>
+            <button style="width:auto; margin:0" class="btn-primary">Kirish</button>
+        </div>
+        <div class="subject-card" style="border-color: var(--warning);" onclick="alert('Admin bilan bog\'laning!')">
+            <span>💰 PULLI TESTLAR</span>
+            <button style="width:auto; margin:0; background: var(--warning);" class="btn-primary">Sotib olish</button>
+        </div>
+    </div>
 
-function startTest() {
-  const code = document.getElementById('test_code').value;
-  if(!code) return alert("Test kodini kiriting!");
-  
-  document.getElementById('init-area').style.display = 'none';
-  document.getElementById('test-area').style.display = 'block';
-  
-  renderQuestions();
-  startTimer();
-}
+    <div id="main" class="page">
+        <h2>Fanlar</h2>
+        <div class="subject-card" onclick="startQuiz('Matematika')"><span>🧮 Matematika</span></div>
+        <div class="subject-card" onclick="startQuiz('Tarix')"><span>📜 Tarix</span></div>
+        <div class="subject-card" onclick="startQuiz('Ona tili')"><span>📚 Ona tili</span></div>
+    </div>
 
-function renderQuestions() {
-  let html = `<table><tr><th style="width:15%">№</th><th>Variantlar</th></tr>`;
-  
-  for (let i = 1; i <= TOTAL_QUESTIONS; i++) {
-    html += `
-      <tr id="row_${i}">
-        <td class="q-num">${i}</td>
-        <td>
-          <div class="opt-grid">
-            ${VARIANTS.map(v => `
-              <div class="opt-item">
-                <input type="radio" name="q${i}" value="${v}">
-                <span class="checkmark"></span>
-                <span style="display:block; margin-top:25px; font-size:10px;">${v}</span>
-              </div>
-            `).join('')}
-          </div>
-        </td>
-      </tr>`;
-  }
-  
-  document.getElementById('questions_table').innerHTML = html + `</table>`;
-}
+    <div id="quiz" class="page">
+        <div class="timer" id="timer">90:00</div>
+        <div class="card">
+            <div id="q-count">Savol: 1/10</div>
+            <div class="q-box" id="q-text">Savol yuklanmoqda...</div>
+            <div id="options-box"></div>
+        </div>
+    </div>
 
-function startTimer() {
-  let time = 3 * 60 * 60; // 3 soat
-  const timerEl = document.getElementById('timer');
-  const interval = setInterval(() => {
-    let h = Math.floor(time / 3600), 
-        m = Math.floor((time % 3600) / 60), 
-        s = time % 60;
-    
-    timerEl.innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-    
-    if (time <= 0) {
-      clearInterval(interval);
-      processData(); // Vaqt tugasa avtomatik yuborish
-    }
-    time--;
-  }, 1000);
-}
+    <div id="result" class="page">
+        <div class="card" style="text-align: center;">
+            <h1 style="color: var(--success)">Natija</h1>
+            <div id="score-text" style="font-size: 25px;">10 dan 8 to'g'ri</div>
+            <button class="btn-primary" onclick="showPage('main')">YANGI TEST</button>
+        </div>
+    </div>
 
-function processData() {
-  const testCode = document.getElementById('test_code').value;
-  const results = {};
-  let emptyCount = 0;
+    <script>
+        // Sahifalarni almashtirish funksiyasi
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+        }
 
-  for (let i = 1; i <= TOTAL_QUESTIONS; i++) {
-    const sel = document.querySelector(`input[name="q${i}"]:checked`);
-    const row = document.getElementById(`row_${i}`);
-    
-    if (sel) {
-      results[i] = sel.value;
-      row.classList.remove('unanswered');
-    } else {
-      results[i] = "";
-      row.classList.add('unanswered');
-      emptyCount++;
-    }
-  }
+        // Splashni 3 soniyadan keyin o'chirish
+        setTimeout(() => showPage('auth'), 3000);
 
-  if (emptyCount > 0) {
-    const confirmSend = confirm(`Sizda ${emptyCount} ta belgilanmagan savol bor. Baribir yuborasizmi?`);
-    if (!confirmSend) return;
-  }
+        // Savollar bazasi
+        const database = {
+            "Matematika": [
+                {q: "5 + 7 = ?", opt: ["10", "12", "13", "11"], a: 1},
+                {q: "25 ning ildizi?", opt: ["4", "5", "6", "3"], a: 1}
+            ],
+            "Tarix": [
+                {q: "Amir Temur nechanchi yilda tug'ilgan?", opt: ["1336", "1342", "1405", "1299"], a: 0}
+            ]
+        };
 
-  tg.sendData(JSON.stringify({
-    type: "dtm_90",
-    test_code: testCode,
-    keys: results,
-    total: TOTAL_QUESTIONS
-  }));
-  tg.close();
-}
-</script>
+        let currentSubject = "";
+        let currentIdx = 0;
+        let score = 0;
+
+        function startQuiz(sub) {
+            currentSubject = sub;
+            currentIdx = 0;
+            score = 0;
+            showPage('quiz');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const data = database[currentSubject][currentIdx];
+            document.getElementById('q-text').innerText = data.q;
+            document.getElementById('q-count').innerText = `Savol: ${currentIdx + 1}/${database[currentSubject].length}`;
+            
+            const box = document.getElementById('options-box');
+            box.innerHTML = "";
+            data.opt.forEach((o, i) => {
+                const d = document.createElement('div');
+                d.className = "option";
+                d.innerText = o;
+                d.onclick = () => checkAnswer(i);
+                box.appendChild(d);
+            });
+        }
+
+        function checkAnswer(i) {
+            if(i === database[currentSubject][currentIdx].a) score++;
+            
+            currentIdx++;
+            if(currentIdx < database[currentSubject].length) {
+                loadQuestion();
+            } else {
+                finishQuiz();
+            }
+        }
+
+        function finishQuiz() {
+            document.getElementById('score-text').innerText = `${database[currentSubject].length} dan ${score} ta to'g'ri`;
+            showPage('result');
+        }
+    </script>
 </body>
 </html>
