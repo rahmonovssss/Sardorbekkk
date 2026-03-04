@@ -18,231 +18,150 @@
         .page {
             display: none; min-height: 100vh; padding: 20px;
             flex-direction: column; align-items: center; justify-content: center;
-            animation: fadeIn 0.5s ease;
+            animation: fadeIn 0.4s ease;
         }
         .active { display: flex; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         /* Splash Screen */
         #splash { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); }
-        .logo { font-size: 45px; font-weight: bold; color: var(--accent); text-shadow: 0 0 20px rgba(56, 189, 248, 0.5); }
+        .logo { font-size: 45px; font-weight: bold; color: var(--accent); text-shadow: 0 0 20px rgba(56, 189, 248, 0.4); }
 
-        /* Auth Form */
+        /* Card & Inputs */
         .card { background: var(--card); padding: 25px; border-radius: 20px; width: 100%; max-width: 400px; border: 1px solid #334155; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
-        input { width: 100%; padding: 14px; margin: 10px 0; border-radius: 12px; border: 1px solid #334155; background: #0f172a; color: white; font-size: 16px; }
+        input { width: 100%; padding: 14px; margin: 10px 0; border-radius: 12px; border: 1px solid #334155; background: #0f172a; color: white; font-size: 16px; transition: 0.3s; }
         input:focus { border-color: var(--accent); outline: none; }
+        
+        /* Buttons */
         button { width: 100%; padding: 15px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; font-size: 16px; }
         .btn-primary { background: var(--accent); color: #000; }
-        .btn-primary:active { transform: scale(0.98); opacity: 0.9; }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
         .btn-outline { background: transparent; border: 1px solid var(--accent); color: var(--accent); }
 
-        /* Menu & Cards */
-        .subject-card {
-            background: var(--card); width: 100%; max-width: 400px;
-            padding: 20px; border-radius: 15px; margin-bottom: 15px;
-            display: flex; justify-content: space-between; align-items: center;
-            border: 1px solid #334155; transition: 0.3s;
-        }
-        .subject-card:active { background: #2d3a4f; }
+        /* Loader */
+        .loader { width: 20px; height: 20px; border: 3px solid #f3f3f3; border-top: 3px solid var(--accent); border-radius: 50%; display: none; animation: spin 1s linear infinite; margin: 10px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Quiz UI */
-        .timer { font-size: 24px; color: var(--warning); font-weight: bold; margin-bottom: 10px; }
-        .q-box { font-size: 20px; margin: 20px 0; text-align: center; font-weight: 500; }
-        .option {
-            width: 100%; background: #334155; padding: 16px;
-            margin: 10px 0; border-radius: 12px; cursor: pointer;
-            transition: 0.2s; border: 1px solid transparent;
-        }
-        .option:active { background: var(--accent); color: #000; border-color: white; }
+        /* Menu */
+        .subject-card { background: var(--card); width: 100%; max-width: 400px; padding: 20px; border-radius: 15px; margin-bottom: 12px; display: flex; justify-content: space-between; border: 1px solid #334155; }
     </style>
 </head>
 <body>
 
     <div id="splash" class="page active">
         <div class="logo">SARDORBEK</div>
-        <p style="letter-spacing: 2px; color: #64748b;">PREMIUM QUIZ SYSTEM</p>
+        <p style="color: #64748b;">Premium Quiz System</p>
     </div>
 
     <div id="auth" class="page">
         <div class="card">
-            <h2 style="margin-top:0">Kirish</h2>
-            <p style="color: #94a3b8; font-size: 14px; margin-bottom: 20px;">Tizimga kirish uchun ma'lumotlarni kiriting</p>
-            <input type="email" id="login-email" placeholder="E-mail">
-            <input type="password" id="login-pass" placeholder="Parol">
-            <button class="btn-primary" onclick="login()">KIRISH</button>
-            <div style="margin: 15px 0; text-align: center; color: #64748b; font-size: 14px;">yoki</div>
-            <button class="btn-outline" onclick="showPage('register')">RO'YXATDAN O'TISH</button>
-        </div>
-    </div>
-
-    <div id="register" class="page">
-        <div class="card">
-            <h2 style="margin-top:0">Ro'yxatdan o'tish</h2>
-            <p style="color: #94a3b8; font-size: 14px; margin-bottom: 20px;">Yangi hisob yaratish</p>
-            <input type="text" id="reg-name" placeholder="To'liq ismingiz">
-            <input type="email" id="reg-email" placeholder="E-mail manzilingiz">
-            <input type="password" id="reg-pass" placeholder="Parol yarating">
-            <button class="btn-primary" onclick="registerUser()">SAQLASH VA KIRISH</button>
-            <button class="btn-outline" style="border:none" onclick="showPage('auth')">Orqaga qaytish</button>
+            <h2 id="auth-title">Kirish / Ro'yxatdan o'tish</h2>
+            <div id="loader" class="loader"></div>
+            
+            <input type="email" id="et_email" placeholder="E-mail">
+            <input type="password" id="et_password" placeholder="Parol (kamida 6 ta belgi)">
+            
+            <button class="btn-primary" id="btn_login" onclick="loginUser()">KIRISH</button>
+            <button class="btn-outline" id="btn_register" onclick="registerUser()">RO'YXATDAN O'TISH</button>
         </div>
     </div>
 
     <div id="mode" class="page">
-        <div style="text-align: center; margin-bottom: 30px;">
-            <h2 id="welcome-text">Xush kelibsiz!</h2>
-            <p style="color:#94a3b8">Test rejimini tanlang</p>
-        </div>
+        <h2 id="welcome-msg">Xush kelibsiz!</h2>
         <div class="subject-card" onclick="showPage('main')">
             <span>🆓 BEPUL TESTLAR</span>
-            <button style="width:auto; margin:0; padding: 8px 15px;" class="btn-primary">Kirish</button>
+            <span style="color:var(--accent)">➔</span>
         </div>
-        <div class="subject-card" style="border-color: var(--warning);" onclick="alert('Premium rejim uchun admin bilan bog\'laning!')">
+        <div class="subject-card" style="border-color: var(--warning);" onclick="alert('Admin bilan bog\'laning!')">
             <span>💰 PULLI TESTLAR</span>
-            <button style="width:auto; margin:0; padding: 8px 15px; background: var(--warning);" class="btn-primary">Sotib olish</button>
+            <span style="color:var(--warning)">★</span>
         </div>
     </div>
 
     <div id="main" class="page">
-        <h2 style="margin-bottom: 25px;">Fanlarni tanlang</h2>
-        <div class="subject-card" onclick="startQuiz('Matematika')"><span>🧮 Matematika</span> <i style="color:var(--accent)">➔</i></div>
-        <div class="subject-card" onclick="startQuiz('Tarix')"><span>📜 Tarix</span> <i style="color:var(--accent)">➔</i></div>
-        <div class="subject-card" onclick="startQuiz('Ona tili')"><span>📚 Ona tili</span> <i style="color:var(--accent)">➔</i></div>
-    </div>
-
-    <div id="quiz" class="page">
-        <div class="timer" id="timer">15:00</div>
-        <div class="card">
-            <div id="q-count" style="color:var(--accent); font-weight:bold; margin-bottom:10px">Savol: 1/10</div>
-            <div class="q-box" id="q-text">Savol yuklanmoqda...</div>
-            <div id="options-box"></div>
-        </div>
-    </div>
-
-    <div id="result" class="page">
-        <div class="card" style="text-align: center;">
-            <div style="font-size: 60px; color: var(--success); margin-bottom: 10px;">🏆</div>
-            <h1 style="color: var(--success); margin: 0;">Natija</h1>
-            <div id="score-text" style="font-size: 28px; margin: 20px 0; font-weight: bold;">0 dan 0 ta</div>
-            <p id="feedback-text" style="color:#94a3b8; margin-bottom: 20px;">Yaxshi harakat!</p>
-            <button class="btn-primary" onclick="showPage('main')">YANGI TEST BOSHLASH</button>
-        </div>
+        <h2>Fanlar</h2>
+        <div class="subject-card" onclick="startQuiz('Matematika')"><span>🧮 Matematika</span></div>
+        <div class="subject-card" onclick="startQuiz('Tarix')"><span>📜 Tarix</span></div>
+        <button class="btn-outline" onclick="showPage('mode')">ORQAGA</button>
     </div>
 
     <script>
+        // UI elementlarini Java kodingizdagi nomlar bilan bir xil qildik
+        const etEmail = document.getElementById('et_email');
+        const etPassword = document.getElementById('et_password');
+        const btnLogin = document.getElementById('btn_login');
+        const btnRegister = document.getElementById('btn_register');
+        const loader = document.getElementById('loader');
+
         function showPage(pageId) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById(pageId).classList.add('active');
         }
 
-        // 3 soniyadan keyin avtomatik tekshirish
-        setTimeout(() => {
-            const savedEmail = localStorage.getItem('userEmail');
-            if(savedEmail) {
-                document.getElementById('welcome-text').innerText = "Xush kelibsiz, " + (localStorage.getItem('userName') || "Foydalanuvchi");
-                showPage('mode');
-            } else {
-                showPage('auth');
-            }
-        }, 3000);
+        // OnStart() mantiqi: Agar foydalanuvchi avval kirgan bo'lsa
+        window.onload = () => {
+            setTimeout(() => {
+                const loggedInUser = localStorage.getItem('currentUser');
+                if (loggedInUser) {
+                    document.getElementById('welcome-msg').innerText = "Xush kelibsiz, " + loggedInUser;
+                    showPage('mode');
+                } else {
+                    showPage('auth');
+                }
+            }, 3000); // 3 soniya Splash
+        };
 
-        // --- AUTH LOGIC ---
+        // RO'YXATDAN O'TISH (registerUser)
         function registerUser() {
-            const name = document.getElementById('reg-name').value;
-            const email = document.getElementById('reg-email').value;
-            const pass = document.getElementById('reg-pass').value;
+            const email = etEmail.value;
+            const password = etPassword.value;
 
-            if (name && email && pass) {
-                localStorage.setItem('userEmail', email);
-                localStorage.setItem('userPass', pass);
-                localStorage.setItem('userName', name);
-                
-                document.getElementById('welcome-text').innerText = "Xush kelibsiz, " + name;
-                alert("Muvaffaqiyatli ro'yxatdan o'tdingiz!");
-                showPage('mode');
-            } else {
-                alert("Barcha maydonlarni to'ldiring!");
+            if (email.trim() === "" || password.trim() === "") {
+                alert("E-mail va parolni kiriting.");
+                return;
             }
+            if (password.length < 6) {
+                alert("Parol kamida 6 ta belgi bo'lishi kerak.");
+                return;
+            }
+
+            // Animatsiya va tugmalarni o'chirish
+            loader.style.display = "block";
+            btnLogin.disabled = true;
+            btnRegister.disabled = true;
+
+            setTimeout(() => {
+                // Ma'lumotlarni saqlash (Java dagi saveUserToDatabase kabi)
+                localStorage.setItem('userEmail', email);
+                localStorage.setItem('userPass', password);
+                localStorage.setItem('currentUser', email);
+                
+                loader.style.display = "none";
+                btnLogin.disabled = false;
+                btnRegister.disabled = false;
+                
+                alert("Ro'yxatdan o'tish muvaffaqiyatli.");
+                showPage('mode');
+            }, 1500);
         }
 
-        function login() {
-            const email = document.getElementById('login-email').value;
-            const pass = document.getElementById('login-pass').value;
+        // KIRISH (loginUser)
+        function loginUser() {
+            const email = etEmail.value;
+            const password = etPassword.value;
+            
             const savedEmail = localStorage.getItem('userEmail');
             const savedPass = localStorage.getItem('userPass');
 
-            if (email === savedEmail && pass === savedPass) {
-                document.getElementById('welcome-text').innerText = "Xush kelibsiz, " + localStorage.getItem('userName');
-                showPage('mode');
+            if (email === savedEmail && password === savedPass) {
+                loader.style.display = "block";
+                setTimeout(() => {
+                    localStorage.setItem('currentUser', email);
+                    showPage('mode');
+                }, 1000);
             } else {
-                alert("Xato! Bunday foydalanuvchi yo'q yoki parol noto'g'ri.");
+                alert("Kirishda xato: Parol yoki E-mail noto'g'ri.");
             }
-        }
-
-        // --- QUIZ LOGIC ---
-        const database = {
-            "Matematika": [
-                {q: "5 + 7 = ?", opt: ["10", "12", "13", "11"], a: 1},
-                {q: "25 ning kvadrat ildizi?", opt: ["4", "5", "6", "3"], a: 1},
-                {q: "100 / 4 = ?", opt: ["20", "25", "30", "15"], a: 1}
-            ],
-            "Tarix": [
-                {q: "Amir Temur nechanchi yilda tug'ilgan?", opt: ["1336", "1342", "1405", "1299"], a: 0},
-                {q: "O'zbekiston mustaqilligi qachon e'lon qilingan?", opt: ["1990", "1991", "1992", "1989"], a: 1}
-            ],
-            "Ona tili": [
-                {q: "Unli tovushlar nechta?", opt: ["5", "6", "8", "10"], a: 1}
-            ]
-        };
-
-        let currentSubject = "";
-        let currentIdx = 0;
-        let score = 0;
-
-        function startQuiz(sub) {
-            currentSubject = sub;
-            currentIdx = 0;
-            score = 0;
-            showPage('quiz');
-            loadQuestion();
-        }
-
-        function loadQuestion() {
-            const data = database[currentSubject][currentIdx];
-            document.getElementById('q-text').innerText = data.q;
-            document.getElementById('q-count').innerText = `Savol: ${currentIdx + 1}/${database[currentSubject].length}`;
-            
-            const box = document.getElementById('options-box');
-            box.innerHTML = "";
-            data.opt.forEach((o, i) => {
-                const d = document.createElement('div');
-                d.className = "option";
-                d.innerText = o;
-                d.onclick = () => checkAnswer(i);
-                box.appendChild(d);
-            });
-        }
-
-        function checkAnswer(i) {
-            if(i === database[currentSubject][currentIdx].a) score++;
-            
-            currentIdx++;
-            if(currentIdx < database[currentSubject].length) {
-                setTimeout(loadQuestion, 200);
-            } else {
-                setTimeout(finishQuiz, 300);
-            }
-        }
-
-        function finishQuiz() {
-            const total = database[currentSubject].length;
-            document.getElementById('score-text').innerText = `${total} dan ${score} ta to'g'ri`;
-            
-            let feedback = "Yana biroz harakat qiling!";
-            if(score === total) feedback = "Ajoyib! Mukammal natija! 🌟";
-            else if(score > total/2) feedback = "Yaxshi natija, barakalla! 👍";
-            
-            document.getElementById('feedback-text').innerText = feedback;
-            showPage('result');
         }
     </script>
 </body>
