@@ -2,166 +2,223 @@
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sardorbek Pro Quiz</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sardorbek Quiz App</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
     <style>
-        :root {
-            --bg: #0f172a; --card: #1e293b; --accent: #38bdf8;
-            --text: #f8fafc; --success: #22c55e; --warning: #f59e0b;
+        * { box-sizing: border-box; }
+        body { 
+            margin: 0; font-family: 'Segoe UI', sans-serif; 
+            background: #1A2D4D; height: 100vh; 
+            display: flex; align-items: center; justify-content: center; 
+            overflow: hidden;
         }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body {
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            background-color: var(--bg); color: var(--text);
-            margin: 0; padding: 0; overflow-x: hidden;
-        }
-        .page {
-            display: none; min-height: 100vh; padding: 20px;
-            flex-direction: column; align-items: center; justify-content: center;
-            animation: fadeIn 0.4s ease;
-        }
-        .active { display: flex; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Splash Screen */
-        #splash { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); }
-        .logo { font-size: 45px; font-weight: bold; color: var(--accent); text-shadow: 0 0 20px rgba(56, 189, 248, 0.4); }
+        /* 1. SPLASH SCREEN */
+        #splash {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #2196F3; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; z-index: 1000;
+        }
+        .logo-box { width: 90px; height: 90px; background: white; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
+        #app-name-text { color: white; font-size: 36px; font-weight: bold; }
 
-        /* Card & Inputs */
-        .card { background: var(--card); padding: 25px; border-radius: 20px; width: 100%; max-width: 400px; border: 1px solid #334155; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
-        input { width: 100%; padding: 14px; margin: 10px 0; border-radius: 12px; border: 1px solid #334155; background: #0f172a; color: white; font-size: 16px; transition: 0.3s; }
-        input:focus { border-color: var(--accent); outline: none; }
+        /* KARTALAR (Sahifalar) */
+        .card {
+            display: none; width: 90%; max-width: 400px; background: white;
+            padding: 35px; border-radius: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            text-align: center; animation: slideUp 0.4s ease-out;
+        }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* INPUT VA TUGMALAR */
+        input { 
+            width: 100%; padding: 14px; margin-bottom: 12px; border: 1px solid #ddd; 
+            border-radius: 12px; font-size: 16px; background: #f9f9f9; outline: none;
+        }
+        input:focus { border-color: #007AFF; background: #fff; }
+
+        button { 
+            width: 100%; padding: 16px; border-radius: 12px; font-size: 17px; 
+            font-weight: bold; cursor: pointer; border: none; transition: 0.2s;
+        }
+        .btn-blue { background: #007AFF; color: white; margin-bottom: 10px; }
+        .btn-outline { background: white; color: #007AFF; border: 2px solid #007AFF; }
+        .btn-premium { background: #FFC107; color: #1A2D4D; margin-top: 15px; }
+        .btn-free { background: #4CAF50; color: white; margin-top: 10px; }
+        .btn-msg { background: #2196F3; color: white; margin-top: 10px; }
         
-        /* Buttons */
-        button { width: 100%; padding: 15px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; font-size: 16px; }
-        .btn-primary { background: var(--accent); color: #000; }
-        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-        .btn-outline { background: transparent; border: 1px solid var(--accent); color: var(--accent); }
+        button:active { transform: scale(0.97); }
 
-        /* Loader */
-        .loader { width: 20px; height: 20px; border: 3px solid #f3f3f3; border-top: 3px solid var(--accent); border-radius: 50%; display: none; animation: spin 1s linear infinite; margin: 10px auto; }
+        .loader { 
+            border: 3px solid #f3f3f3; border-top: 3px solid #007AFF; 
+            border-radius: 50%; width: 25px; height: 25px; 
+            animation: spin 1s linear infinite; display: none; margin: 10px auto; 
+        }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* Menu */
-        .subject-card { background: var(--card); width: 100%; max-width: 400px; padding: 20px; border-radius: 15px; margin-bottom: 12px; display: flex; justify-content: space-between; border: 1px solid #334155; }
+        
+        #user-id-tag { font-size: 12px; color: #fff; background: #12233f; padding: 5px 10px; border-radius: 8px; margin-bottom: 15px; display: inline-block; }
+        .back-link { cursor: pointer; color: #888; font-size: 14px; margin-top: 15px; display: block; text-decoration: underline; }
     </style>
 </head>
 <body>
 
-    <div id="splash" class="page active">
-        <div class="logo">SARDORBEK</div>
-        <p style="color: #64748b;">Premium Quiz System</p>
+    <div id="splash">
+        <div class="logo-box"><b style="font-size: 50px; color: #2196F3;">S</b></div>
+        <div id="app-name-text"></div>
     </div>
 
-    <div id="auth" class="page">
-        <div class="card">
-            <h2 id="auth-title">Kirish / Ro'yxatdan o'tish</h2>
-            <div id="loader" class="loader"></div>
-            
-            <input type="email" id="et_email" placeholder="E-mail">
-            <input type="password" id="et_password" placeholder="Parol (kamida 6 ta belgi)">
-            
-            <button class="btn-primary" id="btn_login" onclick="loginUser()">KIRISH</button>
-            <button class="btn-outline" id="btn_register" onclick="registerUser()">RO'YXATDAN O'TISH</button>
-        </div>
+    <div id="choice-screen" class="card">
+        <h2 style="color: #333;">Xush kelibsiz</h2>
+        <p style="color: #666; margin-bottom: 30px;">Davom etish uchun tanlang</p>
+        <button class="btn-blue" onclick="showAuth('login')">KIRISH</button>
+        <button class="btn-outline" onclick="showAuth('register')">RO'YXATDAN O'TISH</button>
     </div>
 
-    <div id="mode" class="page">
-        <h2 id="welcome-msg">Xush kelibsiz!</h2>
-        <div class="subject-card" onclick="showPage('main')">
-            <span>🆓 BEPUL TESTLAR</span>
-            <span style="color:var(--accent)">➔</span>
+    <div id="auth-form" class="card">
+        <h2 id="form-title" style="color: #333;">Ro'yxatdan o'tish</h2>
+        <div id="reg-fields">
+            <input type="text" id="fname" placeholder="Ism">
+            <input type="text" id="lname" placeholder="Familya">
         </div>
-        <div class="subject-card" style="border-color: var(--warning);" onclick="alert('Admin bilan bog\'laning!')">
-            <span>💰 PULLI TESTLAR</span>
-            <span style="color:var(--warning)">★</span>
-        </div>
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="pass" placeholder="Parol (min. 6 belgi)">
+        
+        <div id="loading" class="loader"></div>
+        <button class="btn-blue" id="auth-btn" onclick="handleAuth()">DAVOM ETISH</button>
+        
+        <span class="back-link" onclick="goBackToChoice()">Orqaga qaytish</span>
     </div>
 
-    <div id="main" class="page">
-        <h2>Fanlar</h2>
-        <div class="subject-card" onclick="startQuiz('Matematika')"><span>🧮 Matematika</span></div>
-        <div class="subject-card" onclick="startQuiz('Tarix')"><span>📜 Tarix</span></div>
-        <button class="btn-outline" onclick="showPage('mode')">ORQAGA</button>
+    <div id="main-menu" class="card">
+        <span id="user-id-tag">ID: yuklanmoqda...</span>
+        <h2 style="color: #333; margin-bottom: 5px;">Test rejimini tanlang</h2>
+        <p style="color: #888; margin-bottom: 25px;">Bilimingizni sinab ko'ring</p>
+        
+        <button class="btn-premium" onclick="alert('Tez kunda: Pulli testlar')">💰 PULLI TESTLAR 🏆</button>
+        <button class="btn-free" onclick="alert('Tez kunda: Bepul testlar')">🆓 BEPUL TESTLAR</button>
+        <button class="btn-msg" onclick="alert('Xabarlar yuklanmoqda...')">📩 XABARLARIM</button>
+        
+        <button class="btn-outline" style="margin-top: 30px; border-color: #ff4444; color: #ff4444;" onclick="logout()">Chiqish</button>
     </div>
 
     <script>
-        // UI elementlarini Java kodingizdagi nomlar bilan bir xil qildik
-        const etEmail = document.getElementById('et_email');
-        const etPassword = document.getElementById('et_password');
-        const btnLogin = document.getElementById('btn_login');
-        const btnRegister = document.getElementById('btn_register');
-        const loader = document.getElementById('loader');
-
-        function showPage(pageId) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(pageId).classList.add('active');
-        }
-
-        // OnStart() mantiqi: Agar foydalanuvchi avval kirgan bo'lsa
-        window.onload = () => {
-            setTimeout(() => {
-                const loggedInUser = localStorage.getItem('currentUser');
-                if (loggedInUser) {
-                    document.getElementById('welcome-msg').innerText = "Xush kelibsiz, " + loggedInUser;
-                    showPage('mode');
-                } else {
-                    showPage('auth');
-                }
-            }, 3000); // 3 soniya Splash
+        // --- FIREBASE KONFIGURATSIYASI ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyA2G8cD0JezEKXRCtKLYiZL0bzDyTp06Vs",
+            authDomain: "quiz-app-3692d.firebaseapp.com",
+            databaseURL: "https://quiz-app-3692d-default-rtdb.firebaseio.com",
+            projectId: "quiz-app-3692d",
+            storageBucket: "quiz-app-3692d.firebasestorage.app",
+            messagingSenderId: "526836020845",
+            appId: "1:526836020845:android:3ea991380c104c75e8b164"
         };
 
-        // RO'YXATDAN O'TISH (registerUser)
-        function registerUser() {
-            const email = etEmail.value;
-            const password = etPassword.value;
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
 
-            if (email.trim() === "" || password.trim() === "") {
-                alert("E-mail va parolni kiriting.");
-                return;
+        // --- 1. SPLASH ANIMATSIYASI ---
+        const appName = "Sardorbek";
+        let idx = 0;
+        function playSplash() {
+            if (idx < appName.length) {
+                document.getElementById("app-name-text").innerHTML += appName.charAt(idx);
+                idx++;
+                setTimeout(playSplash, 150);
+            } else {
+                setTimeout(() => {
+                    document.getElementById("splash").style.display = "none";
+                    // Agar foydalanuvchi allaqachon kirgan bo'lsa, menyuga o'tamiz
+                    auth.onAuthStateChanged(user => {
+                        if (user) { openMainMenu(); } 
+                        else { document.getElementById("choice-screen").style.display = "block"; }
+                    });
+                }, 1000);
             }
-            if (password.length < 6) {
-                alert("Parol kamida 6 ta belgi bo'lishi kerak.");
-                return;
+        }
+        window.onload = playSplash;
+
+        // --- 2. NAVIGATSIYA FUNKSIYALARI ---
+        let currentMode = 'register';
+
+        function showAuth(m) {
+            currentMode = m;
+            document.getElementById("choice-screen").style.display = "none";
+            document.getElementById("auth-form").style.display = "block";
+            
+            if (m === 'login') {
+                document.getElementById("form-title").innerText = "Tizimga kirish";
+                document.getElementById("reg-fields").style.display = "none";
+                document.getElementById("auth-btn").innerText = "KIRISH";
+            } else {
+                document.getElementById("form-title").innerText = "Ro'yxatdan o'tish";
+                document.getElementById("reg-fields").style.display = "block";
+                document.getElementById("auth-btn").innerText = "RO'YXATDAN O'TISH";
             }
-
-            // Animatsiya va tugmalarni o'chirish
-            loader.style.display = "block";
-            btnLogin.disabled = true;
-            btnRegister.disabled = true;
-
-            setTimeout(() => {
-                // Ma'lumotlarni saqlash (Java dagi saveUserToDatabase kabi)
-                localStorage.setItem('userEmail', email);
-                localStorage.setItem('userPass', password);
-                localStorage.setItem('currentUser', email);
-                
-                loader.style.display = "none";
-                btnLogin.disabled = false;
-                btnRegister.disabled = false;
-                
-                alert("Ro'yxatdan o'tish muvaffaqiyatli.");
-                showPage('mode');
-            }, 1500);
         }
 
-        // KIRISH (loginUser)
-        function loginUser() {
-            const email = etEmail.value;
-            const password = etPassword.value;
-            
-            const savedEmail = localStorage.getItem('userEmail');
-            const savedPass = localStorage.getItem('userPass');
+        // --- TO'G'IRLANGAN ORQAGA QAYTISH FUNKSIYASI ---
+        function goBackToChoice() {
+            document.getElementById("auth-form").style.display = "none";
+            document.getElementById("choice-screen").style.display = "block";
+            // Inputlarni tozalash
+            document.getElementById("email").value = "";
+            document.getElementById("pass").value = "";
+        }
 
-            if (email === savedEmail && password === savedPass) {
-                loader.style.display = "block";
-                setTimeout(() => {
-                    localStorage.setItem('currentUser', email);
-                    showPage('mode');
-                }, 1000);
+        // --- 3. FIREBASE AUTH LOGIKASI ---
+        function handleAuth() {
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("pass").value;
+            const loader = document.getElementById("loading");
+
+            if (!email || password.length < 6) { alert("Email xato yoki parol juda qisqa!"); return; }
+            
+            loader.style.display = "block";
+            document.getElementById("auth-btn").disabled = true;
+
+            if (currentMode === 'register') {
+                const fn = document.getElementById("fname").value;
+                const ln = document.getElementById("lname").value;
+                if(!fn || !ln) { alert("Ism va familiyani kiriting!"); loader.style.display="none"; document.getElementById("auth-btn").disabled=false; return; }
+
+                auth.createUserWithEmailAndPassword(email, password)
+                    .then(res => {
+                        return db.ref('Users/' + res.user.uid).set({
+                            firstName: fn, lastName: ln, email: email,
+                            isPremium: false, registrationTime: Date.now()
+                        });
+                    })
+                    .then(() => openMainMenu())
+                    .catch(e => { loader.style.display="none"; document.getElementById("auth-btn").disabled=false; alert(e.message); });
             } else {
-                alert("Kirishda xato: Parol yoki E-mail noto'g'ri.");
+                auth.signInWithEmailAndPassword(email, password)
+                    .then(() => openMainMenu())
+                    .catch(e => { loader.style.display="none"; document.getElementById("auth-btn").disabled=false; alert("Email yoki parol xato!"); });
             }
+        }
+
+        function openMainMenu() {
+            document.getElementById("splash").style.display = "none";
+            document.getElementById("choice-screen").style.display = "none";
+            document.getElementById("auth-form").style.display = "none";
+            document.getElementById("main-menu").style.display = "block";
+            
+            const user = auth.currentUser;
+            if(user) {
+                document.getElementById("user-id-tag").innerText = "ID: " + user.uid.substring(0, 8).toUpperCase();
+            }
+        }
+
+        function logout() {
+            auth.signOut().then(() => {
+                location.reload(); // To'liq chiqish uchun sahifani yangilaymiz
+            });
         }
     </script>
 </body>
