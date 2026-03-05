@@ -3,82 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sardorbek Quiz App</title>
+    <title>Sardorbek Quiz Full App</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        * { box-sizing: border-box; transition: 0.3s; }
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #1A2D4D; color: #333; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-        .card { display: none; width: 90%; max-width: 450px; background: white; padding: 25px; border-radius: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); text-align: center; }
-        input { width: 100%; padding: 15px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 15px; background: #f9f9f9; outline: none; }
-        button { width: 100%; padding: 16px; border-radius: 15px; font-size: 17px; font-weight: bold; cursor: pointer; border: none; margin-bottom: 10px; }
-        .btn-blue { background: #007AFF; color: white; }
-        .btn-option { background: #f0f4f8; border: 1px solid #d1d9e6; text-align: left; padding: 15px; font-weight: normal; }
-        .btn-option:hover { background: #e0e7ff; border-color: #007AFF; }
-        .timer-header { background: #f8f9fa; padding: 15px; border-radius: 20px; margin-bottom: 20px; border: 1px solid #eee; }
-        #timer-text { font-size: 20px; font-weight: bold; color: #d32f2f; }
-        .msg-item { background: #e3f2fd; padding: 15px; border-radius: 15px; margin-bottom: 10px; text-align: left; border-left: 5px solid #2196F3; }
-        #splash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #2196F3; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; color: white; }
+        :root { --primary: #007AFF; --bg: #1A2D4D; --card: #ffffff; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { margin: 0; background: var(--bg); color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow-x: hidden; }
+        
+        .screen { display: none; width: 95%; max-width: 450px; background: var(--card); color: #333; padding: 25px; border-radius: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); text-align: center; animation: slideIn 0.3s ease-out; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .active { display: block; }
+
+        /* Splash */
+        #splash-screen { background: #2196F3; color: white; border: none; }
+        .logo-circle { width: 100px; height: 100px; background: white; border-radius: 25px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 60px; color: #2196F3; font-weight: bold; }
+
+        /* Inputs & Buttons */
+        input { width: 100%; padding: 15px; margin-bottom: 12px; border: 1px solid #ddd; border-radius: 15px; outline: none; font-size: 16px; }
+        button { width: 100%; padding: 16px; border-radius: 15px; border: none; font-size: 17px; font-weight: bold; cursor: pointer; transition: 0.2s; margin-bottom: 10px; }
+        button:active { transform: scale(0.98); }
+        .btn-blue { background: var(--primary); color: white; }
+        .btn-outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); }
+        .btn-yellow { background: #FFC107; color: #1A2D4D; }
+        .btn-green { background: #4CAF50; color: white; }
+        .btn-option { background: #f8f9fa; border: 1px solid #dee2e6; text-align: left; font-weight: normal; color: #444; }
+
+        /* Timer & Progress */
+        .timer-box { background: #fff5f5; border: 2px solid #ff4444; border-radius: 15px; padding: 10px; margin-bottom: 20px; }
+        #timer-display { font-size: 24px; font-weight: bold; color: #ff4444; }
+        .progress-container { width: 100%; background: #eee; height: 8px; border-radius: 4px; overflow: hidden; margin-top: 5px; }
+        .progress-bar { height: 100%; background: #ff4444; width: 100%; transition: width 1s linear; }
+
+        /* Messages */
+        .msg-card { background: #e3f2fd; padding: 15px; border-radius: 15px; text-align: left; margin-bottom: 15px; border-left: 5px solid var(--primary); }
     </style>
 </head>
 <body>
 
-    <div id="splash">
-        <h1 id="splash-text" style="font-size: 40px;"></h1>
+    <div id="splash-screen" class="screen active">
+        <div class="logo-circle">S</div>
+        <h1 id="splash-text"></h1>
     </div>
 
-    <div id="auth-screen" class="card">
+    <div id="auth-screen" class="screen">
         <h2 id="auth-title">Xush kelibsiz</h2>
-        <div id="reg-inputs" style="display:none">
+        <div id="reg-fields" style="display:none">
             <input type="text" id="fname" placeholder="Ism">
             <input type="text" id="lname" placeholder="Familya">
         </div>
-        <input type="email" id="email" placeholder="Email">
-        <input type="password" id="pass" placeholder="Parol">
-        <button class="btn-blue" id="auth-btn" onclick="handleAuth()">DAVOM ETISH</button>
-        <p id="toggle-auth" onclick="toggleAuthMode()" style="cursor:pointer; color:#007AFF">Ro'yxatdan o'tish</p>
+        <input type="email" id="email" placeholder="Email manzilingiz">
+        <input type="password" id="pass" placeholder="Parol (min. 6 belgi)">
+        <button class="btn-blue" onclick="handleAuth()">DAVOM ETISH</button>
+        <p id="toggle-text" style="color:var(--primary); cursor:pointer" onclick="toggleAuth()">Ro'yxatdan o'tish</p>
     </div>
 
-    <div id="mode-screen" class="card">
-        <div id="id-tag" style="background:#eee; padding:10px; border-radius:10px; margin-bottom:15px; font-size:12px; cursor:pointer;" onclick="copyID()">ID: ...</div>
-        <h3>Rejimni tanlang</h3>
-        <button style="background:#FFC107; color:#1A2D4D" onclick="checkPremium()">💰 PULLI TESTLAR</button>
-        <button style="background:#4CAF50; color:white" onclick="enterMain(false)">🆓 BEPUL TESTLAR</button>
-        <button style="background:#2196F3; color:white" onclick="showMessages()">📩 XABARLARIM</button>
+    <div id="mode-screen" class="screen">
+        <div id="user-id-display" style="background:#f0f4f8; padding:10px; border-radius:10px; font-size:13px; margin-bottom:20px; cursor:pointer;" onclick="copyID()">ID: Yuklanmoqda...</div>
+        <h3>Test turini tanlang</h3>
+        <button class="btn-yellow" onclick="checkPremiumStatus()">💰 PULLI TESTLAR 🏆</button>
+        <button class="btn-green" onclick="startApp('Bepul')">🆓 BEPUL TESTLAR</button>
+        <button class="btn-blue" onclick="loadMessages()">📩 XABARLARIM</button>
     </div>
 
-    <div id="main-screen" class="card">
-        <div class="timer-header"><span id="timer-text">90:00</span></div>
-        <h3>Fanni tanlang</h3>
-        <button class="btn-option" onclick="startQuiz('Matematika')">📐 Matematika</button>
-        <button class="btn-option" onclick="startQuiz('Tarix')">📜 Tarix</button>
-        <button class="btn-option" onclick="startQuiz('Ona tili')">✍️ Ona tili</button>
-    </div>
-
-    <div id="quiz-screen" class="card">
-        <div id="q-progress" style="font-size:14px; color:#888; margin-bottom:10px;">Savol: 1/10</div>
-        <h3 id="question-text" style="margin-bottom:20px;">Savol yuklanmoqda...</h3>
-        <div id="options-container"></div>
-    </div>
-
-    <div id="result-screen" class="card">
-        <h2 style="color:#4CAF50">Test yakunlandi!</h2>
-        <div style="font-size:18px; margin:20px 0;">
-            <p>To'g'ri javoblar: <b id="res-correct">0</b></p>
-            <p>Xato javoblar: <b id="res-wrong">0</b></p>
+    <div id="main-screen" class="screen">
+        <div class="timer-box">
+            <div id="timer-display">90:00</div>
+            <div class="progress-container"><div id="main-progress" class="progress-bar"></div></div>
         </div>
+        <h3 id="mode-label">Fanlar</h3>
+        <button class="btn-option" onclick="goToQuiz('Matematika')">📐 Matematika</button>
+        <button class="btn-option" onclick="goToQuiz('Tarix')">📜 Tarix</button>
+        <button class="btn-option" onclick="goToQuiz('Ona tili')">✍️ Ona tili</button>
+        <button class="btn-option" onclick="goToQuiz('Biologiya')">🌿 Biologiya</button>
+        <button class="btn-option" onclick="goToQuiz('Kimyo')">🧪 Kimyo</button>
+    </div>
+
+    <div id="quiz-screen" class="screen">
+        <div style="display:flex; justify-content:space-between; color:gray; font-size:14px; margin-bottom:10px;">
+            <span id="quiz-q-count">Savol: 1/10</span>
+            <span id="quiz-timer">90:00</span>
+        </div>
+        <h3 id="question-text" style="min-height:80px; margin-bottom:20px;">Savol yuklanmoqda...</h3>
+        <div id="options-box"></div>
+    </div>
+
+    <div id="result-screen" class="screen">
+        <h2 style="color:#4CAF50">Test Yakunlandi!</h2>
+        <div id="result-data" style="font-size:18px; line-height:1.6; margin:20px 0; text-align:left; background:#f9f9f9; padding:15px; border-radius:15px;"></div>
         <button class="btn-blue" onclick="location.reload()">ASOSIY MENYUGA QAYTISH</button>
     </div>
 
-    <div id="msg-screen" class="card">
-        <h3>Admin xabarlari</h3>
-        <div id="msg-list" style="max-height:300px; overflow-y:auto; margin-bottom:20px;"></div>
-        <button class="btn-blue" onclick="closeMessages()">ORQAGA</button>
+    <div id="msg-screen" class="screen">
+        <h3>Admin Xabarlari</h3>
+        <div id="msg-container" style="max-height:400px; overflow-y:auto; margin-bottom:20px;"></div>
+        <button class="btn-outline" onclick="showScreen('mode-screen')">ORQAGA</button>
     </div>
 
     <script>
-        // FIREBASE SOZLAMALARI
+        // CONFIG - Java fayllaringizdagi ma'lumotlar asosida
         const firebaseConfig = {
             apiKey: "AIzaSyA2G8cD0JezEKXRCtKLYiZL0bzDyTp06Vs",
             authDomain: "quiz-app-3692d.firebaseapp.com",
@@ -91,134 +115,202 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth(), db = firebase.database();
 
-        let currentMode = 'login', userShortId = '', isPremiumUser = false;
-        let questions = [], currentQIdx = 0, correctCount = 0, wrongCount = 0, timerInterval;
+        let userShortId = '', currentMode = 'login', quizMode = 'Bepul';
+        let globalTimer, timeLeft = 90 * 60;
+        let questions = [], currentIdx = 0, scoreMap = {};
 
-        // SPLASH
-        let sTxt = "Sardorbek", sIdx = 0;
-        function playSplash() {
-            if(sIdx < sTxt.length) { document.getElementById("splash-text").innerHTML += sTxt[sIdx++]; setTimeout(playSplash, 150); }
-            else { setTimeout(() => { 
-                document.getElementById("splash").style.display = "none";
-                auth.onAuthStateChanged(user => { if(user) loadUserData(user); else showScreen('auth-screen'); });
-            }, 1000); }
+        // 1. SPLASH LOGIC (SplashActivity.java)
+        const appName = "Sardorbek"; let charIdx = 0;
+        function runSplash() {
+            if(charIdx < appName.length) {
+                document.getElementById('splash-text').innerHTML += appName[charIdx++];
+                setTimeout(runSplash, 150);
+            } else {
+                setTimeout(() => {
+                    auth.onAuthStateChanged(user => {
+                        if(user) loadUser(user); else showScreen('auth-screen');
+                    });
+                }, 700);
+            }
         }
-        window.onload = playSplash;
+        window.onload = runSplash;
 
-        // AUTH
-        function toggleAuthMode() {
+        // 2. AUTH LOGIC (LoginRegisterActivity.java)
+        function toggleAuth() {
             currentMode = currentMode === 'login' ? 'reg' : 'login';
-            document.getElementById("auth-title").innerText = currentMode === 'login' ? 'Kirish' : 'Ro\'yxatdan o\'tish';
-            document.getElementById("reg-inputs").style.display = currentMode === 'login' ? 'none' : 'block';
-            document.getElementById("toggle-auth").innerText = currentMode === 'login' ? 'Ro\'yxatdan o'tish' : 'Akkauntingiz bormi? Kirish';
+            document.getElementById('auth-title').innerText = currentMode === 'login' ? 'Kirish' : 'Ro\'yxatdan o\'tish';
+            document.getElementById('reg-fields').style.display = currentMode === 'login' ? 'none' : 'block';
+            document.getElementById('toggle-text').innerText = currentMode === 'login' ? 'Ro\'yxatdan o\'tish' : 'Akkauntingiz bormi? Kirish';
         }
 
         function handleAuth() {
-            const email = document.getElementById("email").value, pass = document.getElementById("pass").value;
+            const email = document.getElementById('email').value, pass = document.getElementById('pass').value;
             if(currentMode === 'reg') {
                 auth.createUserWithEmailAndPassword(email, pass).then(res => {
                     const sid = Math.random().toString(36).substr(2, 5).toUpperCase();
-                    db.ref('Users/' + res.user.uid).set({ firstName: document.getElementById("fname").value, lastName: document.getElementById("lname").value, email, isPremium: false, shortId: sid });
+                    db.ref('Users/' + res.user.uid).set({
+                        email, isPremium: false, shortId: sid,
+                        firstName: document.getElementById('fname').value,
+                        lastName: document.getElementById('lname').value,
+                        registrationTime: Date.now()
+                    });
                 }).catch(e => alert(e.message));
             } else {
-                auth.signInWithEmailAndPassword(email, pass).catch(e => alert(e.message));
+                auth.signInWithEmailAndPassword(email, pass).catch(e => alert("Xato: Parol yoki Email noto'g'ri"));
             }
         }
 
-        // CHOOSE MODE
-        function loadUserData(user) {
-            db.ref('Users/' + user.uid).once('value', snap => {
+        // 3. CHOOSE MODE (ChooseModeActivity.java)
+        function loadUser(user) {
+            db.ref('Users/' + user.uid).on('value', snap => {
                 const data = snap.val();
                 userShortId = data.shortId;
-                document.getElementById("id-tag").innerText = "ID: " + userShortId + " (Nusxalash)";
+                document.getElementById('user-id-display').innerText = "Sizning ID: " + userShortId + " (Nusxalash)";
                 showScreen('mode-screen');
             });
         }
 
-        function checkPremium() {
+        function checkPremiumStatus() {
             db.ref('Users/' + auth.currentUser.uid + '/isPremium').once('value', snap => {
                 if(snap.val() === true) {
-                    db.ref('Users/' + auth.currentUser.uid + '/isPremium').set(false);
-                    enterMain(true);
+                    db.ref('Users/' + auth.currentUser.uid + '/isPremium').set(false); // Bir martalik kirish
+                    startApp('Premium');
                 } else {
-                    if(confirm("Premium rejim uchun admin bilan bog'laning. ID: " + userShortId + "\nO'tishni xohlaysizmi?")) window.open("https://t.me/Uzb_Quiz");
+                    if(confirm("Premium rejim uchun admin bilan bog'laning.\nID: " + userShortId + "\nTelegramga o'tasizmi?")) {
+                        window.open("https://t.me/Uzb_Quiz");
+                        db.ref('payments_pending/' + userShortId).set({
+                            firebaseId: auth.currentUser.uid, shortId: userShortId, status: "pending_admin_review", requestTimestamp: Date.now()
+                        });
+                    }
                 }
             });
         }
 
-        // MAIN & TIMER
-        function enterMain(premium) {
-            isPremiumUser = premium;
+        // 4. MAIN & TIMER (MainActivity.java)
+        function startApp(mode) {
+            quizMode = mode;
             showScreen('main-screen');
-            let time = 90 * 60;
-            timerInterval = setInterval(() => {
-                let m = Math.floor(time / 60), s = time % 60;
-                document.getElementById("timer-text").innerText = `${m}:${s < 10 ? '0'+s : s}`;
-                if(time-- <= 0) { clearInterval(timerInterval); alert("Vaqt tugadi!"); location.reload(); }
+            document.getElementById('mode-label').innerText = mode + " rejim - Fan tanlang";
+            startGlobalTimer();
+        }
+
+        function startGlobalTimer() {
+            if(globalTimer) return;
+            globalTimer = setInterval(() => {
+                let m = Math.floor(timeLeft / 60), s = timeLeft % 60;
+                let formatted = `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
+                document.getElementById('timer-display').innerText = formatted;
+                document.getElementById('quiz-timer').innerText = formatted;
+                document.getElementById('main-progress').style.width = (timeLeft / (90*60) * 100) + "%";
+                if(timeLeft-- <= 0) { clearInterval(globalTimer); alert("Vaqt tugadi!"); location.reload(); }
             }, 1000);
         }
 
-        // QUIZ LOGIC
-        function startQuiz(subject) {
+        // 5. QUIZ LOGIC (QuizActivity.java)
+        function goToQuiz(subject) {
             showScreen('quiz-screen');
-            // Haqiqiy bazadan savollarni olish 
-            db.ref('Questions/' + subject).limitToFirst(10).once('value', snap => {
-                snap.forEach(child => { questions.push({id: child.key, ...child.val()}); });
-                showQuestion();
+            // Firebase real manzilidan savollarni yuklash
+            db.ref('Savollar/' + subject).once('value', snap => {
+                questions = [];
+                snap.forEach(c => { questions.push(c.val()); });
+                if(questions.length > 0) {
+                    questions.sort(() => Math.random() - 0.5); // Java Collections.shuffle()
+                    currentIdx = 0;
+                    scoreMap[subject] = 0;
+                    renderQuestion(subject);
+                } else {
+                    alert("Bu fanda hozircha savollar yo'q.");
+                    showScreen('main-screen');
+                }
             });
         }
 
-        function showQuestion() {
-            if(currentQIdx >= questions.length) return showResult();
-            const q = questions[currentQIdx];
-            document.getElementById("q-progress").innerText = `Savol: ${currentQIdx + 1}/${questions.length}`;
-            document.getElementById("question-text").innerText = q.question;
-            const container = document.getElementById("options-container");
-            container.innerHTML = '';
+        function renderQuestion(subject) {
+            if(currentIdx >= questions.length) return finishSubject(subject);
+            const q = questions[currentIdx];
+            document.getElementById('quiz-q-count').innerText = `Savol: ${currentIdx+1}/${questions.length}`;
+            document.getElementById('question-text').innerText = q.question;
+            const box = document.getElementById('options-box');
+            box.innerHTML = '';
             [q.option1, q.option2, q.option3, q.option4].forEach(opt => {
                 const btn = document.createElement('button');
                 btn.className = 'btn-option';
                 btn.innerText = opt;
-                btn.onclick = () => checkAnswer(opt, q.answer);
-                container.appendChild(btn);
+                btn.onclick = () => {
+                    if(opt === q.answer) scoreMap[subject]++;
+                    currentIdx++;
+                    renderQuestion(subject);
+                };
+                box.appendChild(btn);
             });
         }
 
-        function checkAnswer(selected, correct) {
-            if(selected === correct) correctCount++; else wrongCount++;
-            currentQIdx++;
-            showQuestion();
+        function finishSubject(subject) {
+            alert(subject + " fani yakunlandi.");
+            showScreen('main-screen');
+            // Fan tugatilganini belgilash
+            const btn = document.querySelector(`button[onclick*='${subject}']`);
+            btn.disabled = true;
+            btn.style.opacity = '0.5';
+            btn.innerText += " ✅ (Tugatildi)";
+            
+            // Agar hamma fan tugasa natijani chiqarish
+            checkAllFinished();
         }
 
-        // RESULT
-        function showResult() {
-            clearInterval(timerInterval);
+        function checkAllFinished() {
+            const btns = document.querySelectorAll('#main-screen .btn-option');
+            const finished = Array.from(btns).every(b => b.disabled);
+            if(finished) showFinalResults();
+        }
+
+        // 6. RESULT LOGIC (ResultActivity.java)
+        function showFinalResults() {
+            clearInterval(globalTimer);
             showScreen('result-screen');
-            document.getElementById("res-correct").innerText = correctCount;
-            document.getElementById("res-wrong").innerText = wrongCount;
+            let html = "";
+            let totalBall = 0;
+            for(let sub in scoreMap) {
+                let ball = scoreMap[sub] * 2; // Misol: har bir to'g'ri javob 2 ball
+                totalBall += ball;
+                html += `<p><b>${sub}:</b> ${scoreMap[sub]} ta to'g'ri (${ball} ball)</p>`;
+            }
+            html += `<hr><h3 style="color:var(--primary)">Umumiy ball: ${totalBall.toFixed(1)}</h3>`;
+            document.getElementById('result-data').innerHTML = html;
+            
+            // Firebase'ga yuborish
+            db.ref('UserResults/' + userShortId).set({
+                scores: scoreMap,
+                totalBall: totalBall,
+                timestamp: Date.now(),
+                dateFormatted: new Date().toLocaleString()
+            });
         }
 
-        // MESSAGES
-        function showMessages() {
+        // 7. ADMIN MESSAGES (AdminMessagesActivity.java)
+        function loadMessages() {
             showScreen('msg-screen');
+            const container = document.getElementById('msg-container');
+            container.innerHTML = "Yuklanmoqda...";
             db.ref('Messages').on('value', snap => {
-                const list = document.getElementById("msg-list");
-                list.innerHTML = '';
-                snap.forEach(child => {
-                    const d = child.val();
-                    list.innerHTML += `<div class="msg-item"><b>Admin:</b><br>${d.message}</div>`;
+                container.innerHTML = "";
+                snap.forEach(c => {
+                    const m = c.val();
+                    container.innerHTML += `<div class="msg-card">
+                        <small>${new Date(m.timestamp).toLocaleString()}</small>
+                        <h4>${m.title || 'ADMIN'}</h4>
+                        <p>${m.body || m.message}</p>
+                    </div>`;
                 });
             });
         }
 
-        function closeMessages() { showScreen('mode-screen'); }
-
+        // Utilities
         function showScreen(id) {
-            document.querySelectorAll('.card').forEach(c => c.style.display = 'none');
-            document.getElementById(id).style.display = 'block';
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
         }
-
-        function copyID() { navigator.clipboard.writeText(userShortId); alert("ID nusxalandi!"); }
+        function copyID() { navigator.clipboard.writeText(userShortId); alert("ID nusxalandi: " + userShortId); }
     </script>
 </body>
 </html>
