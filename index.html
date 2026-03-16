@@ -2,85 +2,111 @@
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
-    <title>Iloncha O'yini</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iloncha O'yini - Mobile & PC</title>
     <style>
         body {
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
+            justify-content: center;
             height: 100vh;
             margin: 0;
-            background-color: #2c3e50;
+            background: #1a1a2e;
             color: white;
             font-family: Arial, sans-serif;
-            flex-direction: column;
+            touch-action: manipulation; /* Zoomni o'chiradi */
         }
         canvas {
-            border: 5px solid #ecf0f1;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            border: 4px solid #16a085;
             background-color: #000;
+            max-width: 90vw;
+            max-height: 90vw;
         }
-        .score {
+        .controls {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(3, 60px);
+            gap: 10px;
+        }
+        .btn {
+            width: 60px;
+            height: 60px;
+            background: #16a085;
+            border: none;
+            border-radius: 10px;
+            color: white;
             font-size: 24px;
-            margin-bottom: 10px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
         }
+        .btn:active { background: #1abc9c; }
+        .up { grid-column: 2; }
+        .left { grid-column: 1; }
+        .down { grid-column: 2; }
+        .right { grid-column: 3; }
+        .score { font-size: 24px; margin-bottom: 10px; color: #f1c40f; }
     </style>
 </head>
 <body>
 
     <div class="score">Ball: <span id="scoreVal">0</span></div>
     <canvas id="snakeGame" width="400" height="400"></canvas>
-    <p>Boshqarish: Yo'nalish tugmalari (Aylantirish)</p>
+
+    <div class="controls">
+        <button class="btn up" onclick="changeDir('UP')">▲</button>
+        <button class="btn left" onclick="changeDir('LEFT')">◀</button>
+        <button class="btn down" onclick="changeDir('DOWN')">▼</button>
+        <button class="btn right" onclick="changeDir('RIGHT')">▶</button>
+    </div>
 
     <script>
         const canvas = document.getElementById("snakeGame");
         const ctx = canvas.getContext("2d");
         const scoreElement = document.getElementById("scoreVal");
 
-        const box = 20; // Katak o'lchami
+        const box = 20;
         let score = 0;
-        let gameSpeed = 100;
-
-        // Ilonchaning boshlang'ich holati
-        let snake = [{ x: 9 * box, y: 10 * box }];
-
-        // Ovqat (tasodifiy joyda)
+        let snake = [{ x: 10 * box, y: 10 * box }];
         let food = {
             x: Math.floor(Math.random() * 19 + 1) * box,
             y: Math.floor(Math.random() * 19 + 1) * box
         };
+        let d = "RIGHT"; 
 
-        let d; // Yo'nalish
+        // Klaviaturadan boshqarish
+        document.addEventListener("keydown", (e) => {
+            if(e.keyCode == 37 && d != "RIGHT") d = "LEFT";
+            else if(e.keyCode == 38 && d != "DOWN") d = "UP";
+            else if(e.keyCode == 39 && d != "LEFT") d = "RIGHT";
+            else if(e.keyCode == 40 && d != "UP") d = "DOWN";
+        });
 
-        document.addEventListener("keydown", direction);
-
-        function direction(event) {
-            if(event.keyCode == 37 && d != "RIGHT") d = "LEFT";
-            else if(event.keyCode == 38 && d != "DOWN") d = "UP";
-            else if(event.keyCode == 39 && d != "LEFT") d = "RIGHT";
-            else if(event.keyCode == 40 && d != "UP") d = "DOWN";
-        }
-
-        // To'qnashuvni tekshirish
-        function collision(head, array) {
-            for(let i = 0; i < array.length; i++) {
-                if(head.x == array[i].x && head.y == array[i].y) return true;
-            }
-            return false;
+        // Tugmalar orqali boshqarish funksiyasi
+        function changeDir(newDir) {
+            if(newDir == "LEFT" && d != "RIGHT") d = "LEFT";
+            if(newDir == "UP" && d != "DOWN") d = "UP";
+            if(newDir == "RIGHT" && d != "LEFT") d = "RIGHT";
+            if(newDir == "DOWN" && d != "UP") d = "DOWN";
         }
 
         function draw() {
             ctx.fillStyle = "black";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+            // Ilonni chizish
             for(let i = 0; i < snake.length; i++) {
-                ctx.fillStyle = (i == 0) ? "#2ecc71" : "#27ae60"; // Boshi och yashil
+                ctx.fillStyle = (i == 0) ? "#1abc9c" : "#2ecc71";
                 ctx.fillRect(snake[i].x, snake[i].y, box, box);
-                ctx.strokeStyle = "black";
+                ctx.strokeStyle = "#000";
                 ctx.strokeRect(snake[i].x, snake[i].y, box, box);
             }
 
-            ctx.fillStyle = "#e74c3c"; // Ovqat qizil rangda
+            // Ovqatni chizish
+            ctx.fillStyle = "#e74c3c";
             ctx.fillRect(food.x, food.y, box, box);
 
             let snakeX = snake[0].x;
@@ -91,7 +117,7 @@
             if( d == "RIGHT") snakeX += box;
             if( d == "DOWN") snakeY += box;
 
-            // Ilon ovqatni yegan holati
+            // Ovqat yeyish mantiqi
             if(snakeX == food.x && snakeY == food.y) {
                 score++;
                 scoreElement.innerHTML = score;
@@ -100,22 +126,29 @@
                     y: Math.floor(Math.random() * 19 + 1) * box
                 };
             } else {
-                snake.pop(); // Oxirgi bo'g'inni olib tashlash
+                snake.pop();
             }
 
             let newHead = { x: snakeX, y: snakeY };
 
-            // O'yin tugash shartlari (devorga urilish yoki o'ziga urilish)
+            // Devorga yoki o'ziga urilish
             if(snakeX < 0 || snakeX >= canvas.width || snakeY < 0 || snakeY >= canvas.height || collision(newHead, snake)) {
                 clearInterval(game);
-                alert("O'yin tugadi! Sizning balingiz: " + score);
-                location.reload(); // O'yinni qayta boshlash
+                alert("O'yin tugadi! Ball: " + score);
+                location.reload();
             }
 
             snake.unshift(newHead);
         }
 
-        let game = setInterval(draw, gameSpeed);
+        function collision(head, array) {
+            for(let i = 0; i < array.length; i++) {
+                if(head.x == array[i].x && head.y == array[i].y) return true;
+            }
+            return false;
+        }
+
+        let game = setInterval(draw, 150); // Tezlik: 150ms
     </script>
 </body>
 </html>
