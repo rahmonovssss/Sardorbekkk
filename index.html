@@ -3,137 +3,235 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Pomodoro</title>
+    <title>Zen Pomodoro - Premium</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-color: #0f172a;
+            --accent-color: #38bdf8;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #2f3640;
+            margin: 0;
+            padding: 0;
+            font-family: 'Montserrat', sans-serif;
+            background: radial-gradient(circle at top right, #1e293b, #0f172a);
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
-            color: white;
+            color: #f8fafc;
+            overflow: hidden;
         }
-        .pomodoro-card {
-            background: #e84118;
-            padding: 40px;
-            border-radius: 30px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+
+        /* Orqa fon effektlari */
+        .circle-bg {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: linear-gradient(135deg, #38bdf822, #818cf822);
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+            animation: move 10s infinite alternate;
+        }
+
+        @keyframes move {
+            from { transform: translate(-50px, -50px); }
+            to { transform: translate(50px, 50px); }
+        }
+
+        .container {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 40px;
+            padding: 50px;
             text-align: center;
-            width: 300px;
-            transition: background 0.5s;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            width: 320px;
+            position: relative;
         }
-        .timer-display {
-            font-size: 80px;
-            font-weight: bold;
-            margin: 20px 0;
-        }
-        .controls button {
-            background: white;
-            border: none;
-            padding: 10px 25px;
-            border-radius: 10px;
-            font-weight: bold;
-            cursor: pointer;
-            color: #e84118;
-            margin: 5px;
-            font-size: 16px;
-        }
-        .status-text {
-            font-size: 20px;
+
+        h1 {
+            font-weight: 300;
+            letter-spacing: 4px;
+            font-size: 14px;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            margin-bottom: 30px;
+            color: var(--accent-color);
         }
-        /* Dam olish vaqti uchun yashil rang */
-        .break-mode {
-            background: #4cd137;
+
+        .timer-circle {
+            width: 220px;
+            height: 220px;
+            border: 4px solid var(--border);
+            border-radius: 50%;
+            margin: 0 auto 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
         }
-        .break-mode button {
-            color: #4cd137;
+
+        .timer-display {
+            font-size: 54px;
+            font-weight: 700;
+            margin: 0;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .status-badge {
+            font-size: 10px;
+            background: var(--accent-color);
+            color: #000;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            margin-top: 5px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        button {
+            background: none;
+            border: 1px solid var(--border);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        button:hover {
+            background: white;
+            color: black;
+            transform: translateY(-3px);
+        }
+
+        button.primary {
+            background: white;
+            color: black;
+            border: none;
+            box-shadow: 0 10px 15px -3px rgba(255,255,255,0.2);
+        }
+
+        .progress-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 4px;
+            background: var(--accent-color);
+            width: 0%;
+            transition: width 1s linear;
+            border-bottom-left-radius: 40px;
+            border-bottom-right-radius: 40px;
         }
     </style>
 </head>
 <body>
 
-<div class="pomodoro-card" id="card">
-    <div class="status-text" id="status">Diqqat: Ish vaqti</div>
-    <div class="timer-display" id="timer">25:00</div>
-    
-    <div class="controls">
-        <button onclick="startTimer()">START</button>
-        <button onclick="pauseTimer()">PAUSE</button>
-        <button onclick="resetTimer()">RESET</button>
-    </div>
-</div>
+    <div class="circle-bg"></div>
 
-<script>
-    let timeLeft = 25 * 60;
-    let timerId = null;
-    let isWorkMode = true;
-
-    const timerDisplay = document.getElementById('timer');
-    const statusText = document.getElementById('status');
-    const card = document.getElementById('card');
-
-    function updateDisplay() {
-        let minutes = Math.floor(timeLeft / 60);
-        let seconds = timeLeft % 60;
-        timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-    }
-
-    function startTimer() {
-        if (timerId !== null) return;
+    <div class="container">
+        <h1>Focus Session</h1>
         
-        timerId = setInterval(() => {
-            timeLeft--;
-            updateDisplay();
+        <div class="timer-circle">
+            <p class="timer-display" id="timer">25:00</p>
+            <span class="status-badge" id="status">Deep Work</span>
+        </div>
 
-            if (timeLeft <= 0) {
+        <div class="controls">
+            <button onclick="toggleTimer()" id="mainBtn" class="primary">Start</button>
+            <button onclick="resetTimer()">Reset</button>
+        </div>
+
+        <div class="progress-bar" id="progress"></div>
+    </div>
+
+    <script>
+        let timeLeft = 25 * 60;
+        let totalTime = 25 * 60;
+        let timerId = null;
+        let isWorkMode = true;
+
+        const timerDisplay = document.getElementById('timer');
+        const statusText = document.getElementById('status');
+        const mainBtn = document.getElementById('mainBtn');
+        const progress = document.getElementById('progress');
+
+        function updateDisplay() {
+            let minutes = Math.floor(timeLeft / 60);
+            let seconds = timeLeft % 60;
+            timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Progress bar hisobi
+            let percent = ((totalTime - timeLeft) / totalTime) * 100;
+            progress.style.width = percent + "%";
+        }
+
+        function toggleTimer() {
+            if (timerId === null) {
+                mainBtn.textContent = 'Pause';
+                mainBtn.style.background = 'rgba(255,255,255,0.1)';
+                mainBtn.style.color = 'white';
+                
+                timerId = setInterval(() => {
+                    timeLeft--;
+                    updateDisplay();
+                    if (timeLeft <= 0) {
+                        clearInterval(timerId);
+                        timerId = null;
+                        switchMode();
+                    }
+                }, 1000);
+            } else {
                 clearInterval(timerId);
                 timerId = null;
-                switchMode();
+                mainBtn.textContent = 'Resume';
+                mainBtn.className = 'primary';
             }
-        }, 1000);
-    }
-
-    function pauseTimer() {
-        clearInterval(timerId);
-        timerId = null;
-    }
-
-    function resetTimer() {
-        pauseTimer();
-        isWorkMode = true;
-        timeLeft = 25 * 60;
-        updateDisplay();
-        updateUI();
-    }
-
-    function switchMode() {
-        // Ovozli xabar (Brauzer ruxsat bersa)
-        const bell = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
-        bell.play();
-
-        isWorkMode = !isWorkMode;
-        timeLeft = isWorkMode ? 25 * 60 : 5 * 60;
-        
-        updateUI();
-        updateDisplay();
-        alert(isWorkMode ? "Ishni boshlaymiz!" : "Tanaffus vaqti!");
-        startTimer();
-    }
-
-    function updateUI() {
-        if (isWorkMode) {
-            statusText.textContent = "Diqqat: Ish vaqti";
-            card.classList.remove('break-mode');
-        } else {
-            statusText.textContent = "Tanaffus";
-            card.classList.add('break-mode');
         }
-    }
-</script>
 
+        function resetTimer() {
+            clearInterval(timerId);
+            timerId = null;
+            isWorkMode = true;
+            timeLeft = 25 * 60;
+            totalTime = 25 * 60;
+            mainBtn.textContent = 'Start';
+            mainBtn.className = 'primary';
+            statusText.textContent = "Deep Work";
+            statusText.style.background = "#38bdf8";
+            updateDisplay();
+        }
+
+        function switchMode() {
+            isWorkMode = !isWorkMode;
+            timeLeft = isWorkMode ? 25 * 60 : 5 * 60;
+            totalTime = timeLeft;
+            
+            statusText.textContent = isWorkMode ? "Deep Work" : "Short Break";
+            statusText.style.background = isWorkMode ? "#38bdf8" : "#4ade80";
+            
+            new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg').play();
+            updateDisplay();
+            toggleTimer();
+        }
+
+        updateDisplay();
+    </script>
 </body>
 </html>
