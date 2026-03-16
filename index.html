@@ -1,74 +1,121 @@
 <!DOCTYPE html>
-<html>
+<html lang="uz">
 <head>
-    <title>Matematik Mayatnik Simulyatsiyasi</title>
+    <meta charset="UTF-8">
+    <title>Iloncha O'yini</title>
     <style>
-        body { display: flex; flex-direction: column; align-items: center; background: #f0f0f0; font-family: sans-serif; }
-        canvas { background: white; border: 2px solid #333; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        .controls { margin-top: 20px; padding: 10px; background: #fff; border-radius: 8px; }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #2c3e50;
+            color: white;
+            font-family: Arial, sans-serif;
+            flex-direction: column;
+        }
+        canvas {
+            border: 5px solid #ecf0f1;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            background-color: #000;
+        }
+        .score {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
 
-    <h2>Matematik Mayatnik</h2>
-    <canvas id="canvas" width="600" height="400"></canvas>
-
-    <div class="controls">
-        <label>Ip uzunligi (L): </label>
-        <input type="range" id="lenSlider" min="50" max="250" value="150">
-    </div>
+    <div class="score">Ball: <span id="scoreVal">0</span></div>
+    <canvas id="snakeGame" width="400" height="400"></canvas>
+    <p>Boshqarish: Yo'nalish tugmalari (Aylantirish)</p>
 
     <script>
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        const lenSlider = document.getElementById('lenSlider');
+        const canvas = document.getElementById("snakeGame");
+        const ctx = canvas.getContext("2d");
+        const scoreElement = document.getElementById("scoreVal");
 
-        // Fizik o'zgaruvchilar
-        let angle = Math.PI / 4; // Boshlang'ich burchak (45 daraja)
-        let angleV = 0;          // Burchak tezligi
-        let angleA = 0;          // Burchak tezlanishi
-        let g = 0.8;             // Erkin tushish tezlanishi (simulyatsiya uchun)
-        
-        const origin = { x: 300, y: 50 };
+        const box = 20; // Katak o'lchami
+        let score = 0;
+        let gameSpeed = 100;
 
-        function draw() {
-            let L = parseFloat(lenSlider.value);
-            
-            // Fizik hisob-kitob (Nyuton qonuni asosida)
-            // formula: a = -(g/L) * sin(theta)
-            angleA = (-1 * g / L) * Math.sin(angle);
-            angleV += angleA;
-            angle += angleV;
+        // Ilonchaning boshlang'ich holati
+        let snake = [{ x: 9 * box, y: 10 * box }];
 
-            // Ishqalanish (damping) - to'xtab qolishi uchun
-            angleV *= 0.995;
+        // Ovqat (tasodifiy joyda)
+        let food = {
+            x: Math.floor(Math.random() * 19 + 1) * box,
+            y: Math.floor(Math.random() * 19 + 1) * box
+        };
 
-            // Koordinatalarni hisoblash
-            let x = L * Math.sin(angle) + origin.x;
-            let y = L * Math.cos(angle) + origin.y;
+        let d; // Yo'nalish
 
-            // Chizish
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // Ipni chizish
-            ctx.beginPath();
-            ctx.moveTo(origin.x, origin.y);
-            ctx.lineTo(x, y);
-            ctx.strokeStyle = '#333';
-            ctx.lineWidth = 2;
-            ctx.stroke();
+        document.addEventListener("keydown", direction);
 
-            // Yukni (sharchani) chizish
-            ctx.beginPath();
-            ctx.arc(x, y, 20, 0, Math.PI * 2);
-            ctx.fillStyle = '#e74c3c';
-            ctx.fill();
-            ctx.stroke();
-
-            requestAnimationFrame(draw);
+        function direction(event) {
+            if(event.keyCode == 37 && d != "RIGHT") d = "LEFT";
+            else if(event.keyCode == 38 && d != "DOWN") d = "UP";
+            else if(event.keyCode == 39 && d != "LEFT") d = "RIGHT";
+            else if(event.keyCode == 40 && d != "UP") d = "DOWN";
         }
 
-        draw();
+        // To'qnashuvni tekshirish
+        function collision(head, array) {
+            for(let i = 0; i < array.length; i++) {
+                if(head.x == array[i].x && head.y == array[i].y) return true;
+            }
+            return false;
+        }
+
+        function draw() {
+            ctx.fillStyle = "black";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            for(let i = 0; i < snake.length; i++) {
+                ctx.fillStyle = (i == 0) ? "#2ecc71" : "#27ae60"; // Boshi och yashil
+                ctx.fillRect(snake[i].x, snake[i].y, box, box);
+                ctx.strokeStyle = "black";
+                ctx.strokeRect(snake[i].x, snake[i].y, box, box);
+            }
+
+            ctx.fillStyle = "#e74c3c"; // Ovqat qizil rangda
+            ctx.fillRect(food.x, food.y, box, box);
+
+            let snakeX = snake[0].x;
+            let snakeY = snake[0].y;
+
+            if( d == "LEFT") snakeX -= box;
+            if( d == "UP") snakeY -= box;
+            if( d == "RIGHT") snakeX += box;
+            if( d == "DOWN") snakeY += box;
+
+            // Ilon ovqatni yegan holati
+            if(snakeX == food.x && snakeY == food.y) {
+                score++;
+                scoreElement.innerHTML = score;
+                food = {
+                    x: Math.floor(Math.random() * 19 + 1) * box,
+                    y: Math.floor(Math.random() * 19 + 1) * box
+                };
+            } else {
+                snake.pop(); // Oxirgi bo'g'inni olib tashlash
+            }
+
+            let newHead = { x: snakeX, y: snakeY };
+
+            // O'yin tugash shartlari (devorga urilish yoki o'ziga urilish)
+            if(snakeX < 0 || snakeX >= canvas.width || snakeY < 0 || snakeY >= canvas.height || collision(newHead, snake)) {
+                clearInterval(game);
+                alert("O'yin tugadi! Sizning balingiz: " + score);
+                location.reload(); // O'yinni qayta boshlash
+            }
+
+            snake.unshift(newHead);
+        }
+
+        let game = setInterval(draw, gameSpeed);
     </script>
 </body>
 </html>
