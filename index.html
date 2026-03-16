@@ -21,7 +21,6 @@
             overflow: hidden;
         }
 
-        /* --- SPLASH SCREEN --- */
         #splash-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg); display: flex; flex-direction: column;
@@ -36,7 +35,6 @@
             text-shadow: 0 0 30px rgba(0, 210, 255, 0.3);
         }
 
-        /* --- MAIN INTERFACE --- */
         #main-content {
             opacity: 0; transform: translateY(20px);
             transition: all 0.8s ease;
@@ -55,7 +53,6 @@
             color: var(--accent); margin-bottom: 15px; font-weight: 800;
         }
 
-        /* --- VAQTNI SOZLASH INPUTLARI --- */
         .time-setter {
             display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;
         }
@@ -67,7 +64,6 @@
         .time-setter input:focus { border-color: var(--accent); }
 
         .timer-box { position: relative; width: 200px; height: 200px; margin: 0 auto 30px; }
-
         svg { transform: rotate(-90deg); width: 200px; height: 200px; }
         circle { fill: none; stroke-width: 8; stroke-linecap: round; }
         .bg-circle { stroke: var(--border); }
@@ -88,9 +84,8 @@
             transition: 0.3s; margin: 0 5px;
         }
 
-        button:active { transform: scale(0.9); }
+        button:active { transform: scale(0.95); }
         button.reset-btn { background: var(--glass); color: white; border: 1px solid var(--border); }
-        
         .hidden { display: none; }
     </style>
 </head>
@@ -135,8 +130,23 @@
         let isWorkMode = true;
         let endTime = null;
 
-        // Audio elementini chaqiramiz
         const alarm = document.getElementById('alarmSound');
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        // Yoqimli click ovozi (Soft Pop)
+        function playClickEffect() {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(1000, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.1);
+        }
 
         window.onload = () => {
             setTimeout(() => {
@@ -144,7 +154,6 @@
                 setTimeout(() => document.getElementById('splash-screen').style.display = 'none', 800);
                 document.getElementById('main-content').style.opacity = '1';
                 document.getElementById('main-content').style.transform = 'translateY(0)';
-                if (Notification.permission !== 'granted') Notification.requestPermission();
             }, 2500);
         };
 
@@ -166,7 +175,7 @@
         }
 
         function toggleTimer() {
-            // Androidda ovozni "uyg'otish"
+            playClickEffect(); // CLICK!
             alarm.play().then(() => { alarm.pause(); alarm.currentTime = 0; }).catch(() => {});
 
             if (timerId) {
@@ -199,14 +208,11 @@
         }
 
         function handleEnd() {
-            // MP3 OVOZINI CHALAMIZ
-            alarm.play().catch(e => console.log("Audio xatosi:", e));
-
+            alarm.play().catch(e => console.log("Audio error"));
             if (Notification.permission === 'granted') {
                 new Notification(isWorkMode ? "Vaqt tugadi!" : "Tanaffus tugadi!");
             }
             isWorkMode = !isWorkMode;
-            
             if (isWorkMode) {
                 manualSet();
                 document.getElementById('statusLabel').textContent = "Focus Session";
@@ -219,13 +225,13 @@
                 document.getElementById('statusLabel').style.color = "var(--break)";
                 document.getElementById('progress').style.stroke = "var(--break)";
             }
-            
             document.getElementById('playBtn').textContent = "START";
             document.getElementById('setter').classList.remove('hidden');
             updateUI();
         }
 
         function resetTimer() {
+            playClickEffect(); // CLICK!
             clearInterval(timerId);
             timerId = null;
             isWorkMode = true;
