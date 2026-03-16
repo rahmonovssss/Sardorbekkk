@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sardorbek Taymeri - Ultra</title>
+    <title>Sardorbek Taymeri - Premium</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -26,7 +26,7 @@
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg); display: flex; flex-direction: column;
             justify-content: center; align-items: center; z-index: 100;
-            transition: opacity 0.8s ease;
+            transition: opacity 1s ease, visibility 1s;
         }
 
         .logo-text {
@@ -36,10 +36,10 @@
             text-shadow: 0 0 30px rgba(0, 210, 255, 0.3);
         }
 
-        /* --- MAIN INTERFACE --- */
+        /* --- ASOSIY INTERFEYS --- */
         #main-content {
             opacity: 0; transform: translateY(20px);
-            transition: all 0.8s ease;
+            transition: all 1s ease;
             height: 100vh; display: flex; justify-content: center; align-items: center;
         }
 
@@ -51,7 +51,7 @@
         }
 
         .status-label {
-            font-size: 11px; text-transform: uppercase; letter-spacing: 4px;
+            font-size: 10px; text-transform: uppercase; letter-spacing: 4px;
             color: var(--accent); margin-bottom: 10px; font-weight: 800;
         }
 
@@ -79,6 +79,7 @@
 
         button:active { transform: scale(0.9); }
         button.reset-btn { background: var(--glass); color: white; border: 1px solid var(--border); }
+
     </style>
 </head>
 <body>
@@ -113,26 +114,47 @@
         let isWorkMode = true;
         let endTime = null;
 
-        // Splash screenni yo'qotish
+        // --- SPLASH VA RUXSAT ---
         window.onload = () => {
             setTimeout(() => {
                 document.getElementById('splash-screen').style.opacity = '0';
-                setTimeout(() => document.getElementById('splash-screen').style.display = 'none', 800);
+                setTimeout(() => document.getElementById('splash-screen').style.display = 'none', 1000);
                 document.getElementById('main-content').style.opacity = '1';
                 document.getElementById('main-content').style.transform = 'translateY(0)';
                 
-                if (Notification.permission !== 'granted') Notification.requestPermission();
-            }, 2500);
+                // Bildirishnoma ruxsatini so'rash
+                if (Notification.permission !== "granted") {
+                    Notification.requestPermission();
+                }
+            }, 3000);
         };
 
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function playSound(freq, duration) {
+        
+        function notifyUser(title, body) {
+            // 1. Tepadagi bildirishnoma
+            if (Notification.permission === "granted") {
+                new Notification(title, { body: body });
+            }
+            // 2. Vibratsiya
+            if (navigator.vibrate) {
+                navigator.vibrate([300, 100, 300]);
+            }
+            // 3. Ovoz
+            playAlarmSound();
+        }
+
+        function playAlarmSound() {
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
-            osc.type = 'sine'; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime + 1);
             gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.start(); osc.stop(audioCtx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 1);
         }
 
         function updateUI() {
@@ -144,7 +166,6 @@
         }
 
         function toggleTimer() {
-            playSound(1200, 0.1);
             if (timerId) {
                 clearInterval(timerId);
                 timerId = null;
@@ -166,7 +187,7 @@
                 updateUI();
                 clearInterval(timerId);
                 timerId = null;
-                handleEnd();
+                handleCycleEnd();
             } else {
                 updateUI();
             }
@@ -182,28 +203,29 @@
             }
         });
 
-        function handleEnd() {
-            playSound(600, 0.5);
-            if (Notification.permission === 'granted') {
-                new Notification(isWorkMode ? "Ish tugadi!" : "Tanaffus tugadi!", {
-                    body: isWorkMode ? "Sardorbek, endi 5 daqiqa dam oling." : "Sardorbek, yana ishga qaytamiz!"
-                });
+        function handleCycleEnd() {
+            if (isWorkMode) {
+                notifyUser("Vaqt tugadi!", "Sardorbek, endi 5 daqiqa dam oling.");
+                isWorkMode = false;
+                timeLeft = 5 * 60;
+                totalTime = 5 * 60;
+                document.getElementById('statusLabel').textContent = "Short Break";
+                document.getElementById('statusLabel').style.color = "var(--break)";
+                document.getElementById('progress').style.stroke = "var(--break)";
+            } else {
+                notifyUser("Tanaffus tugadi!", "Sardorbek, ishga qaytamiz!");
+                isWorkMode = true;
+                timeLeft = 25 * 60;
+                totalTime = 25 * 60;
+                document.getElementById('statusLabel').textContent = "Focus Session";
+                document.getElementById('statusLabel').style.color = "var(--accent)";
+                document.getElementById('progress').style.stroke = "var(--accent)";
             }
-
-            isWorkMode = !isWorkMode;
-            timeLeft = isWorkMode ? 25 * 60 : 5 * 60;
-            totalTime = timeLeft;
-
-            const color = isWorkMode ? "var(--accent)" : "var(--break)";
-            document.getElementById('statusLabel').textContent = isWorkMode ? "Focus Session" : "Short Break";
-            document.getElementById('statusLabel').style.color = color;
-            document.getElementById('progress').style.stroke = color;
             document.getElementById('playBtn').textContent = "START";
             updateUI();
         }
 
         function resetTimer() {
-            playSound(800, 0.1);
             clearInterval(timerId);
             timerId = null;
             isWorkMode = true;
