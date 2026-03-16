@@ -3,232 +3,250 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zen Pomodoro - Premium</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&display=swap" rel="stylesheet">
+    <title>Zen Flow - Premium Pomodoro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #0f172a;
-            --accent-color: #38bdf8;
-            --glass: rgba(255, 255, 255, 0.05);
+            --bg: #0b0e14;
+            --accent: #00d2ff;
+            --break: #00ff88;
+            --glass: rgba(255, 255, 255, 0.03);
             --border: rgba(255, 255, 255, 0.1);
         }
 
         body {
             margin: 0;
-            padding: 0;
-            font-family: 'Montserrat', sans-serif;
-            background: radial-gradient(circle at top right, #1e293b, #0f172a);
+            background: var(--bg);
+            color: white;
+            font-family: 'Outfit', sans-serif;
             height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            color: #f8fafc;
             overflow: hidden;
         }
 
-        /* Orqa fon effektlari */
-        .circle-bg {
+        /* Fon animatsiyasi */
+        .ambient-bg {
             position: absolute;
-            width: 400px;
-            height: 400px;
-            background: linear-gradient(135deg, #38bdf822, #818cf822);
-            border-radius: 50%;
-            filter: blur(80px);
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, #1a2a44 0%, #0b0e14 100%);
             z-index: -1;
-            animation: move 10s infinite alternate;
-        }
-
-        @keyframes move {
-            from { transform: translate(-50px, -50px); }
-            to { transform: translate(50px, 50px); }
         }
 
         .container {
             background: var(--glass);
-            backdrop-filter: blur(20px);
+            backdrop-filter: blur(30px);
             border: 1px solid var(--border);
-            border-radius: 40px;
-            padding: 50px;
+            padding: 40px;
+            border-radius: 50px;
             text-align: center;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 40px 100px rgba(0,0,0,0.5);
             width: 320px;
+        }
+
+        .timer-box {
             position: relative;
-        }
-
-        h1 {
-            font-weight: 300;
-            letter-spacing: 4px;
-            font-size: 14px;
-            text-transform: uppercase;
-            margin-bottom: 30px;
-            color: var(--accent-color);
-        }
-
-        .timer-circle {
-            width: 220px;
-            height: 220px;
-            border: 4px solid var(--border);
-            border-radius: 50%;
+            width: 250px;
+            height: 250px;
             margin: 0 auto 30px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
         }
 
-        .timer-display {
-            font-size: 54px;
+        /* Aylana Progress */
+        svg {
+            transform: rotate(-90deg);
+            width: 250px;
+            height: 250px;
+        }
+
+        circle {
+            fill: none;
+            stroke-width: 8;
+            stroke-linecap: round;
+        }
+
+        .bg-circle { stroke: var(--border); }
+        
+        .progress-circle {
+            stroke: var(--accent);
+            stroke-dasharray: 754; /* 2 * PI * R (R=120) */
+            stroke-dashoffset: 754;
+            transition: stroke-dashoffset 1s linear, stroke 0.5s;
+        }
+
+        .timer-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .time {
+            font-size: 50px;
             font-weight: 700;
             margin: 0;
-            font-variant-numeric: tabular-nums;
+            letter-spacing: -1px;
         }
 
-        .status-badge {
-            font-size: 10px;
-            background: var(--accent-color);
-            color: #000;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-weight: 700;
-            margin-top: 5px;
+        .mode-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--accent);
+            margin-bottom: 5px;
+            display: block;
         }
 
         .controls {
             display: flex;
             justify-content: center;
             gap: 15px;
+            margin-bottom: 25px;
         }
 
         button {
-            background: none;
+            background: var(--glass);
             border: 1px solid var(--border);
             color: white;
-            padding: 12px 25px;
-            border-radius: 12px;
+            padding: 12px 20px;
+            border-radius: 15px;
             cursor: pointer;
-            font-size: 12px;
-            font-weight: 600;
-            transition: all 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            font-size: 13px;
+            transition: 0.3s;
         }
 
-        button:hover {
-            background: white;
-            color: black;
-            transform: translateY(-3px);
+        button:hover { background: white; color: black; }
+
+        .audio-controls {
+            border-top: 1px solid var(--border);
+            padding-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
         }
 
-        button.primary {
-            background: white;
+        .audio-btn {
+            font-size: 18px;
+            padding: 8px;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .active-audio {
+            background: var(--accent);
             color: black;
             border: none;
-            box-shadow: 0 10px 15px -3px rgba(255,255,255,0.2);
-        }
-
-        .progress-bar {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            height: 4px;
-            background: var(--accent-color);
-            width: 0%;
-            transition: width 1s linear;
-            border-bottom-left-radius: 40px;
-            border-bottom-right-radius: 40px;
         }
     </style>
 </head>
 <body>
 
-    <div class="circle-bg"></div>
+    <div class="ambient-bg"></div>
 
     <div class="container">
-        <h1>Focus Session</h1>
-        
-        <div class="timer-circle">
-            <p class="timer-display" id="timer">25:00</p>
-            <span class="status-badge" id="status">Deep Work</span>
+        <div class="timer-box">
+            <svg>
+                <circle class="bg-circle" cx="125" cy="125" r="120"></circle>
+                <circle id="progress" class="progress-circle" cx="125" cy="125" r="120"></circle>
+            </svg>
+            <div class="timer-content">
+                <span id="modeLabel" class="mode-label">Focus</span>
+                <p id="timeDisplay" class="time">25:00</p>
+            </div>
         </div>
 
         <div class="controls">
-            <button onclick="toggleTimer()" id="mainBtn" class="primary">Start</button>
+            <button onclick="toggleTimer()" id="playBtn">Start</button>
             <button onclick="resetTimer()">Reset</button>
         </div>
 
-        <div class="progress-bar" id="progress"></div>
+        <div class="audio-controls">
+            <button class="audio-btn" id="rainBtn" onclick="toggleAudio('rain')">🌧️</button>
+            <button class="audio-btn" id="lofiBtn" onclick="toggleAudio('lofi')">🎵</button>
+        </div>
     </div>
+
+    <audio id="rainSound" loop src="https://www.soundjay.com/nature/rain-07.mp3"></audio>
+    <audio id="lofiSound" loop src="https://p.scdn.co/mp3-preview/659695d36e2f694e1d3e230872658866e4a8497d?cid=774b75d4050d42d392e2764b85d30132"></audio>
+    <audio id="bell" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
 
     <script>
         let timeLeft = 25 * 60;
         let totalTime = 25 * 60;
         let timerId = null;
-        let isWorkMode = true;
+        let isWork = true;
 
-        const timerDisplay = document.getElementById('timer');
-        const statusText = document.getElementById('status');
-        const mainBtn = document.getElementById('mainBtn');
-        const progress = document.getElementById('progress');
+        const circle = document.getElementById('progress');
+        const timeDisplay = document.getElementById('timeDisplay');
+        const modeLabel = document.getElementById('modeLabel');
+        const playBtn = document.getElementById('playBtn');
 
         function updateDisplay() {
-            let minutes = Math.floor(timeLeft / 60);
-            let seconds = timeLeft % 60;
-            timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            let mins = Math.floor(timeLeft / 60);
+            let secs = timeLeft % 60;
+            timeDisplay.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
             
-            // Progress bar hisobi
-            let percent = ((totalTime - timeLeft) / totalTime) * 100;
-            progress.style.width = percent + "%";
+            // Aylana to'lishi
+            const offset = 754 - (754 * (totalTime - timeLeft)) / totalTime;
+            circle.style.strokeDashoffset = offset;
         }
 
         function toggleTimer() {
-            if (timerId === null) {
-                mainBtn.textContent = 'Pause';
-                mainBtn.style.background = 'rgba(255,255,255,0.1)';
-                mainBtn.style.color = 'white';
-                
+            if (timerId) {
+                clearInterval(timerId);
+                timerId = null;
+                playBtn.textContent = "Resume";
+            } else {
+                playBtn.textContent = "Pause";
                 timerId = setInterval(() => {
                     timeLeft--;
                     updateDisplay();
                     if (timeLeft <= 0) {
-                        clearInterval(timerId);
-                        timerId = null;
+                        document.getElementById('bell').play();
                         switchMode();
                     }
                 }, 1000);
-            } else {
-                clearInterval(timerId);
-                timerId = null;
-                mainBtn.textContent = 'Resume';
-                mainBtn.className = 'primary';
             }
+        }
+
+        function switchMode() {
+            isWork = !isWork;
+            timeLeft = isWork ? 25 * 60 : 5 * 60;
+            totalTime = timeLeft;
+            modeLabel.textContent = isWork ? "Focus" : "Break";
+            modeLabel.style.color = isWork ? "var(--accent)" : "var(--break)";
+            circle.style.stroke = isWork ? "var(--accent)" : "var(--break)";
+            updateDisplay();
         }
 
         function resetTimer() {
             clearInterval(timerId);
             timerId = null;
-            isWorkMode = true;
             timeLeft = 25 * 60;
             totalTime = 25 * 60;
-            mainBtn.textContent = 'Start';
-            mainBtn.className = 'primary';
-            statusText.textContent = "Deep Work";
-            statusText.style.background = "#38bdf8";
+            isWork = true;
+            playBtn.textContent = "Start";
             updateDisplay();
         }
 
-        function switchMode() {
-            isWorkMode = !isWorkMode;
-            timeLeft = isWorkMode ? 25 * 60 : 5 * 60;
-            totalTime = timeLeft;
-            
-            statusText.textContent = isWorkMode ? "Deep Work" : "Short Break";
-            statusText.style.background = isWorkMode ? "#38bdf8" : "#4ade80";
-            
-            new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg').play();
-            updateDisplay();
-            toggleTimer();
+        function toggleAudio(type) {
+            const rain = document.getElementById('rainSound');
+            const lofi = document.getElementById('lofiSound');
+            const rBtn = document.getElementById('rainBtn');
+            const lBtn = document.getElementById('lofiBtn');
+
+            if (type === 'rain') {
+                if (rain.paused) { rain.play(); rBtn.classList.add('active-audio'); }
+                else { rain.pause(); rBtn.classList.remove('active-audio'); }
+            } else {
+                if (lofi.paused) { lofi.play(); lBtn.classList.add('active-audio'); }
+                else { lofi.pause(); lBtn.classList.remove('active-audio'); }
+            }
         }
 
         updateDisplay();
