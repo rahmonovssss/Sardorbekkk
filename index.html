@@ -3,178 +3,193 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zen Flow - Sound Integrated</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
+    <title>Sardorbek Taymeri - Premium</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #0b0e14;
+            --bg: #05070a;
             --accent: #00d2ff;
-            --break: #00ff88;
-            --glass: rgba(255, 255, 255, 0.05);
-            --border: rgba(255, 255, 255, 0.1);
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.08);
         }
 
-        body {
-            margin: 0; background: var(--bg); color: white;
-            font-family: 'Outfit', sans-serif; height: 100vh;
-            display: flex; justify-content: center; align-items: center;
+        body, html {
+            margin: 0; padding: 0; height: 100%;
+            background: var(--bg); color: white;
+            font-family: 'Outfit', sans-serif;
+            overflow: hidden;
+        }
+
+        /* --- KIRISH QISMI (Splash Screen) --- */
+        #splash-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg); display: flex; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 100;
+            transition: opacity 1s ease, visibility 1s;
+        }
+
+        .logo-text {
+            font-size: 42px; font-weight: 800; letter-spacing: 5px;
+            background: linear-gradient(to right, #fff, var(--accent));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(0, 210, 255, 0.3);
+            animation: fadeInOut 2.5s infinite alternate;
+        }
+
+        .loader-bar {
+            width: 150px; height: 2px; background: var(--border);
+            margin-top: 20px; border-radius: 2px; overflow: hidden;
+        }
+
+        .loader-progress {
+            width: 0%; height: 100%; background: var(--accent);
+            animation: load 2.5s forwards;
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0.5; transform: scale(0.95); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes load { 100% { width: 100%; } }
+
+        /* --- ASOSIY INTERFEYS --- */
+        #main-content {
+            opacity: 0; transform: translateY(20px);
+            transition: all 1s ease;
+            height: 100vh; display: flex; justify-content: center; align-items: center;
         }
 
         .container {
-            background: var(--glass); backdrop-filter: blur(25px);
-            border: 1px solid var(--border); padding: 45px;
-            border-radius: 55px; text-align: center;
-            box-shadow: 0 40px 100px rgba(0,0,0,0.6); width: 300px;
+            background: var(--glass); backdrop-filter: blur(40px);
+            border: 1px solid var(--border); padding: 50px;
+            border-radius: 60px; text-align: center;
+            box-shadow: 0 50px 100px rgba(0,0,0,0.8); width: 280px;
         }
 
-        .timer-box { position: relative; width: 240px; height: 240px; margin: 0 auto 30px; }
+        .app-title {
+            font-size: 12px; text-transform: uppercase; letter-spacing: 4px;
+            color: rgba(255,255,255,0.4); margin-bottom: 30px;
+        }
 
-        svg { transform: rotate(-90deg); width: 240px; height: 240px; }
-        circle { fill: none; stroke-width: 10; stroke-linecap: round; }
+        .timer-box { position: relative; width: 220px; height: 220px; margin: 0 auto 40px; }
+
+        svg { transform: rotate(-90deg); width: 220px; height: 220px; }
+        circle { fill: none; stroke-width: 8; stroke-linecap: round; }
         .bg-circle { stroke: var(--border); }
         .progress-circle {
-            stroke: var(--accent); stroke-dasharray: 722; stroke-dashoffset: 722;
-            transition: stroke-dashoffset 1s linear, stroke 0.5s;
+            stroke: var(--accent); stroke-dasharray: 660; stroke-dashoffset: 660;
+            transition: stroke-dashoffset 1s linear;
         }
 
-        .timer-content {
-            position: absolute; top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
+        .time-display {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            font-size: 52px; font-weight: 600;
         }
 
-        .time { font-size: 48px; font-weight: 700; margin: 0; }
-        .label { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--accent); }
-
-        .controls { display: flex; justify-content: center; gap: 15px; }
-
-        button {
+        .controls button {
             background: white; border: none; color: black;
-            padding: 12px 28px; border-radius: 18px;
-            cursor: pointer; font-size: 14px; font-weight: 700;
-            transition: 0.3s;
+            padding: 14px 35px; border-radius: 20px;
+            cursor: pointer; font-size: 15px; font-weight: 800;
+            transition: 0.3s; margin: 0 5px;
         }
 
-        button:active { transform: scale(0.95); }
-        button.secondary { background: var(--glass); color: white; border: 1px solid var(--border); }
+        button:active { transform: scale(0.9); }
+        button.reset-btn { background: var(--glass); color: white; border: 1px solid var(--border); }
+
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="timer-box">
-            <svg>
-                <circle class="bg-circle" cx="120" cy="120" r="115"></circle>
-                <circle id="progress" class="progress-circle" cx="120" cy="120" r="115"></circle>
-            </svg>
-            <div class="timer-content">
-                <span id="modeLabel" class="label">Focus</span>
-                <p id="timeDisplay" class="time">25:00</p>
-            </div>
-        </div>
+    <div id="splash-screen">
+        <div class="logo-text">SARDORBEK</div>
+        <div style="font-size: 10px; letter-spacing: 3px; margin-top: 5px; color: #555;">PREMIUM TIMER</div>
+        <div class="loader-bar"><div class="loader-progress"></div></div>
+    </div>
 
-        <div class="controls">
-            <button onclick="handleToggle()" id="playBtn">START</button>
-            <button onclick="handleReset()" class="secondary">RESET</button>
+    <div id="main-content">
+        <div class="container">
+            <div class="app-title">Focus Session</div>
+            <div class="timer-box">
+                <svg>
+                    <circle class="bg-circle" cx="110" cy="110" r="105"></circle>
+                    <circle id="progress" class="progress-circle" cx="110" cy="110" r="105"></circle>
+                </svg>
+                <div class="time-display" id="time">25:00</div>
+            </div>
+
+            <div class="controls">
+                <button onclick="toggleTimer()" id="playBtn">START</button>
+                <button onclick="resetTimer()" class="reset-btn">RESET</button>
+            </div>
         </div>
     </div>
 
     <script>
+        // --- KIRISH ANIMATSIYASI ---
+        window.onload = () => {
+            setTimeout(() => {
+                document.getElementById('splash-screen').style.opacity = '0';
+                document.getElementById('splash-screen').style.visibility = 'hidden';
+                document.getElementById('main-content').style.opacity = '1';
+                document.getElementById('main-content').style.transform = 'translateY(0)';
+            }, 3000);
+        };
+
+        // --- OVOZ FUNKSIYASI (Integrated) ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playClick() {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine'; osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+        }
+
+        // --- TAYMER MANTIQI ---
         let timeLeft = 25 * 60;
         let totalTime = 25 * 60;
         let timerId = null;
-        let isWork = true;
 
-        const circle = document.getElementById('progress');
-        const timeDisplay = document.getElementById('timeDisplay');
-        const modeLabel = document.getElementById('modeLabel');
-        const playBtn = document.getElementById('playBtn');
-
-        // --- OVOZLAR (Audio Synthesis) ---
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-        function playClickSound() {
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.1);
+        function updateUI() {
+            const mins = Math.floor(timeLeft / 60);
+            const secs = timeLeft % 60;
+            document.getElementById('time').textContent = `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+            const offset = 660 - (660 * (totalTime - timeLeft)) / totalTime;
+            document.getElementById('progress').style.strokeDashoffset = offset;
         }
 
-        function playAlarmSound() {
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'square';
-            osc.frequency.setValueAtTime(440, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.5);
-            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.5);
-        }
-
-        // --- FUNKSIYALAR ---
-        function updateDisplay() {
-            let mins = Math.floor(timeLeft / 60);
-            let secs = timeLeft % 60;
-            timeDisplay.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-            const offset = 722 - (722 * (totalTime - timeLeft)) / totalTime;
-            circle.style.strokeDashoffset = offset;
-        }
-
-        function handleToggle() {
-            playClickSound(); // Tugma bosilganda ovoz
+        function toggleTimer() {
+            playClick();
             if (timerId) {
                 clearInterval(timerId);
                 timerId = null;
-                playBtn.textContent = "RESUME";
+                document.getElementById('playBtn').textContent = "RESUME";
             } else {
-                playBtn.textContent = "PAUSE";
+                document.getElementById('playBtn').textContent = "PAUSE";
                 timerId = setInterval(() => {
                     timeLeft--;
-                    updateDisplay();
+                    updateUI();
                     if (timeLeft <= 0) {
                         clearInterval(timerId);
-                        timerId = null;
-                        playAlarmSound(); // Taymer tugaganda ovoz
-                        setTimeout(switchMode, 1000);
+                        alert("Vaqt tugadi!");
                     }
                 }, 1000);
             }
         }
 
-        function handleReset() {
-            playClickSound();
+        function resetTimer() {
+            playClick();
             clearInterval(timerId);
             timerId = null;
             timeLeft = 25 * 60;
-            totalTime = 25 * 60;
-            isWork = true;
-            playBtn.textContent = "START";
-            modeLabel.textContent = "Focus";
-            modeLabel.style.color = "var(--accent)";
-            circle.style.stroke = "var(--accent)";
-            updateDisplay();
+            document.getElementById('playBtn').textContent = "START";
+            updateUI();
         }
 
-        function switchMode() {
-            isWork = !isWork;
-            timeLeft = isWork ? 25 * 60 : 5 * 60;
-            totalTime = timeLeft;
-            modeLabel.textContent = isWork ? "Focus" : "Break";
-            const color = isWork ? "var(--accent)" : "var(--break)";
-            modeLabel.style.color = color;
-            circle.style.stroke = color;
-            updateDisplay();
-            handleToggle();
-        }
-
-        updateDisplay();
+        updateUI();
     </script>
 </body>
 </html>
