@@ -45,43 +45,58 @@
 
         .container {
             background: var(--glass); backdrop-filter: blur(40px);
-            border: 1px solid var(--border); padding: 50px;
+            border: 1px solid var(--border); padding: 40px;
             border-radius: 60px; text-align: center;
             box-shadow: 0 50px 100px rgba(0,0,0,0.8); width: 280px;
         }
 
         .status-label {
             font-size: 11px; text-transform: uppercase; letter-spacing: 4px;
-            color: var(--accent); margin-bottom: 10px; font-weight: 800;
+            color: var(--accent); margin-bottom: 15px; font-weight: 800;
         }
 
-        .timer-box { position: relative; width: 220px; height: 220px; margin: 0 auto 40px; }
+        /* --- VAQTNI SOZLASH INPUTLARI --- */
+        .time-setter {
+            display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;
+        }
+        .time-setter input {
+            background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+            color: white; width: 50px; padding: 10px; border-radius: 12px;
+            text-align: center; font-family: 'Outfit'; font-size: 18px; outline: none;
+        }
+        .time-setter input:focus { border-color: var(--accent); }
 
-        svg { transform: rotate(-90deg); width: 220px; height: 220px; }
+        .timer-box { position: relative; width: 200px; height: 200px; margin: 0 auto 30px; }
+
+        svg { transform: rotate(-90deg); width: 200px; height: 200px; }
         circle { fill: none; stroke-width: 8; stroke-linecap: round; }
         .bg-circle { stroke: var(--border); }
         .progress-circle {
-            stroke: var(--accent); stroke-dasharray: 660; stroke-dashoffset: 660;
+            stroke: var(--accent); stroke-dasharray: 600; stroke-dashoffset: 600;
             transition: stroke-dashoffset 0.5s linear, stroke 0.5s;
         }
 
         .time-display {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            font-size: 52px; font-weight: 600;
+            font-size: 45px; font-weight: 600;
         }
 
         .controls button {
             background: white; border: none; color: black;
-            padding: 14px 35px; border-radius: 20px;
-            cursor: pointer; font-size: 15px; font-weight: 800;
+            padding: 14px 30px; border-radius: 20px;
+            cursor: pointer; font-size: 14px; font-weight: 800;
             transition: 0.3s; margin: 0 5px;
         }
 
         button:active { transform: scale(0.9); }
         button.reset-btn { background: var(--glass); color: white; border: 1px solid var(--border); }
+        
+        .hidden { display: none; }
     </style>
 </head>
 <body>
+
+    <audio id="alarmSound" src="alarm.mp3" preload="auto"></audio>
 
     <div id="splash-screen">
         <div class="logo-text">SARDORBEK</div>
@@ -91,10 +106,17 @@
     <div id="main-content">
         <div class="container">
             <div id="statusLabel" class="status-label">Focus Session</div>
+
+            <div class="time-setter" id="setter">
+                <input type="number" id="minInput" value="25" min="0" max="99" onchange="manualSet()">
+                <span style="line-height: 45px; opacity: 0.5;">:</span>
+                <input type="number" id="secInput" value="0" min="0" max="59" onchange="manualSet()">
+            </div>
+
             <div class="timer-box">
                 <svg>
-                    <circle class="bg-circle" cx="110" cy="110" r="105"></circle>
-                    <circle id="progress" class="progress-circle" cx="110" cy="110" r="105"></circle>
+                    <circle class="bg-circle" cx="100" cy="100" r="95"></circle>
+                    <circle id="progress" class="progress-circle" cx="100" cy="100" r="95"></circle>
                 </svg>
                 <div class="time-display" id="time">25:00</div>
             </div>
@@ -113,46 +135,51 @@
         let isWorkMode = true;
         let endTime = null;
 
-        // Splash screenni yo'qotish
+        // Audio elementini chaqiramiz
+        const alarm = document.getElementById('alarmSound');
+
         window.onload = () => {
             setTimeout(() => {
                 document.getElementById('splash-screen').style.opacity = '0';
                 setTimeout(() => document.getElementById('splash-screen').style.display = 'none', 800);
                 document.getElementById('main-content').style.opacity = '1';
                 document.getElementById('main-content').style.transform = 'translateY(0)';
-                
                 if (Notification.permission !== 'granted') Notification.requestPermission();
             }, 2500);
         };
-
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function playSound(freq, duration) {
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'sine'; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.start(); osc.stop(audioCtx.currentTime + duration);
-        }
 
         function updateUI() {
             const mins = Math.floor(timeLeft / 60);
             const secs = timeLeft % 60;
             document.getElementById('time').textContent = `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
-            const offset = 660 - (660 * (totalTime - timeLeft)) / totalTime;
+            const offset = 600 - (600 * (totalTime - timeLeft)) / totalTime;
             document.getElementById('progress').style.strokeDashoffset = offset;
         }
 
+        function manualSet() {
+            if (timerId) return;
+            const m = parseInt(document.getElementById('minInput').value) || 0;
+            const s = parseInt(document.getElementById('secInput').value) || 0;
+            timeLeft = (m * 60) + s;
+            totalTime = timeLeft;
+            updateUI();
+        }
+
         function toggleTimer() {
-            playSound(1200, 0.1);
+            // Androidda ovozni "uyg'otish"
+            alarm.play().then(() => { alarm.pause(); alarm.currentTime = 0; }).catch(() => {});
+
             if (timerId) {
                 clearInterval(timerId);
                 timerId = null;
                 endTime = null;
                 document.getElementById('playBtn').textContent = "RESUME";
+                document.getElementById('setter').classList.remove('hidden');
             } else {
+                if (timeLeft <= 0) return;
                 endTime = Date.now() + (timeLeft * 1000);
                 document.getElementById('playBtn').textContent = "PAUSE";
+                document.getElementById('setter').classList.add('hidden');
                 timerId = setInterval(tick, 1000);
             }
         }
@@ -160,7 +187,6 @@
         function tick() {
             const now = Date.now();
             timeLeft = Math.round((endTime - now) / 1000);
-
             if (timeLeft <= 0) {
                 timeLeft = 0;
                 updateUI();
@@ -172,47 +198,43 @@
             }
         }
 
-        // Ilovadan chiqib qaytib kirganda vaqtni sinxronlash
-        document.addEventListener("visibilitychange", () => {
-            if (document.visibilityState === "visible" && timerId && endTime) {
-                const now = Date.now();
-                timeLeft = Math.round((endTime - now) / 1000);
-                if (timeLeft < 0) timeLeft = 0;
-                updateUI();
-            }
-        });
-
         function handleEnd() {
-            playSound(600, 0.5);
+            // MP3 OVOZINI CHALAMIZ
+            alarm.play().catch(e => console.log("Audio xatosi:", e));
+
             if (Notification.permission === 'granted') {
-                new Notification(isWorkMode ? "Ish tugadi!" : "Tanaffus tugadi!", {
-                    body: isWorkMode ? "Sardorbek, endi 5 daqiqa dam oling." : "Sardorbek, yana ishga qaytamiz!"
-                });
+                new Notification(isWorkMode ? "Vaqt tugadi!" : "Tanaffus tugadi!");
             }
-
             isWorkMode = !isWorkMode;
-            timeLeft = isWorkMode ? 25 * 60 : 5 * 60;
-            totalTime = timeLeft;
-
-            const color = isWorkMode ? "var(--accent)" : "var(--break)";
-            document.getElementById('statusLabel').textContent = isWorkMode ? "Focus Session" : "Short Break";
-            document.getElementById('statusLabel').style.color = color;
-            document.getElementById('progress').style.stroke = color;
+            
+            if (isWorkMode) {
+                manualSet();
+                document.getElementById('statusLabel').textContent = "Focus Session";
+                document.getElementById('statusLabel').style.color = "var(--accent)";
+                document.getElementById('progress').style.stroke = "var(--accent)";
+            } else {
+                timeLeft = 5 * 60;
+                totalTime = timeLeft;
+                document.getElementById('statusLabel').textContent = "Short Break";
+                document.getElementById('statusLabel').style.color = "var(--break)";
+                document.getElementById('progress').style.stroke = "var(--break)";
+            }
+            
             document.getElementById('playBtn').textContent = "START";
+            document.getElementById('setter').classList.remove('hidden');
             updateUI();
         }
 
         function resetTimer() {
-            playSound(800, 0.1);
             clearInterval(timerId);
             timerId = null;
             isWorkMode = true;
-            timeLeft = 25 * 60;
-            totalTime = 25 * 60;
+            manualSet();
             document.getElementById('playBtn').textContent = "START";
             document.getElementById('statusLabel').textContent = "Focus Session";
             document.getElementById('statusLabel').style.color = "var(--accent)";
             document.getElementById('progress').style.stroke = "var(--accent)";
+            document.getElementById('setter').classList.remove('hidden');
             updateUI();
         }
 
