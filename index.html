@@ -3,145 +3,242 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sardorbek Pro - Audio</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;800&display=swap" rel="stylesheet">
+    <title>Sardorbek Taymeri - Ultra</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;800&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #05070a; --accent: #00d2ff; --glass: rgba(255, 255, 255, 0.05); }
-        body { margin: 0; background: var(--bg); color: white; font-family: 'Outfit', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
-        .container { background: var(--glass); backdrop-filter: blur(40px); border: 1px solid rgba(255,255,255,0.1); padding: 40px; border-radius: 50px; text-align: center; width: 280px; }
-        .time-inputs { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
-        input { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; width: 55px; padding: 10px; border-radius: 12px; text-align: center; font-size: 18px; outline: none; }
+        :root {
+            --bg: #05070a;
+            --accent: #00d2ff;
+            --break: #00ff88;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.08);
+        }
+
+        body, html {
+            margin: 0; padding: 0; height: 100%;
+            background: var(--bg); color: white;
+            font-family: 'Outfit', sans-serif;
+            overflow: hidden;
+        }
+
+        #splash-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg); display: flex; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 100;
+            transition: opacity 0.8s ease;
+        }
+
+        .logo-text {
+            font-size: 42px; font-weight: 800; letter-spacing: 5px;
+            background: linear-gradient(to right, #fff, var(--accent));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
+        #main-content {
+            opacity: 0; transform: translateY(20px);
+            transition: all 0.8s ease;
+            height: 100vh; display: flex; justify-content: center; align-items: center;
+        }
+
+        .container {
+            background: var(--glass); backdrop-filter: blur(40px);
+            border: 1px solid var(--border); padding: 40px;
+            border-radius: 60px; text-align: center;
+            box-shadow: 0 50px 100px rgba(0,0,0,0.8); width: 280px;
+        }
+
+        /* --- VAQTNI KIRITISH --- */
+        .time-inputs {
+            display: flex; justify-content: center; align-items: center;
+            gap: 10px; margin-bottom: 20px;
+        }
+
+        .time-inputs input {
+            background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+            color: white; width: 60px; padding: 10px; border-radius: 15px;
+            text-align: center; font-size: 20px; font-family: 'Outfit';
+        }
+
+        .status-label {
+            font-size: 11px; text-transform: uppercase; letter-spacing: 4px;
+            color: var(--accent); margin-bottom: 10px; font-weight: 800;
+        }
+
         .timer-box { position: relative; width: 200px; height: 200px; margin: 0 auto 30px; }
         svg { transform: rotate(-90deg); width: 200px; height: 200px; }
-        circle { fill: none; stroke-width: 8; stroke: rgba(255,255,255,0.1); stroke-linecap: round; }
-        #progress { stroke: var(--accent); stroke-dasharray: 600; stroke-dashoffset: 600; transition: 0.5s linear; }
-        .display { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 45px; font-weight: 800; }
-        .btns button { background: white; border: none; padding: 12px 30px; border-radius: 15px; font-weight: 800; cursor: pointer; transition: 0.3s; margin: 0 5px; }
-        .stats { margin-top: 25px; font-size: 11px; opacity: 0.5; letter-spacing: 2px; }
+        circle { fill: none; stroke-width: 8; stroke-linecap: round; }
+        .bg-circle { stroke: var(--border); }
+        .progress-circle {
+            stroke: var(--accent); stroke-dasharray: 600; stroke-dashoffset: 600;
+            transition: stroke-dashoffset 0.5s linear, stroke 0.5s;
+        }
+
+        .time-display {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            font-size: 45px; font-weight: 600;
+        }
+
+        .controls button {
+            background: white; border: none; color: black;
+            padding: 14px 30px; border-radius: 20px;
+            cursor: pointer; font-size: 15px; font-weight: 800;
+            transition: 0.3s; margin: 5px; width: 120px;
+        }
+
+        button:active { transform: scale(0.9); }
+        button.reset-btn { background: var(--glass); color: white; border: 1px solid var(--border); }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div id="status" style="font-size: 10px; color: var(--accent); margin-bottom: 15px; letter-spacing: 2px;">READY TO FOCUS</div>
-    <div class="time-inputs" id="inputArea">
-        <input type="number" id="m" value="25">
-        <input type="number" id="s" value="0">
+    <div id="splash-screen">
+        <div class="logo-text">SARDORBEK</div>
+        <div style="font-size: 10px; letter-spacing: 3px; margin-top: 5px; color: #555;">PREMIUM TIMER</div>
     </div>
 
-    <div class="timer-box">
-        <svg><circle cx="100" cy="100" r="95"></circle><circle id="progress" cx="100" cy="100" r="95"></circle></svg>
-        <div class="display" id="display">25:00</div>
+    <div id="main-content">
+        <div class="container">
+            <div id="statusLabel" class="status-label">Focus Session</div>
+            
+            <div class="time-inputs" id="inputSection">
+                <input type="number" id="mInput" value="25" min="0" max="99">
+                <span>:</span>
+                <input type="number" id="sInput" value="0" min="0" max="59">
+            </div>
+
+            <div class="timer-box">
+                <svg>
+                    <circle class="bg-circle" cx="100" cy="100" r="95"></circle>
+                    <circle id="progress" class="progress-circle" cx="100" cy="100" r="95"></circle>
+                </svg>
+                <div class="time-display" id="time">25:00</div>
+            </div>
+
+            <div class="controls">
+                <button onclick="toggleTimer()" id="playBtn">START</button>
+                <button onclick="resetTimer()" class="reset-btn">RESET</button>
+            </div>
+        </div>
     </div>
 
-    <div class="btns">
-        <button onclick="toggleTimer()" id="mainBtn">START</button>
-        <button onclick="reset()" style="background:none; color:white; border:1px solid rgba(255,255,255,0.1);">RESET</button>
-    </div>
+    <audio id="alarmSound" src="alarm.mp3" preload="auto"></audio>
 
-    <div class="stats">BUGUNGI FOKUSLAR: <span id="count" style="color:var(--accent)">0</span></div>
-</div>
+    <script>
+        let timeLeft = 25 * 60;
+        let totalTime = 25 * 60;
+        let timerId = null;
+        let isWorkMode = true;
+        let endTime = null;
+        const alarm = document.getElementById('alarmSound');
 
-<script>
-    let timeLeft, total, timerId = null, endTime = null;
-    let sessions = parseInt(localStorage.getItem('sessions')) || 0;
-    document.getElementById('count').textContent = sessions;
+        window.onload = () => {
+            setTimeout(() => {
+                document.getElementById('splash-screen').style.opacity = '0';
+                setTimeout(() => document.getElementById('splash-screen').style.display = 'none', 800);
+                document.getElementById('main-content').style.opacity = '1';
+                document.getElementById('main-content').style.transform = 'translateY(0)';
+            }, 2500);
+        };
 
-    // --- AUDIO FAYLNI BIRLASHTIRISH ---
-    // Fayl assets papkasida "alarm.mp3" nomi bilan bo'lishi kerak
-    const finishAudio = new Audio('alarm.mp3');
+        function updateUI() {
+            const mins = Math.floor(timeLeft / 60);
+            const secs = timeLeft % 60;
+            document.getElementById('time').textContent = `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+            const offset = 600 - (600 * (totalTime - timeLeft)) / totalTime;
+            document.getElementById('progress').style.strokeDashoffset = offset || 600;
+        }
 
-    function playFinishSound() {
-        finishAudio.play().catch(e => console.log("Audio xatosi: ", e));
-    }
+        function toggleTimer() {
+            // Android/GitHub uchun ovozni "uyg'otish"
+            alarm.play().then(() => { alarm.pause(); alarm.currentTime = 0; }).catch(() => {});
 
-    function updateUI() {
-        const mm = Math.floor(timeLeft / 60);
-        const ss = timeLeft % 60;
-        document.getElementById('display').textContent = `${mm.toString().padStart(2,'0')}:${ss.toString().padStart(2,'0')}`;
-        document.getElementById('progress').style.strokeDashoffset = 600 - (600 * (total - timeLeft) / total);
-    }
+            if (timerId) {
+                clearInterval(timerId);
+                timerId = null;
+                endTime = null;
+                document.getElementById('playBtn').textContent = "RESUME";
+            } else {
+                // Agar yangi boshlanayotgan bo'lsa, inputdan vaqtni oladi
+                if (!endTime && timeLeft === (parseInt(document.getElementById('mInput').value)*60 + parseInt(document.getElementById('sInput').value))) {
+                    const m = parseInt(document.getElementById('mInput').value) || 0;
+                    const s = parseInt(document.getElementById('sInput').value) || 0;
+                    timeLeft = (m * 60) + s;
+                    totalTime = timeLeft;
+                }
+                
+                if (timeLeft <= 0) return;
 
-    function toggleTimer() {
-        // Android uchun audio tizimini "uyg'otish"
-        finishAudio.play(); 
-        finishAudio.pause();
-        finishAudio.currentTime = 0;
+                document.getElementById('inputSection').style.opacity = "0.3";
+                endTime = Date.now() + (timeLeft * 1000);
+                document.getElementById('playBtn').textContent = "PAUSE";
+                timerId = setInterval(tick, 1000);
+            }
+        }
 
-        if (timerId) {
+        function tick() {
+            const now = Date.now();
+            timeLeft = Math.round((endTime - now) / 1000);
+
+            if (timeLeft <= 0) {
+                timeLeft = 0;
+                updateUI();
+                clearInterval(timerId);
+                timerId = null;
+                handleEnd();
+            } else {
+                updateUI();
+            }
+        }
+
+        function handleEnd() {
+            alarm.play().catch(e => console.log("Ovoz xatosi:", e));
+            
+            isWorkMode = !isWorkMode;
+            // Tanaffus bo'lsa 5 daqiqa, ish bo'lsa inputdagi vaqt
+            const m = parseInt(document.getElementById('mInput').value) || 25;
+            timeLeft = isWorkMode ? m * 60 : 5 * 60;
+            totalTime = timeLeft;
+
+            const color = isWorkMode ? "var(--accent)" : "var(--break)";
+            document.getElementById('statusLabel').textContent = isWorkMode ? "Focus Session" : "Short Break";
+            document.getElementById('statusLabel').style.color = color;
+            document.getElementById('progress').style.stroke = color;
+            document.getElementById('playBtn').textContent = "START";
+            document.getElementById('inputSection').style.opacity = "1";
+            updateUI();
+        }
+
+        function resetTimer() {
             clearInterval(timerId);
             timerId = null;
-            localStorage.removeItem('endTime');
-            document.getElementById('mainBtn').textContent = "RESUME";
-        } else {
-            if (!endTime) {
-                const m = parseInt(document.getElementById('m').value) || 0;
-                const s = parseInt(document.getElementById('s').value) || 0;
-                timeLeft = (m * 60) + s;
-                total = timeLeft;
-            }
-            endTime = Date.now() + (timeLeft * 1000);
-            localStorage.setItem('endTime', endTime);
-            localStorage.setItem('totalTime', total);
-            timerId = setInterval(tick, 1000);
-            document.getElementById('mainBtn').textContent = "PAUSE";
-            document.getElementById('inputArea').style.opacity = "0.2";
-        }
-    }
-
-    function tick() {
-        const now = Date.now();
-        const storedEnd = localStorage.getItem('endTime');
-        timeLeft = Math.round((storedEnd - now) / 1000);
-
-        if (timeLeft <= 0) {
-            timeLeft = 0;
-            updateUI();
-            finish();
-        } else {
+            endTime = null;
+            isWorkMode = true;
+            const m = parseInt(document.getElementById('mInput').value) || 25;
+            const s = parseInt(document.getElementById('sInput').value) || 0;
+            timeLeft = (m * 60) + s;
+            totalTime = timeLeft;
+            document.getElementById('playBtn').textContent = "START";
+            document.getElementById('statusLabel').textContent = "Focus Session";
+            document.getElementById('statusLabel').style.color = "var(--accent)";
+            document.getElementById('progress').style.stroke = "var(--accent)";
+            document.getElementById('inputSection').style.opacity = "1";
             updateUI();
         }
-    }
 
-    function finish() {
-        clearInterval(timerId);
-        timerId = null;
-        localStorage.removeItem('endTime');
-        
-        // --- OVOZNI CHIQARISH ---
-        playFinishSound();
-        
-        sessions++;
-        localStorage.setItem('sessions', sessions);
-        document.getElementById('count').textContent = sessions;
-        document.getElementById('mainBtn').textContent = "START";
-        document.getElementById('inputArea').style.opacity = "1";
-        endTime = null;
-    }
+        // Input o'zgarganda ekranni yangilash
+        document.querySelectorAll('.time-inputs input').forEach(input => {
+            input.addEventListener('change', () => {
+                if (!timerId) {
+                    const m = parseInt(document.getElementById('mInput').value) || 0;
+                    const s = parseInt(document.getElementById('sInput').value) || 0;
+                    timeLeft = (m * 60) + s;
+                    totalTime = timeLeft;
+                    updateUI();
+                }
+            });
+        });
 
-    function reset() {
-        clearInterval(timerId);
-        timerId = null;
-        endTime = null;
-        localStorage.removeItem('endTime');
-        const m = parseInt(document.getElementById('m').value) || 0;
-        const s = parseInt(document.getElementById('s').value) || 0;
-        timeLeft = (m * 60) + s;
         updateUI();
-        document.getElementById('mainBtn').textContent = "START";
-        document.getElementById('inputArea').style.opacity = "1";
-    }
-
-    window.onload = () => {
-        const storedEnd = localStorage.getItem('endTime');
-        if (storedEnd) {
-            total = localStorage.getItem('totalTime');
-            endTime = storedEnd;
-            timerId = setInterval(tick, 1000);
-            document.getElementById('mainBtn').textContent = "PAUSE";
-            document.getElementById('inputArea').style.opacity = "0.2";
-        }
-    };
-</script>
+    </script>
 </body>
 </html>
