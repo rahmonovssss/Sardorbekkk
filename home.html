@@ -3,174 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asosiy sahifa - Profil</title>
+    <title>Asosiy sahifa - Profil (Bepul talqin)</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        
         body {
-            height: 100vh;
-            background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
-            color: white;
-            overflow: hidden;
+            height: 100vh; background: linear-gradient(-45deg, #0f2027, #2c5364);
+            color: white; overflow: hidden;
         }
-
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        /* Yuqori o'ng burchakdagi profil tugmasi */
         .top-header {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
+            position: absolute; top: 20px; right: 20px;
+            display: flex; align-items: center; gap: 10px;
             background: rgba(255, 255, 255, 0.1);
-            padding: 8px 18px;
-            border-radius: 50px;
-            cursor: pointer;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            transition: 0.3s;
-            z-index: 10;
+            padding: 5px 15px; border-radius: 50px;
+            cursor: pointer; border: 1px solid rgba(255,255,255,0.2);
         }
-
-        .top-header:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: scale(1.05);
-        }
-
         .top-profile-img {
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid #00d2ff;
+            width: 40px; height: 40px; border-radius: 50%;
+            object-fit: cover; border: 2px solid #00d2ff;
         }
-
-        #header-name {
-            font-weight: 500;
-            font-size: 14px;
-        }
-
-        /* Modal oynasi */
         .modal {
-            display: none;
-            position: fixed;
-            z-index: 100;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(8px);
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+            display: none; position: fixed; z-index: 100;
+            left: 0; top: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+            align-items: center; justify-content: center;
         }
-
         .modal-content {
-            background: #1a2a33;
-            padding: 30px;
-            border-radius: 25px;
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            background: #1a2a33; padding: 30px; border-radius: 20px;
+            width: 90%; max-width: 400px; text-align: center;
         }
-
-        .edit-avatar-wrapper {
-            position: relative;
-            display: inline-block;
-            margin-bottom: 20px;
-        }
-
         .edit-avatar {
-            width: 110px;
-            height: 110px;
-            border-radius: 50%;
-            border: 3px solid #00d2ff;
+            width: 100px; height: 100px; border-radius: 50%;
+            margin-bottom: 15px; border: 3px solid #00d2ff; cursor: pointer;
             object-fit: cover;
-            cursor: pointer;
-            transition: 0.3s;
         }
-
-        .edit-avatar:hover {
-            filter: brightness(0.7);
-        }
-
-        .camera-icon {
-            position: absolute;
-            bottom: 5px;
-            right: 5px;
-            background: #00d2ff;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            pointer-events: none;
-        }
-
         input[type="text"], input[type="email"] {
-            width: 100%;
-            padding: 14px;
-            margin: 10px 0;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(255, 255, 255, 0.05);
-            color: white;
-            outline: none;
-            font-size: 15px;
+            width: 100%; padding: 12px; margin: 10px 0;
+            border-radius: 8px; border: none; outline: none;
         }
-
-        input[type="email"] {
-            background: rgba(0, 0, 0, 0.2);
-            color: #888;
-            cursor: not-allowed;
-        }
-
+        input[type="email"] { background: #333; color: #888; }
         .save-btn {
-            background: linear-gradient(90deg, #00d2ff, #3a7bd5);
-            color: white;
-            padding: 14px;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            width: 100%;
-            font-weight: bold;
-            font-size: 16px;
-            margin-top: 15px;
-            transition: 0.3s;
-        }
-
-        .save-btn:disabled {
-            background: #444;
-            cursor: not-allowed;
-        }
-
-        /* Markaziy qism */
-        .main-content {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-        }
-
-        .main-content h2 {
-            font-size: 24px;
-            margin-bottom: 10px;
-            opacity: 0.9;
+            background: #00d2ff; color: white; padding: 10px 20px;
+            border: none; border-radius: 8px; cursor: pointer; width: 100%;
         }
     </style>
 </head>
@@ -181,36 +54,31 @@
         <img src="https://via.placeholder.com/150" id="header-img" class="top-profile-img">
     </div>
 
-    <div class="main-content">
-        <h2>DTM Test Tizimi</h2>
-        <p style="color: #00d2ff;">Asosiy sahifa</p>
+    <div style="display: flex; height: 100vh; align-items: center; justify-content: center;">
+        <h2>Xush kelibsiz, <span id="welcome-name">...</span>!</h2>
     </div>
 
     <div id="editModal" class="modal">
         <div class="modal-content">
-            <h3 style="margin-bottom: 20px;">Profil sozlamalari</h3>
-            
-            <label for="file-input" class="edit-avatar-wrapper">
-                <img src="https://via.placeholder.com/150" id="edit-preview" class="edit-avatar">
-                <div class="camera-icon">📷</div>
+            <h3>Profilni tahrirlash</h3>
+            <label for="file-input">
+                <img src="https://via.placeholder.com/150" id="edit-preview" class="edit-avatar" title="Rasm almashtirish">
             </label>
             <input type="file" id="file-input" style="display: none;" accept="image/*">
             
             <input type="text" id="edit-name" placeholder="F.I.SH">
-            <input type="email" id="edit-email" readonly title="Emailni o'zgartirib bo'lmaydi">
+            <input type="email" id="edit-email" readonly>
             
-            <button class="save-btn" id="btn-save" onclick="saveProfile()">O'ZGARIŞLARNI SAQLASH</button>
-            <p onclick="closeModal()" style="margin-top: 15px; cursor: pointer; font-size: 14px; opacity: 0.6;">Yopish</p>
+            <button class="save-btn" id="btn-save" onclick="saveProfile()">SAQLASH</button>
+            <button onclick="closeModal()" style="background:none; color:white; border:none; margin-top:10px; cursor:pointer;">Yopish</button>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Firebase sozlamalari
         const firebaseConfig = {
             apiKey: "AIzaSyA2G8cD0JezEKXRCtKLYiZL0bzDyTp06Vs",
             authDomain: "quiz-app-3692d.firebaseapp.com",
@@ -223,85 +91,80 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const storage = getStorage(app);
 
         let currentUser = null;
 
-        // Tizimga kirgan foydalanuvchini aniqlash
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
-                // Ma'lumotlarni sahifaga qo'yish
-                const name = user.displayName || "Foydalanuvchi";
-                const photo = user.photoURL || "https://via.placeholder.com/150";
+                // Firestore'dan ma'lumotlarni olish (Rasm kodini olish uchun)
+                const docSnap = await getDoc(doc(db, "users", user.uid));
+                let photoData = user.photoURL || "https://via.placeholder.com/150";
+                let nameData = user.displayName || "Foydalanuvchi";
 
-                document.getElementById('header-name').innerText = name;
-                document.getElementById('header-img').src = photo;
-                document.getElementById('edit-name').value = name;
+                if (docSnap.exists()) {
+                    photoData = docSnap.data().photo || photoData;
+                    nameData = docSnap.data().fio || nameData;
+                }
+
+                document.getElementById('header-name').innerText = nameData;
+                document.getElementById('welcome-name').innerText = nameData;
+                document.getElementById('header-img').src = photoData;
+                document.getElementById('edit-name').value = nameData;
                 document.getElementById('edit-email').value = user.email;
-                document.getElementById('edit-preview').src = photo;
+                document.getElementById('edit-preview').src = photoData;
             } else {
                 window.location.href = "auth.html";
             }
         });
 
-        // Modalni boshqarish
-        window.openModal = () => document.getElementById('editModal').style.display = 'flex';
-        window.closeModal = () => document.getElementById('editModal').style.display = 'none';
-
-        // Profilni saqlash funksiyasi
         window.saveProfile = async () => {
             const newName = document.getElementById('edit-name').value;
             const fileInput = document.getElementById('file-input');
             const file = fileInput.files[0];
             const btn = document.getElementById('btn-save');
 
-            if (!newName) return alert("Ismni kiriting!");
-
             btn.disabled = true;
-            btn.innerText = "SAQLANMOQDA...";
+            btn.innerText = "Saqlanmoqda...";
 
             try {
-                let finalPhotoURL = currentUser.photoURL;
+                let base64Image = document.getElementById('edit-preview').src;
 
-                // 1. Rasm yuklash (agar tanlangan bo'lsa)
+                // Agar yangi rasm tanlangan bo'lsa, uni Base64 ga o'tkazamiz
                 if (file) {
-                    const storageRef = ref(storage, 'avatars/' + currentUser.uid);
-                    const snapshot = await uploadBytes(storageRef, file);
-                    finalPhotoURL = await getDownloadURL(snapshot.ref);
+                    base64Image = await new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onload = (e) => resolve(e.target.result);
+                        reader.readAsDataURL(file);
+                    });
                 }
 
-                // 2. Auth profilini yangilash
-                await updateProfile(auth.currentUser, {
-                    displayName: newName,
-                    photoURL: finalPhotoURL
-                });
-
-                // 3. Firestore bazasini yangilash
+                // 1. Auth profilini yangilash (Ism)
+                await updateProfile(auth.currentUser, { displayName: newName });
+                
+                // 2. Firestore'ga saqlash (Mutlaqo bepul)
                 await setDoc(doc(db, "users", currentUser.uid), {
                     fio: newName,
-                    photo: finalPhotoURL,
-                    lastUpdate: new Date()
+                    photo: base64Image,
+                    email: currentUser.email
                 }, { merge: true });
 
-                alert("Profil muvaffaqiyatli yangilandi!");
+                alert("Profil muvaffaqiyatli saqlandi!");
                 location.reload();
             } catch (error) {
                 alert("Xatolik: " + error.message);
                 btn.disabled = false;
-                btn.innerText = "O'ZGARIŞLARNI SAQLASH";
+                btn.innerText = "SAQLASH";
             }
         };
 
-        // Rasm tanlanganda uni ko'rsatish
+        window.openModal = () => document.getElementById('editModal').style.display = 'flex';
+        window.closeModal = () => document.getElementById('editModal').style.display = 'none';
+
         document.getElementById('file-input').onchange = (e) => {
-            if (e.target.files && e.target.files[0]) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    document.getElementById('edit-preview').src = event.target.result;
-                };
-                reader.readAsDataURL(e.target.files[0]);
-            }
+            const reader = new FileReader();
+            reader.onload = () => document.getElementById('edit-preview').src = reader.result;
+            reader.readAsDataURL(e.target.files[0]);
         };
     </script>
 </body>
