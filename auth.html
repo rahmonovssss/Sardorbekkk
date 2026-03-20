@@ -3,216 +3,187 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DTM Tizimi - Kirish va Ro'yxatdan o'tish</title>
-    
-    <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-      import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
-      const firebaseConfig = {
-        apiKey: "AIzaSyA2G8cD0JezEKXRCtKLYiZL0bzDyTp06Vs",
-        authDomain: "quiz-app-3692d.firebaseapp.com",
-        projectId: "quiz-app-3692d",
-        storageBucket: "quiz-app-3692d.firebasestorage.app",
-        messagingSenderId: "526836020845",
-        appId: "1:526836020845:android:3ea991380c104c75e8b164"
-      };
-
-      const app = initializeApp(firebaseConfig);
-      const auth = getAuth(app);
-
-      // --- MUHIM: AVTOMATIK KIRISHNI TEKSHIRISH ---
-      onAuthStateChanged(auth, (user) => {
-          if (user) {
-              // Agar foydalanuvchi allaqachon kirgan bo'lsa, home.html ga o'tadi
-              // replace ishlatildi, shunda "Orqaga" bosganda login sahifasiga qaytmaydi
-              window.location.replace("home.html");
-          }
-      });
-
-      window.handleAuth = async () => {
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-        const fullname = document.getElementById('fullname').value;
-        const btn = document.getElementById('submit-btn');
-        const isLoginMode = btn.getAttribute('data-mode') === 'login';
-
-        try {
-            if (isLoginMode) {
-                await signInWithEmailAndPassword(auth, email, password);
-                // Muvaffaqiyatli kirgandan keyin tarixni tozalab o'tish
-                window.location.replace("home.html"); 
-            } else {
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                await updateProfile(userCredential.user, {
-                    displayName: fullname
-                });
-                alert("Muvaffaqiyatli ro'yxatdan o'tdingiz!");
-                window.location.replace("home.html");
-            }
-        } catch (error) {
-            alert("Xatolik: " + error.message);
-        }
-      };
-    </script>
-
+    <title>Asosiy Sahifa - Profil (Bepul talqin)</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-
         body {
-            height: 100vh;
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364);
-            background-size: 400% 400%;
-            animation: gradientBG 10s ease infinite;
-            overflow: hidden;
+            height: 100vh; background: linear-gradient(-45deg, #0f2027, #2c5364);
+            color: white; overflow: hidden;
         }
 
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        .main-container {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            padding: 20px;
-        }
-
-        .form-box {
-            width: 100%;
-            max-width: 450px;
-            padding: 40px;
+        /* Yuqori o'ng burchakdagi profil */
+        .top-header {
+            position: absolute; top: 20px; right: 20px;
+            display: flex; align-items: center; gap: 10px;
             background: rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            text-align: center;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            padding: 5px 15px; border-radius: 50px;
+            cursor: pointer; border: 1px solid rgba(255,255,255,0.2);
+        }
+        .top-profile-img {
+            width: 40px; height: 40px; border-radius: 50%;
+            object-fit: cover; border: 2px solid #00d2ff;
         }
 
-        h2 { color: #fff; margin-bottom: 30px; letter-spacing: 2px; text-transform: uppercase; }
-
-        .input-group { position: relative; margin-bottom: 25px; }
-
-        .input-group input {
-            width: 100%;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            outline: none;
-            border-radius: 10px;
-            color: #fff;
-            font-size: 16px;
-            border-bottom: 2px solid transparent;
-            transition: 0.3s;
+        /* Modal (Tahrirlash oynasi) */
+        .modal {
+            display: none; position: fixed; z-index: 100;
+            left: 0; top: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+            align-items: center; justify-content: center;
         }
-
-        .input-group input:focus {
-            border-bottom: 2px solid #00d2ff;
-            background: rgba(255, 255, 255, 0.2);
+        .modal-content {
+            background: #1a2a33; padding: 30px; border-radius: 20px;
+            width: 90%; max-width: 400px; text-align: center;
         }
-
-        .input-group label {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: rgba(255, 255, 255, 0.5);
-            pointer-events: none;
-            transition: 0.3s;
+        .edit-avatar {
+            width: 100px; height: 100px; border-radius: 50%;
+            margin-bottom: 15px; border: 3px solid #00d2ff; cursor: pointer;
+            object-fit: cover;
         }
-
-        .input-group input:focus ~ label,
-        .input-group input:valid ~ label {
-            top: -10px;
-            left: 10px;
-            font-size: 12px;
-            color: #00d2ff;
+        input[type="text"], input[type="email"] {
+            width: 100%; padding: 12px; margin: 10px 0;
+            border-radius: 8px; border: none; outline: none;
         }
-
-        .submit-btn {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(90deg, #00d2ff, #3a7bd5);
-            border: none;
-            border-radius: 10px;
-            color: white;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.4s;
-            box-shadow: 0 5px 15px rgba(0,210,255,0.3);
+        input[type="email"] { background: #333; color: #888; } /* Emailni tahrirlab bo'lmaydi */
+        
+        .save-btn {
+            background: #00d2ff; color: white; padding: 10px 20px;
+            border: none; border-radius: 8px; cursor: pointer; width: 100%;
         }
-
-        .submit-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(0,210,255,0.5);
-        }
-
-        .footer-text { margin-top: 20px; color: rgba(255, 255, 255, 0.7); font-size: 14px; }
-        .footer-text span { color: #00d2ff; cursor: pointer; text-decoration: underline; }
     </style>
 </head>
 <body>
 
-    <div class="main-container">
-        <div class="form-box">
-            <h2 id="form-title">Kirish</h2>
-            <form id="auth-form" onsubmit="event.preventDefault(); handleAuth();">
-                <div class="input-group" id="name-group" style="display: none;">
-                    <input type="text" id="fullname">
-                    <label>F.I.SH</label>
-                </div>
-                <div class="input-group">
-                    <input type="email" id="email" required>
-                    <label>Email</label>
-                </div>
-                <div class="input-group">
-                    <input type="password" id="password" required>
-                    <label>Parol</label>
-                </div>
-                <button type="submit" class="submit-btn" id="submit-btn" data-mode="login">DAVOM ETISH</button>
-            </form>
-            <p class="footer-text" id="toggle-text">
-                Akkauntingiz yo'qmi? <span onclick="toggleMode()">Ro'yxatdan o'tish</span>
-            </p>
+    <div class="top-header" onclick="openModal()">
+        <span id="header-name">Yuklanmoqda...</span>
+        <img src="https://via.placeholder.com/150" id="header-img" class="top-profile-img">
+    </div>
+
+    <div style="display: flex; height: 100vh; align-items: center; justify-content: center;">
+        <h2>Xush kelibsiz!</h2>
+    </div>
+
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <h3>Profilni tahrirlash</h3>
+            <label for="file-input">
+                <img src="https://via.placeholder.com/150" id="edit-preview" class="edit-avatar" title="Rasm almashtirish">
+            </label>
+            <input type="file" id="file-input" style="display: none;" accept="image/*">
+            
+            <input type="text" id="edit-name" placeholder="F.I.SH">
+            <input type="email" id="edit-email" readonly>
+            
+            <button class="save-btn" id="btn-save" onclick="saveProfile()">SAQLASH</button>
+            <button onclick="closeModal()" style="background:none; color:white; border:none; margin-top:10px; cursor:pointer;">Yopish</button>
         </div>
     </div>
 
-    <script>
-        function toggleMode() {
-            const title = document.getElementById('form-title');
-            const btn = document.getElementById('submit-btn');
-            const toggleText = document.getElementById('toggle-text');
-            const nameGroup = document.getElementById('name-group');
-            const mode = btn.getAttribute('data-mode');
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-            if (mode === 'login') {
-                title.innerText = "Ro'yxatdan o'tish";
-                btn.innerText = "RO'YXATDAN O'TISH";
-                btn.setAttribute('data-mode', 'signup');
-                toggleText.innerHTML = "Akkauntingiz bormi? <span onclick='toggleMode()'>Kirish</span>";
-                nameGroup.style.display = "block";
-                document.getElementById('fullname').required = true;
+        // Firebase sozlamalari
+        const firebaseConfig = {
+            apiKey: "AIzaSyA2G8cD0JezEKXRCtKLYiZL0bzDyTp06Vs",
+            authDomain: "quiz-app-3692d.firebaseapp.com",
+            projectId: "quiz-app-3692d",
+            storageBucket: "quiz-app-3692d.firebasestorage.app",
+            messagingSenderId: "526836020845",
+            appId: "1:526836020845:android:3ea991380c104c75e8b164"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app); // Firestore bazasi
+
+        let currentUser = null;
+
+        // Tizimga kirganini tekshirish
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                
+                // Firestore'dan ma'lumotlarni olish (Rasm kodini olish uchun)
+                const docSnap = await getDoc(doc(db, "users", user.uid));
+                let photoData = user.photoURL || "https://via.placeholder.com/150";
+                let nameData = user.displayName || "Foydalanuvchi";
+
+                if (docSnap.exists()) {
+                    photoData = docSnap.data().photo || photoData;
+                    nameData = docSnap.data().fio || nameData;
+                }
+
+                // Ma'lumotlarni sahifaga qo'yish
+                document.getElementById('header-name').innerText = nameData;
+                document.getElementById('header-img').src = photoData;
+                document.getElementById('edit-name').value = nameData;
+                document.getElementById('edit-email').value = user.email;
+                document.getElementById('edit-preview').src = photoData;
             } else {
-                title.innerText = "Kirish";
-                btn.innerText = "KIRISH";
-                btn.setAttribute('data-mode', 'login');
-                toggleText.innerHTML = "Akkauntingiz yo'qmi? <span onclick='toggleMode()'>Ro'yxatdan o'tish</span>";
-                nameGroup.style.display = "none";
-                document.getElementById('fullname').required = false;
+                window.location.href = "auth.html"; // Kirilmagan bo'lsa auth'ga yuboradi
             }
-        }
-    </script>
+        });
 
+        // Modalni ochish/yopish
+        window.openModal = () => document.getElementById('editModal').style.display = 'flex';
+        window.closeModal = () => document.getElementById('editModal').style.display = 'none';
+
+        // Profilni saqlash funksiyasi (Rasmni kodga aylantirib)
+        window.saveProfile = async () => {
+            const newName = document.getElementById('edit-name').value;
+            const fileInput = document.getElementById('file-input');
+            const file = fileInput.files[0];
+            const btn = document.getElementById('btn-save');
+
+            btn.disabled = true;
+            btn.innerText = "Saqlanmoqda...";
+
+            try {
+                let base64Image = document.getElementById('edit-preview').src;
+
+                // 1. Agar yangi rasm tanlangan bo'lsa, uni kodga (Base64) o'tkazamiz
+                if (file) {
+                    base64Image = await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = (e) => resolve(e.target.result);
+                        reader.onerror = reject;
+                        reader.readAsDataURL(file);
+                    });
+                }
+
+                // 2. Auth profilini yangilash (Faqat ism, rasm Auth profiliga sig'maydi)
+                await updateProfile(auth.currentUser, {
+                    displayName: newName
+                });
+                
+                // 3. Firestore bazasiga saqlash (Mutlaqo bepul va sig'im katta)
+                await setDoc(doc(db, "users", currentUser.uid), {
+                    fio: newName,
+                    photo: base64Image, // Rasm kodini saqlaymiz
+                    email: currentUser.email,
+                    updatedAt: new Date()
+                }, { merge: true });
+
+                alert("Profil muvaffaqiyatli saqlandi!");
+                location.reload(); // Sahifani yangilaymiz
+            } catch (error) {
+                alert("Xatolik yuz berdi: " + error.message);
+                console.error(error);
+                btn.disabled = false;
+                btn.innerText = "SAQLASH";
+            }
+        };
+
+        // Rasm tanlanganda preview qilish
+        document.getElementById('file-input').onchange = (e) => {
+            if (e.target.files && e.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = () => document.getElementById('edit-preview').src = reader.result;
+                reader.readAsDataURL(e.target.files[0]);
+            }
+        };
+    </script>
 </body>
 </html>
