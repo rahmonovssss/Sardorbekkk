@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DTM Ro'yxatdan o'tish</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+        body {
+            height: 100vh;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* Harakatlanuvchi jonli fon */
+            background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364);
+            background-size: 400% 400%;
+            animation: gradientBG 10s ease infinite;
+            overflow: hidden;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* To'liq ekranni qoplaydigan konteyner */
+        .main-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.05); /* Shaffoflik */
+            backdrop-filter: blur(10px);
+            padding: 20px;
+        }
+
+        .form-box {
+            width: 100%;
+            max-width: 500px; /* Telefonlarda chiroyli turishi uchun cheklov */
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+        }
+
+        h2 { color: #fff; margin-bottom: 30px; letter-spacing: 2px; text-transform: uppercase; }
+
+        .input-group { position: relative; margin-bottom: 25px; }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            outline: none;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 16px;
+            border-bottom: 2px solid transparent;
+            transition: 0.3s;
+        }
+
+        .input-group input:focus {
+            border-bottom: 2px solid #00d2ff;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .input-group label {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.5);
+            pointer-events: none;
+            transition: 0.3s;
+        }
+
+        .input-group input:focus ~ label,
+        .input-group input:valid ~ label {
+            top: -10px;
+            left: 10px;
+            font-size: 12px;
+            color: #00d2ff;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.4s;
+            box-shadow: 0 5px 15px rgba(0,210,255,0.3);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,210,255,0.5);
+        }
+
+        .footer-text {
+            margin-top: 20px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+        }
+
+        .footer-text a { color: #00d2ff; text-decoration: none; }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <div class="form-box">
+            <h2>DTM Tizimi</h2>
+            <form>
+                <div class="input-group">
+                    <input type="text" required>
+                    <label>F.I.SH</label>
+                </div>
+                <div class="input-group">
+                    <input type="email" required>
+                    <label>Email yoki Telefon</label>
+                </div>
+                <div class="input-group">
+                    <input type="password" required>
+                    <label>Parol</label>
+                </div>
+                <button type="submit" class="submit-btn">RO'YXATDAN O'TISH</button>
+            </form>
+            <p class="footer-text">Akkauntingiz bormi? <a href="#">Kirish</a></p>
+        </div>
+    </div>
+
+</body>
+</html>
