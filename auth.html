@@ -7,7 +7,7 @@
     
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-      import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+      import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
       // google-services.json faylingizdagi ma'lumotlar
       const firebaseConfig = {
@@ -26,18 +26,26 @@
       window.handleAuth = async () => {
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
-        const isLoginMode = document.getElementById('submit-btn').getAttribute('data-mode') === 'login';
+        const fullname = document.getElementById('fullname').value;
+        const btn = document.getElementById('submit-btn');
+        const isLoginMode = btn.getAttribute('data-mode') === 'login';
 
         try {
             if (isLoginMode) {
                 // KIRISH LOGIKASI
                 await signInWithEmailAndPassword(auth, email, password);
-                alert("Xush kelibsiz!");
-                window.location.href = "home.html"; // Muvaffaqiyatli kirsa home sahifaga o'tadi
+                window.location.href = "home.html"; 
             } else {
                 // RO'YXATDAN O'TISH LOGIKASI
-                await createUserWithEmailAndPassword(auth, email, password);
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                
+                // Ismni profilga saqlash
+                await updateProfile(userCredential.user, {
+                    displayName: fullname
+                });
+
                 alert("Muvaffaqiyatli ro'yxatdan o'tdingiz!");
+                window.location.href = "home.html"; // Endi aftomatik home sahifaga o'tadi
             }
         } catch (error) {
             alert("Xatolik: " + error.message);
