@@ -7,9 +7,8 @@
     
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-      import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+      import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-      // google-services.json faylingizdagi ma'lumotlar
       const firebaseConfig = {
         apiKey: "AIzaSyA2G8cD0JezEKXRCtKLYiZL0bzDyTp06Vs",
         authDomain: "quiz-app-3692d.firebaseapp.com",
@@ -22,7 +21,15 @@
       const app = initializeApp(firebaseConfig);
       const auth = getAuth(app);
 
-      // Funksiyani global qilish
+      // --- MUHIM: AVTOMATIK KIRISHNI TEKSHIRISH ---
+      onAuthStateChanged(auth, (user) => {
+          if (user) {
+              // Agar foydalanuvchi allaqachon kirgan bo'lsa, home.html ga o'tadi
+              // replace ishlatildi, shunda "Orqaga" bosganda login sahifasiga qaytmaydi
+              window.location.replace("home.html");
+          }
+      });
+
       window.handleAuth = async () => {
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
@@ -32,20 +39,16 @@
 
         try {
             if (isLoginMode) {
-                // KIRISH LOGIKASI
                 await signInWithEmailAndPassword(auth, email, password);
-                window.location.href = "home.html"; 
+                // Muvaffaqiyatli kirgandan keyin tarixni tozalab o'tish
+                window.location.replace("home.html"); 
             } else {
-                // RO'YXATDAN O'TISH LOGIKASI
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                
-                // Ismni profilga saqlash
                 await updateProfile(userCredential.user, {
                     displayName: fullname
                 });
-
                 alert("Muvaffaqiyatli ro'yxatdan o'tdingiz!");
-                window.location.href = "home.html"; // Endi aftomatik home sahifaga o'tadi
+                window.location.replace("home.html");
             }
         } catch (error) {
             alert("Xatolik: " + error.message);
