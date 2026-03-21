@@ -3,80 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asosiy Sahifa - Profil</title>
+    <title>Profil - DTM Quiz</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body {
-            height: 100vh; background: linear-gradient(-45deg, #0f2027, #2c5364);
-            color: white; overflow: hidden;
+            height: 100vh; background: #0f2027;
+            color: white; display: flex; align-items: center; justify-content: center;
         }
 
-        /* Yuqori o'ng burchakdagi profil */
-        .top-header {
-            position: absolute; top: 20px; right: 20px;
-            display: flex; align-items: center; gap: 10px;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 5px 15px; border-radius: 50px;
-            cursor: pointer; border: 1px solid rgba(255,255,255,0.2);
-            z-index: 10;
-        }
-        .top-profile-img {
-            width: 40px; height: 40px; border-radius: 50%;
-            object-fit: cover; border: 2px solid #00d2ff;
+        .profile-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 40px; border-radius: 30px;
+            backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center; width: 90%; max-width: 400px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         }
 
-        /* Modal */
-        .modal {
-            display: none; position: fixed; z-index: 100;
-            left: 0; top: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
-            align-items: center; justify-content: center;
+        /* --- Animatsiyali Profil Aylanasi --- */
+        .avatar-circle {
+            width: 120px; height: 120px;
+            background: linear-gradient(45deg, #00d2ff, #3a7bd5);
+            border-radius: 50%; margin: 0 auto 20px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 40px; font-weight: bold; color: white;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.5);
+            animation: pulse 2s infinite;
         }
-        .modal-content {
-            background: #1a2a33; padding: 30px; border-radius: 20px;
-            width: 90%; max-width: 400px; text-align: center;
+
+        .avatar-circle::before {
+            content: ''; position: absolute; top: -5px; left: -5px; right: -5px; bottom: -5px;
+            border-radius: 50%; border: 2px solid #00d2ff;
+            animation: rotate 4s linear infinite;
         }
-        .edit-avatar-wrapper { position: relative; width: 100px; height: 100px; margin: 0 auto 15px; cursor: pointer; }
-        .edit-avatar { width: 100px; height: 100px; border-radius: 50%; border: 3px solid #00d2ff; object-fit: cover; }
-        
-        input[type="text"], input[type="email"] {
-            width: 100%; padding: 12px; margin: 10px 0;
-            border-radius: 8px; border: none; outline: none;
-            background: #2c3e50; color: white;
+
+        @keyframes rotate { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+
+        .user-name { font-size: 22px; font-weight: 600; margin-bottom: 5px; color: #fff; }
+        .user-email { font-size: 14px; color: rgba(255,255,255,0.5); margin-bottom: 30px; }
+
+        .edit-input {
+            width: 100%; padding: 12px; background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2); border-radius: 10px;
+            color: white; margin-bottom: 15px; outline: none; text-align: center;
         }
-        input[type="email"] { background: #121d25; color: #7f8c8d; cursor: not-allowed; }
-        
-        .save-btn { background: #00d2ff; color: white; padding: 12px; border: none; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 10px; }
-        .logout-btn { background: #ff4b2b; color: white; padding: 12px; border: none; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 10px; }
+
+        .btn-save {
+            width: 100%; padding: 12px; background: #00d2ff;
+            border: none; border-radius: 10px; color: white;
+            font-weight: bold; cursor: pointer; transition: 0.3s;
+        }
+        .btn-save:hover { background: #3a7bd5; transform: translateY(-2px); }
+
+        .logout-link { margin-top: 20px; display: inline-block; color: #ff4b2b; font-size: 14px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <div class="top-header" onclick="openModal()">
-        <span id="header-name">Yuklanmoqda...</span>
-        <img src="https://via.placeholder.com/150" id="header-img" class="top-profile-img">
-    </div>
+    <div class="profile-card">
+        <div class="avatar-circle" id="user-initials">?</div>
 
-    <div style="display: flex; height: 100vh; align-items: center; justify-content: center;">
-        <h2>Xush kelibsiz!</h2>
-    </div>
+        <div class="user-name" id="display-name">Yuklanmoqda...</div>
+        <div class="user-email" id="display-email">---</div>
 
-    <div id="editModal" class="modal">
-        <div class="modal-content">
-            <h3>Profilni tahrirlash</h3>
-            <div class="edit-avatar-wrapper" onclick="document.getElementById('file-input').click()">
-                <img src="https://via.placeholder.com/150" id="edit-preview" class="edit-avatar">
-                <p style="font-size: 10px; color: #00d2ff; margin-top: 5px;">Rasm tanlash</p>
-            </div>
-            <input type="file" id="file-input" style="display: none;" accept="image/*">
-            
-            <input type="text" id="edit-name" placeholder="F.I.SH">
-            <input type="email" id="edit-email" readonly>
-            
-            <button class="save-btn" id="btn-save" onclick="saveProfile()">SAQLASH</button>
-            <button class="logout-btn" onclick="logoutUser()">CHIQUV</button>
-            <p onclick="closeModal()" style="margin-top:15px; cursor:pointer; opacity:0.6;">Yopish</p>
-        </div>
+        <hr style="opacity: 0.1; margin-bottom: 20px;">
+
+        <input type="text" id="input-name" class="edit-input" placeholder="Yangi F.I.SH kiritish">
+        <button class="btn-save" id="save-btn" onclick="updateName()">F.I.SHNI YANGILASH</button>
+
+        <span class="logout-link" onclick="logoutUser()">Tizimdan chiqish</span>
     </div>
 
     <script type="module">
@@ -97,88 +93,74 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        let currentUser = null;
+        let uid = null;
 
-        // --- PROFILNI FIRESORE'DAN YUKLASH ---
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                currentUser = user;
-                try {
-                    const docRef = doc(db, "users", user.uid);
-                    const docSnap = await getDoc(docRef);
-
-                    let name = user.displayName || "Foydalanuvchi";
-                    let photo = "https://via.placeholder.com/150";
-
-                    if (docSnap.exists()) {
-                        const data = docSnap.data();
-                        name = data.fio || name;
-                        photo = data.photo || photo;
-                    }
-
-                    document.getElementById('header-name').innerText = name;
-                    document.getElementById('header-img').src = photo;
-                    document.getElementById('edit-name').value = name;
-                    document.getElementById('edit-email').value = user.email;
-                    document.getElementById('edit-preview').src = photo;
-                } catch (e) { console.error("Xato:", e); }
+                uid = user.uid;
+                fetchUserData(user);
             } else {
                 window.location.replace("index.html");
             }
         });
 
-        window.openModal = () => document.getElementById('editModal').style.display = 'flex';
-        window.closeModal = () => document.getElementById('editModal').style.display = 'none';
+        // Ma'lumotlarni Firestore'dan yuklash
+        async function fetchUserData(user) {
+            try {
+                const docRef = doc(db, "users", user.uid);
+                const docSnap = await getDoc(docRef);
 
-        // --- CHIQUV ---
-        window.logoutUser = async () => {
-            if (confirm("Tizimdan chiqishni xohlaysizmi?")) {
-                await signOut(auth);
-                localStorage.removeItem("user_logged_in");
-                window.location.replace("index.html");
+                let fullName = user.displayName || "Foydalanuvchi";
+                
+                if (docSnap.exists()) {
+                    fullName = docSnap.data().fio || fullName;
+                }
+
+                // UI ni yangilash
+                document.getElementById('display-name').innerText = fullName;
+                document.getElementById('display-email').innerText = user.email;
+                document.getElementById('input-name').value = fullName;
+                
+                // Ism bosh harfini logoga qo'yish
+                document.getElementById('user-initials').innerText = fullName.charAt(0).toUpperCase();
+
+            } catch (e) {
+                console.error("Yuklashda xato:", e);
+                document.getElementById('display-name').innerText = "Xatolik yuz berdi";
             }
-        };
+        }
 
-        // --- SAQLASH (FIRESTORE GA) ---
-        window.saveProfile = async () => {
-            const name = document.getElementById('edit-name').value;
-            const photo = document.getElementById('edit-preview').src;
-            const btn = document.getElementById('btn-save');
+        // F.I.SH ni o'zgartirish
+        window.updateName = async () => {
+            const newName = document.getElementById('input-name').value;
+            const btn = document.getElementById('save-btn');
 
-            if (!name) return alert("F.I.SH kiriting!");
+            if (!newName) return alert("Ismni bo'sh qoldirmang!");
 
             btn.disabled = true;
             btn.innerText = "Saqlanmoqda...";
 
             try {
-                await setDoc(doc(db, "users", currentUser.uid), {
-                    fio: name,
-                    photo: photo, // Base64 matn ko'rinishida saqlaydi
-                    email: currentUser.email
+                await setDoc(doc(db, "users", uid), {
+                    fio: newName,
+                    updatedAt: new Date()
                 }, { merge: true });
 
-                alert("Muvaffaqiyatli saqlandi!");
+                alert("Ismingiz muvaffaqiyatli o'zgartirildi!");
                 location.reload();
             } catch (e) {
                 alert("Xatolik: " + e.message);
                 btn.disabled = false;
-                btn.innerText = "SAQLASH";
+                btn.innerText = "F.I.SHNI YANGILASH";
             }
         };
 
-        // --- TELEFONDAN RASM OLISH (BASE64) ---
-        document.getElementById('file-input').onchange = (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                if (file.size > 800000) { // Firestore bitta hujjat uchun ~1MB gacha ruxsat beradi
-                    alert("Rasm hajmi juda katta!");
-                    return;
-                }
-                const reader = new FileReader();
-                reader.onload = () => {
-                    document.getElementById('edit-preview').src = reader.result;
-                };
-                reader.readAsDataURL(file);
+        // Logout
+        window.logoutUser = async () => {
+            if(confirm("Chiqmoqchimisiz?")) {
+                await signOut(auth);
+                localStorage.removeItem("user_logged_in");
+                window.location.replace("index.html");
             }
         };
     </script>
