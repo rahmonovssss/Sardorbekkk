@@ -83,6 +83,10 @@
             height: 100vh; display: flex; align-items: center; justify-content: center;
             flex-direction: column; text-align: center;
         }
+
+        /* MAXSUS CHIQUV TUGMALARI */
+        .confirm-btn-red { background: #ff4b2b; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; flex: 1; }
+        .cancel-btn-grey { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 12px; border-radius: 10px; cursor: pointer; flex: 1; }
     </style>
 </head>
 <body>
@@ -105,9 +109,20 @@
             <input type="text" id="input-name" class="edit-input" placeholder="F.I.SH kiriting">
             
             <button class="btn-update" id="save-btn" onclick="updateName()">SAQLASH</button>
-            <button class="logout-btn" onclick="logoutUser()">TIZIMDAN CHIQISH</button>
+            <button class="logout-btn" onclick="openLogoutModal()">TIZIMDAN CHIQISH</button>
             
             <p onclick="toggleModal(false)" style="margin-top: 15px; cursor: pointer; font-size: 13px; opacity: 0.7;">Yopish</p>
+        </div>
+    </div>
+
+    <div id="logoutModal" class="modal">
+        <div class="modal-content" style="border-top: 4px solid #ff4b2b;">
+            <h3 style="margin-bottom: 15px;">Chiqish</h3>
+            <p style="opacity: 0.7; font-size: 14px; margin-bottom: 25px;">Haqiqatan ham akkauntdan chiqmoqchimisiz?</p>
+            <div style="display: flex; gap: 10px;">
+                <button class="cancel-btn-grey" onclick="closeLogoutModal()">YO'Q</button>
+                <button class="confirm-btn-red" id="confirm-logout-btn" onclick="confirmLogout()">HA, CHIQISH</button>
+            </div>
         </div>
     </div>
 
@@ -187,28 +202,32 @@
             }
         };
 
-        // --- CHIQUV (LOGOUT) - ILovalarda aniq ishlashi uchun to'liq tozalash ---
-        window.logoutUser = async () => {
-            if(confirm("Haqiqatan ham akkauntdan chiqmoqchimisiz?")) {
-                try {
-                    // 1. Firebase seansini tugatish
-                    await signOut(auth);
-                    
-                    // 2. Local xotirani butunlay tozalash
-                    localStorage.clear();
-                    sessionStorage.clear();
+        // --- YANGI LOGOUT MANTIQI ---
+        window.openLogoutModal = () => {
+            toggleModal(false); // Profil modalini yopish
+            document.getElementById('logoutModal').style.display = 'flex';
+        };
 
-                    // 3. Cookie fayllarini majburiy o'chirish (Ilovalar uchun)
-                    document.cookie.split(";").forEach((c) => {
-                        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
-                    });
+        window.closeLogoutModal = () => {
+            document.getElementById('logoutModal').style.display = 'none';
+        };
 
-                    // 4. Seansni qayta tiklanmasligi uchun majburiy yo'naltirish
-                    window.location.replace("index.html");
-                } catch (e) {
-                    console.error("Logout xatosi:", e);
-                    window.location.replace("index.html");
-                }
+        window.confirmLogout = async () => {
+            const btn = document.getElementById('confirm-logout-btn');
+            btn.disabled = true;
+            btn.innerText = "...";
+
+            try {
+                await signOut(auth);
+                localStorage.clear();
+                sessionStorage.clear();
+                document.cookie.split(";").forEach((c) => {
+                    document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+                });
+                window.location.replace("index.html");
+            } catch (e) {
+                console.error("Logout xatosi:", e);
+                window.location.replace("index.html");
             }
         };
     </script>
