@@ -9,7 +9,6 @@
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
       import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-      // google-services.json faylingizdagi ma'lumotlar
       const firebaseConfig = {
         apiKey: "AIzaSyA2G8cD0JezEKXRCtKLYiZL0bzDyTp06Vs",
         authDomain: "quiz-app-3692d.firebaseapp.com",
@@ -22,15 +21,14 @@
       const app = initializeApp(firebaseConfig);
       const auth = getAuth(app);
 
-      // --- MANA SHU QISM AVTOMATIK TEKSHIRADI ---
+      // --- MANA SHU QISM KEYINGI SAFAR BIRDAN HOMEGA KIRGIZADI ---
       onAuthStateChanged(auth, (user) => {
           if (user) {
-              // Agar foydalanuvchi allaqachon kirgan bo'lsa, home.html ga o'tadi
+              // Agar foydalanuvchi tizimga kirgan bo'lsa, birdan home.html ga o'tadi
               window.location.replace("home.html");
           }
       });
 
-      // Funksiyani global qilish
       window.handleAuth = async () => {
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
@@ -40,20 +38,15 @@
 
         try {
             if (isLoginMode) {
-                // KIRISH LOGIKASI
                 await signInWithEmailAndPassword(auth, email, password);
                 window.location.replace("home.html"); 
             } else {
-                // RO'YXATDAN O'TISH LOGIKASI
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                
-                // Ismni profilga saqlash
                 await updateProfile(userCredential.user, {
                     displayName: fullname
                 });
-
                 alert("Muvaffaqiyatli ro'yxatdan o'tdingiz!");
-                window.location.replace("home.html"); 
+                window.location.replace("home.html");
             }
         } catch (error) {
             alert("Xatolik: " + error.message);
@@ -63,112 +56,27 @@
 
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-
         body {
-            height: 100vh;
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            height: 100vh; width: 100%; display: flex; align-items: center; justify-content: center;
             background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364);
-            background-size: 400% 400%;
-            animation: gradientBG 10s ease infinite;
-            overflow: hidden;
+            background-size: 400% 400%; animation: gradientBG 10s ease infinite; overflow: hidden;
         }
-
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        .main-container {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            padding: 20px;
-        }
-
-        .form-box {
-            width: 100%;
-            max-width: 450px;
-            padding: 40px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            text-align: center;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
-        }
-
+        @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        .main-container { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); padding: 20px; }
+        .form-box { width: 100%; max-width: 450px; padding: 40px; background: rgba(255, 255, 255, 0.1); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.2); text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.5); }
         h2 { color: #fff; margin-bottom: 30px; letter-spacing: 2px; text-transform: uppercase; }
-
         .input-group { position: relative; margin-bottom: 25px; }
-
-        .input-group input {
-            width: 100%;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            outline: none;
-            border-radius: 10px;
-            color: #fff;
-            font-size: 16px;
-            border-bottom: 2px solid transparent;
-            transition: 0.3s;
-        }
-
-        .input-group input:focus {
-            border-bottom: 2px solid #00d2ff;
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .input-group label {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: rgba(255, 255, 255, 0.5);
-            pointer-events: none;
-            transition: 0.3s;
-        }
-
-        .input-group input:focus ~ label,
-        .input-group input:valid ~ label {
-            top: -10px;
-            left: 10px;
-            font-size: 12px;
-            color: #00d2ff;
-        }
-
-        .submit-btn {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(90deg, #00d2ff, #3a7bd5);
-            border: none;
-            border-radius: 10px;
-            color: white;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.4s;
-            box-shadow: 0 5px 15px rgba(0,210,255,0.3);
-        }
-
-        .submit-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(0,210,255,0.5);
-        }
-
+        .input-group input { width: 100%; padding: 15px; background: rgba(255, 255, 255, 0.1); border: none; outline: none; border-radius: 10px; color: #fff; font-size: 16px; border-bottom: 2px solid transparent; transition: 0.3s; }
+        .input-group input:focus { border-bottom: 2px solid #00d2ff; background: rgba(255, 255, 255, 0.2); }
+        .input-group label { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: rgba(255, 255, 255, 0.5); pointer-events: none; transition: 0.3s; }
+        .input-group input:focus ~ label, .input-group input:valid ~ label { top: -10px; left: 10px; font-size: 12px; color: #00d2ff; }
+        .submit-btn { width: 100%; padding: 15px; background: linear-gradient(90deg, #00d2ff, #3a7bd5); border: none; border-radius: 10px; color: white; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.4s; box-shadow: 0 5px 15px rgba(0,210,255,0.3); }
+        .submit-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,210,255,0.5); }
         .footer-text { margin-top: 20px; color: rgba(255, 255, 255, 0.7); font-size: 14px; }
         .footer-text span { color: #00d2ff; cursor: pointer; text-decoration: underline; }
     </style>
 </head>
 <body>
-
     <div class="main-container">
         <div class="form-box">
             <h2 id="form-title">Kirish</h2>
@@ -218,6 +126,5 @@
             }
         }
     </script>
-
 </body>
 </html>
