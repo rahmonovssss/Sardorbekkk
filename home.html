@@ -48,7 +48,7 @@
 
         #top-name { font-size: 14px; font-weight: 500; }
 
-        /* --- 2. MODAL OYNA (Profilni tahrirlash uchun) --- */
+        /* --- 2. MODAL OYNA --- */
         .modal {
             display: none; position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -79,7 +79,6 @@
             color: #ff4b2b; border-radius: 10px; cursor: pointer;
         }
 
-        /* --- MARKAZIY MATN --- */
         .welcome-hero {
             height: 100vh; display: flex; align-items: center; justify-content: center;
             flex-direction: column; text-align: center;
@@ -132,7 +131,6 @@
 
         let currentUserUid = null;
 
-        // --- AUTH HOLATINI TEKSHIRISH ---
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUserUid = user.uid;
@@ -142,7 +140,6 @@
             }
         });
 
-        // --- MA'LUMOTLARNI YUKLASH ---
         async function loadUserData(user) {
             try {
                 const docRef = doc(db, "users", user.uid);
@@ -153,7 +150,6 @@
                     name = docSnap.data().fio || name;
                 }
 
-                // UI ni yangilash
                 document.getElementById('top-name').innerText = name;
                 document.getElementById('top-initials').innerText = name.charAt(0).toUpperCase();
                 document.getElementById('modal-email').innerText = user.email;
@@ -164,12 +160,10 @@
             }
         }
 
-        // --- MODALNI BOSHQARISH ---
         window.toggleModal = (show) => {
             document.getElementById('profileModal').style.display = show ? 'flex' : 'none';
         };
 
-        // --- F.I.SHNI YANGILASH ---
         window.updateName = async () => {
             const newName = document.getElementById('input-name').value;
             const btn = document.getElementById('save-btn');
@@ -193,20 +187,27 @@
             }
         };
 
-        // --- CHIQUV (LOGOUT) - TO'G'RILANGAN ---
+        // --- CHIQUV (LOGOUT) - ILovalarda aniq ishlashi uchun to'liq tozalash ---
         window.logoutUser = async () => {
-            if(confirm("Haqiqatan ham chiqmoqchimisiz?")) {
+            if(confirm("Haqiqatan ham akkauntdan chiqmoqchimisiz?")) {
                 try {
-                    // 1. Sign out qilish
+                    // 1. Firebase seansini tugatish
                     await signOut(auth);
-                    // 2. Local storage tozalash
+                    
+                    // 2. Local xotirani butunlay tozalash
                     localStorage.clear();
-                    // 3. Majburiy yo'naltirish
+                    sessionStorage.clear();
+
+                    // 3. Cookie fayllarini majburiy o'chirish (Ilovalar uchun)
+                    document.cookie.split(";").forEach((c) => {
+                        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+                    });
+
+                    // 4. Seansni qayta tiklanmasligi uchun majburiy yo'naltirish
                     window.location.replace("index.html");
                 } catch (e) {
                     console.error("Logout xatosi:", e);
-                    // Agar signOut ishlamasa ham majburan haydash
-                    window.location.href = "index.html";
+                    window.location.replace("index.html");
                 }
             }
         };
