@@ -9,108 +9,149 @@
         
         body {
             height: 100vh; background: #0f2027;
-            color: white; overflow: hidden;
+            color: white; overflow-x: hidden;
         }
 
-        /* --- 1. PROFIL TEPADA BURCHAKDA --- */
+        /* --- 1. HEADER (PROFIL VA XABARLAR) --- */
+        .header {
+            position: fixed; top: 0; left: 0; width: 100%; 
+            padding: 20px; display: flex; justify-content: space-between; 
+            align-items: center; background: rgba(15, 32, 39, 0.8); 
+            backdrop-filter: blur(10px); z-index: 1000;
+        }
+
+        .header-left { display: flex; align-items: center; gap: 15px; }
+
+        .notif-btn {
+            width: 45px; height: 45px; background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%; display: flex; align-items: center; 
+            justify-content: center; cursor: pointer; position: relative;
+            transition: 0.3s; border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .notif-btn:hover { background: rgba(255, 255, 255, 0.2); }
+        .notif-badge {
+            position: absolute; top: 0; right: 0; background: #ff4b2b;
+            color: white; font-size: 10px; padding: 2px 6px; 
+            border-radius: 50%; border: 2px solid #0f2027;
+        }
+
         .top-profile-container {
-            position: absolute; top: 20px; right: 20px;
-            display: flex; align-items: center; gap: 15px;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 8px 20px; border-radius: 50px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px); cursor: pointer;
-            transition: 0.3s; z-index: 1000;
+            display: flex; align-items: center; gap: 12px;
+            background: rgba(255, 255, 255, 0.1); padding: 5px 15px; 
+            border-radius: 50px; border: 1px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer; transition: 0.3s;
         }
         .top-profile-container:hover { background: rgba(255, 255, 255, 0.2); }
 
         .mini-avatar {
-            width: 40px; height: 40px;
-            background: linear-gradient(45deg, #00d2ff, #3a7bd5);
-            border-radius: 50%; display: flex;
-            align-items: center; justify-content: center;
-            font-weight: bold; font-size: 18px;
-            position: relative;
-            box-shadow: 0 0 10px #00d2ff;
+            width: 35px; height: 35px; background: #00d2ff;
+            border-radius: 50%; display: flex; align-items: center; 
+            justify-content: center; font-weight: bold; font-size: 16px;
         }
 
-        /* Animatsiyali halqa */
-        .mini-avatar::after {
-            content: ''; position: absolute;
-            width: 100%; height: 100%;
-            border: 2px solid #00d2ff;
-            border-radius: 50%;
-            border-top-color: transparent;
-            animation: spin 2s linear infinite;
+        /* --- 2. ASOSIY KONTENT --- */
+        .main-content {
+            padding: 100px 20px 40px; text-align: center;
+            max-width: 600px; margin: 0 auto;
         }
 
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .balance-card {
+            background: linear-gradient(135deg, #00d2ff, #3a7bd5);
+            padding: 25px; border-radius: 25px; margin-bottom: 30px;
+            text-align: left; box-shadow: 0 10px 20px rgba(0, 210, 255, 0.2);
+        }
+        .balance-card h3 { font-size: 14px; opacity: 0.8; font-weight: 400; }
+        .balance-card h1 { font-size: 32px; margin: 5px 0; }
 
-        #top-name { font-size: 14px; font-weight: 500; }
+        .grid-menu {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;
+        }
 
-        /* --- 2. MODAL OYNA --- */
+        .menu-item {
+            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 25px 15px; border-radius: 20px; transition: 0.3s; cursor: pointer;
+            display: flex; flex-direction: column; align-items: center; gap: 10px;
+        }
+        .menu-item:hover { 
+            transform: translateY(-5px); border-color: #00d2ff; 
+            background: rgba(0, 210, 255, 0.1); 
+        }
+        .menu-item i { font-size: 30px; font-style: normal; }
+        .menu-item span { font-size: 14px; font-weight: 600; }
+        .premium { border-color: rgba(255, 215, 0, 0.3) !important; color: #ffd700; }
+
+        /* --- 3. MODALLAR VA TOAST --- */
         .modal {
-            display: none; position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
+            display: none; position: fixed; top: 0; left: 0; 
+            width: 100%; height: 100%; background: rgba(0,0,0,0.85);
             align-items: center; justify-content: center; z-index: 2000;
         }
         .modal-content {
-            background: #1a2a33; padding: 30px; border-radius: 20px;
+            background: #1a2a33; padding: 30px; border-radius: 25px;
             width: 90%; max-width: 350px; text-align: center;
-            border: 1px solid rgba(255,255,255,0.1);
         }
-
         .edit-input {
             width: 100%; padding: 12px; background: rgba(255,255,255,0.05);
             border: 1px solid rgba(255,255,255,0.2); border-radius: 10px;
             color: white; margin: 15px 0; outline: none; text-align: center;
         }
-
         .btn-update {
             width: 100%; padding: 12px; background: #00d2ff;
-            border: none; border-radius: 10px; color: white;
-            font-weight: bold; cursor: pointer;
+            border: none; border-radius: 10px; color: white; font-weight: bold;
         }
-
         .logout-btn {
             margin-top: 15px; width: 100%; padding: 10px;
             background: transparent; border: 1px solid #ff4b2b;
-            color: #ff4b2b; border-radius: 10px; cursor: pointer;
+            color: #ff4b2b; border-radius: 10px;
         }
+        .confirm-btn-red { background: #ff4b2b; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; flex: 1; }
+        .cancel-btn-grey { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 12px; border-radius: 10px; flex: 1; }
 
-        .welcome-hero {
-            height: 100vh; display: flex; align-items: center; justify-content: center;
-            flex-direction: column; text-align: center;
-        }
-
-        /* MAXSUS CHIQUV TUGMALARI */
-        .confirm-btn-red { background: #ff4b2b; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; flex: 1; }
-        .cancel-btn-grey { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 12px; border-radius: 10px; cursor: pointer; flex: 1; }
-
-        /* TOAST BILDIRISHNOMA */
         #toast {
             position: fixed; bottom: 30px; left: 50%;
             transform: translateX(-50%) translateY(100px);
-            background: #00d2ff; color: white;
-            padding: 12px 25px; border-radius: 50px;
-            font-weight: bold; font-size: 14px;
-            box-shadow: 0 5px 15px rgba(0,210,255,0.3);
-            transition: 0.5s ease; z-index: 3000;
+            background: #00d2ff; color: white; padding: 12px 25px;
+            border-radius: 50px; transition: 0.5s; z-index: 3000;
         }
         #toast.show { transform: translateX(-50%) translateY(0); }
     </style>
 </head>
 <body>
 
-    <div class="top-profile-container" onclick="toggleModal(true)">
-        <div class="mini-avatar" id="top-initials">?</div>
-        <span id="top-name">Yuklanmoqda...</span>
-    </div>
+    <header class="header">
+        <div class="header-left">
+            <div class="notif-btn" onclick="openMessages()">
+                <i>🔔</i>
+                <span class="notif-badge" id="notif-count">0</span>
+            </div>
+        </div>
+        <div class="top-profile-container" onclick="toggleModal(true)">
+            <span id="top-name">Yuklanmoqda...</span>
+            <div class="mini-avatar" id="top-initials">?</div>
+        </div>
+    </header>
 
-    <div class="welcome-hero">
-        <h1>Xush kelibsiz!</h1>
-        <p style="opacity: 0.5; margin-top: 10px;">DTM Quiz tizimi siz uchun tayyor.</p>
+    <div class="main-content">
+        <div class="balance-card">
+            <h3>Mening balansim</h3>
+            <h1 id="user-balance">0 so'm</h1>
+            <p style="font-size: 12px; cursor: pointer; display: inline-block; margin-top: 10px;" onclick="addMoney()">💳 To'ldirish</p>
+        </div>
+
+        <div class="grid-menu">
+            <div class="menu-item" onclick="startQuiz('free')">
+                <i>🎁</i><span>Bepul Testlar</span>
+            </div>
+            <div class="menu-item premium" onclick="startQuiz('paid')">
+                <i>💎</i><span>Premium Testlar</span>
+            </div>
+            <div class="menu-item" onclick="openMessages()">
+                <i>✉️</i><span>Xabarlarim</span>
+            </div>
+            <div class="menu-item" onclick="openSupport()">
+                <i>🎧</i><span>Yordam</span>
+            </div>
+        </div>
     </div>
 
     <div id="toast">Muvaffaqiyatli saqlandi!</div>
@@ -119,12 +160,9 @@
         <div class="modal-content">
             <h3 style="margin-bottom: 10px;">Profil Sozlamalari</h3>
             <div id="modal-email" style="font-size: 12px; opacity: 0.5; margin-bottom: 10px;">---</div>
-            
             <input type="text" id="input-name" class="edit-input" placeholder="F.I.SH kiriting">
-            
             <button class="btn-update" id="save-btn" onclick="updateName()">SAQLASH</button>
             <button class="logout-btn" onclick="openLogoutModal()">TIZIMDAN CHIQISH</button>
-            
             <p onclick="toggleModal(false)" style="margin-top: 15px; cursor: pointer; font-size: 13px; opacity: 0.7;">Yopish</p>
         </div>
     </div>
@@ -135,7 +173,7 @@
             <p style="opacity: 0.7; font-size: 14px; margin-bottom: 25px;">Haqiqatan ham akkauntdan chiqmoqchimisiz?</p>
             <div style="display: flex; gap: 10px;">
                 <button class="cancel-btn-grey" onclick="closeLogoutModal()">YO'Q</button>
-                <button class="confirm-btn-red" id="confirm-logout-btn" onclick="confirmLogout()">HA, CHIQISH</button>
+                <button class="confirm-btn-red" id="confirm-logout-btn" onclick="confirmLogout()">HA</button>
             </div>
         </div>
     </div>
@@ -175,17 +213,24 @@
                 const docSnap = await getDoc(docRef);
 
                 let name = user.displayName || "Foydalanuvchi";
+                let balance = 0;
+                let notifs = 0;
+
                 if (docSnap.exists()) {
                     name = docSnap.data().fio || name;
+                    balance = docSnap.data().balance || 0;
+                    notifs = docSnap.data().notifCount || 0;
                 }
 
                 document.getElementById('top-name').innerText = name;
                 document.getElementById('top-initials').innerText = name.charAt(0).toUpperCase();
                 document.getElementById('modal-email').innerText = user.email;
                 document.getElementById('input-name').value = name;
+                document.getElementById('user-balance').innerText = balance.toLocaleString() + " so'm";
+                document.getElementById('notif-count').innerText = notifs;
+
             } catch (e) {
                 console.error("Xato:", e);
-                document.getElementById('top-name').innerText = "Xatolik!";
             }
         }
 
@@ -197,36 +242,21 @@
             const newName = document.getElementById('input-name').value;
             const btn = document.getElementById('save-btn');
             const toast = document.getElementById('toast');
-            if(!newName) return alert("Ism kiriting!");
+            if(!newName) return;
 
-            btn.disabled = true;
-            btn.innerText = "SAQLANMOQDA...";
+            btn.disabled = true; btn.innerText = "...";
 
             try {
-                await setDoc(doc(db, "users", currentUserUid), {
-                    fio: newName,
-                    lastUpdate: new Date()
-                }, { merge: true });
-                
-                // UI ni darhol yangilash
+                await setDoc(doc(db, "users", currentUserUid), { fio: newName }, { merge: true });
                 document.getElementById('top-name').innerText = newName;
                 document.getElementById('top-initials').innerText = newName.charAt(0).toUpperCase();
-                
-                // Toast ko'rsatish
                 toast.classList.add('show');
-                
                 setTimeout(() => {
                     toast.classList.remove('show');
                     toggleModal(false);
-                    btn.disabled = false;
-                    btn.innerText = "SAQLASH";
+                    btn.disabled = false; btn.innerText = "SAQLASH";
                 }, 2000);
-                
-            } catch (e) {
-                alert("Xato: " + e.message);
-                btn.disabled = false;
-                btn.innerText = "SAQLASH";
-            }
+            } catch (e) { alert(e.message); btn.disabled = false; }
         };
 
         window.openLogoutModal = () => {
@@ -239,23 +269,17 @@
         };
 
         window.confirmLogout = async () => {
-            const btn = document.getElementById('confirm-logout-btn');
-            btn.disabled = true;
-            btn.innerText = "...";
-
-            try {
-                await signOut(auth);
-                localStorage.clear();
-                sessionStorage.clear();
-                document.cookie.split(";").forEach((c) => {
-                    document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
-                });
-                window.location.replace("index.html");
-            } catch (e) {
-                console.error("Logout xatosi:", e);
-                window.location.replace("index.html");
-            }
+            await signOut(auth);
+            localStorage.clear();
+            window.location.replace("index.html");
         };
+
+        // --- QO'SHIMCHA FUNKSIYALAR ---
+        window.openMessages = () => { alert("Yangi xabarlar hozircha yo'q!"); };
+        window.openSupport = () => { window.location.href = "https://t.me/Sardorbek_Rahmonov"; };
+        window.startQuiz = (type) => { alert(type === 'free' ? "Bepul testlar yuklanmoqda..." : "Premium test uchun balans yetarli emas!"); };
+        window.addMoney = () => { alert("To'lov tizimi tez kunda ishga tushadi!"); };
+
     </script>
 </body>
 </html>
