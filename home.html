@@ -18,6 +18,7 @@
             background: rgba(255, 255, 255, 0.1);
             padding: 5px 15px; border-radius: 50px;
             cursor: pointer; border: 1px solid rgba(255,255,255,0.2);
+            z-index: 10;
         }
         .top-profile-img {
             width: 40px; height: 40px; border-radius: 50%;
@@ -43,16 +44,19 @@
         input[type="text"], input[type="email"] {
             width: 100%; padding: 12px; margin: 10px 0;
             border-radius: 8px; border: none; outline: none;
+            background: #2c3e50; color: white;
         }
         input[type="email"] { background: #333; color: #888; }
         
         .save-btn {
             background: #00d2ff; color: white; padding: 10px 20px;
             border: none; border-radius: 8px; cursor: pointer; width: 100%; margin-bottom: 10px;
+            font-weight: bold;
         }
         .logout-btn {
             background: #ff4b2b; color: white; padding: 8px 15px;
             border: none; border-radius: 8px; cursor: pointer; width: 100%;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -122,7 +126,8 @@
                 document.getElementById('edit-email').value = user.email;
                 document.getElementById('edit-preview').src = photoData;
             } else {
-                // Tizimdan chiqilsa, orqaga qaytmaydigan qilib yuborish
+                // Tizimdan chiqilsa, xotirani ham tozalaymiz
+                localStorage.removeItem("user_logged_in");
                 window.location.replace("auth.html");
             }
         });
@@ -134,7 +139,11 @@
         window.logoutUser = () => {
             if(confirm("Tizimdan chiqishni xohlaysizmi?")) {
                 signOut(auth).then(() => {
+                    // XOTIRADAGI MUHRNI O'CHIRISH
+                    localStorage.removeItem("user_logged_in");
                     window.location.replace("auth.html");
+                }).catch((error) => {
+                    alert("Chiqishda xatolik: " + error.message);
                 });
             }
         };
@@ -144,6 +153,8 @@
             const fileInput = document.getElementById('file-input');
             const file = fileInput.files[0];
             const btn = document.getElementById('btn-save');
+
+            if(!newName) { alert("Ismni kiriting!"); return; }
 
             btn.disabled = true;
             btn.innerText = "Saqlanmoqda...";
