@@ -7,7 +7,7 @@
     
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-      import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+      import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
       const firebaseConfig = {
         apiKey: "AIzaSyA2G8cD0JezEKXRCtKLYiZL0bzDyTp06Vs",
@@ -21,14 +21,6 @@
       const app = initializeApp(firebaseConfig);
       const auth = getAuth(app);
 
-      // --- MANA SHU QISM KEYINGI SAFAR BIRDAN HOMEGA KIRGIZADI ---
-      onAuthStateChanged(auth, (user) => {
-          if (user) {
-              // Agar foydalanuvchi tizimga kirgan bo'lsa, birdan home.html ga o'tadi
-              window.location.replace("home.html");
-          }
-      });
-
       window.handleAuth = async () => {
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
@@ -39,12 +31,22 @@
         try {
             if (isLoginMode) {
                 await signInWithEmailAndPassword(auth, email, password);
+                
+                // --- ANDROIDGA LOGIN BO'LGANINI AYTAMIZ ---
+                if (window.AndroidControl) {
+                    window.AndroidControl.setLoggedIn(true);
+                }
+                
                 window.location.replace("home.html"); 
             } else {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                await updateProfile(userCredential.user, {
-                    displayName: fullname
-                });
+                await updateProfile(userCredential.user, { displayName: fullname });
+                
+                // --- RO'YXATDAN O'TGANDA HAM ANDROIDGA AYTAMIZ ---
+                if (window.AndroidControl) {
+                    window.AndroidControl.setLoggedIn(true);
+                }
+
                 alert("Muvaffaqiyatli ro'yxatdan o'tdingiz!");
                 window.location.replace("home.html");
             }
