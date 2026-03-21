@@ -275,10 +275,23 @@
         };
 
         // --- QO'SHIMCHA FUNKSIYALAR ---
-        window.openMessages = () => { alert("Yangi xabarlar hozircha yo'q!"); };
-        window.openSupport = () => { window.location.href = "https://t.me/Sardorbek_Rahmonov"; };
-        window.startQuiz = (type) => { alert(type === 'free' ? "Bepul testlar yuklanmoqda..." : "Premium test uchun balans yetarli emas!"); };
-        window.addMoney = () => { alert("To'lov tizimi tez kunda ishga tushadi!"); };
+        
+        // Yangilangan xabarlar funksiyasi
+        window.openMessages = () => {
+            window.location.href = "messages.html";
+        };
+
+        window.openSupport = () => {
+            window.location.href = "https://t.me/Sardorbek_Rahmonov";
+        };
+
+        window.startQuiz = (type) => { 
+            alert(type === 'free' ? "Bepul testlar yuklanmoqda..." : "Premium test uchun balans yetarli emas!"); 
+        };
+
+        window.addMoney = () => { 
+            alert("To'lov tizimi tez kunda ishga tushadi!"); 
+        };
 
     </script>
 </body>
