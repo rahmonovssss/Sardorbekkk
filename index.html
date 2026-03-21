@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DTM QUIZ - Kirish va Ro'yxatdan o'tish</title>
+    <title>DTM Tizimi - Index</title>
     
     <style>
-        /* --- 1. UMUMIY STIL --- */
+        /* --- 1. UMUMIY VA FON DIZAYNI --- */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
 
         body {
@@ -45,7 +45,7 @@
         }
         @keyframes loading { 0% { left: -100%; } 100% { left: 100%; } }
 
-        /* --- 3. ASOSIY AUTH KONTEYNER --- */
+        /* --- 3. FORMA KONTEYNERI --- */
         #main-auth-container {
             display: none; width: 100%; height: 100%;
             align-items: center; justify-content: center;
@@ -62,56 +62,37 @@
 
         h2 { color: #fff; margin-bottom: 30px; letter-spacing: 2px; text-transform: uppercase; }
 
-        /* --- 4. INPUT VA LABEL (MUAMMO SHU YERDA EDI) --- */
+        /* --- 4. INPUTLAR VA LABEL (TO'G'RILANGAN QISM) --- */
         .input-group { position: relative; margin-bottom: 25px; width: 100%; }
 
         .input-group input {
-            width: 100%;
-            padding: 15px;
+            width: 100%; padding: 15px;
             background: rgba(255, 255, 255, 0.1);
-            border: none;
-            outline: none;
-            border-radius: 10px;
-            color: #fff;
-            font-size: 16px;
-            border-bottom: 2px solid transparent;
-            transition: 0.3s;
+            border: none; outline: none; border-radius: 10px;
+            color: #fff; font-size: 16px;
+            border-bottom: 2px solid transparent; transition: 0.3s;
         }
 
-        .input-group input:focus {
-            border-bottom: 2px solid #00d2ff;
-            background: rgba(255, 255, 255, 0.2);
-        }
+        .input-group input:focus { border-bottom: 2px solid #00d2ff; background: rgba(255, 255, 255, 0.2); }
 
         .input-group label {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: rgba(255, 255, 255, 0.5);
-            pointer-events: none;
-            transition: 0.3s ease;
-            font-size: 16px;
+            position: absolute; left: 15px; top: 50%;
+            transform: translateY(-50%); color: rgba(255, 255, 255, 0.5);
+            pointer-events: none; transition: 0.3s ease;
         }
 
-        /* Label tepaga chiqishi */
+        /* Label animatsiyasi */
         .input-group input:focus ~ label,
         .input-group input:valid ~ label {
-            top: -12px;
-            left: 10px;
-            font-size: 12px;
-            color: #00d2ff;
-            font-weight: bold;
+            top: -12px; left: 10px; font-size: 12px; color: #00d2ff; font-weight: bold;
         }
 
-        /* --- 5. TUGMALAR VA MATNLAR --- */
         .submit-btn {
             width: 100%; padding: 15px;
             background: linear-gradient(90deg, #00d2ff, #3a7bd5);
             border: none; border-radius: 10px; color: white;
             font-size: 18px; font-weight: bold; cursor: pointer;
             transition: 0.4s; box-shadow: 0 5px 15px rgba(0,210,255,0.3);
-            margin-top: 10px;
         }
 
         .submit-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,210,255,0.5); }
@@ -136,7 +117,7 @@
       const app = initializeApp(firebaseConfig);
       const auth = getAuth(app);
 
-      // --- 1. LOGIN STATUSNI TEKSHIRISH ---
+      // --- LOGIN HOLATINI TEKSHIRISH (Miltillashga qarshi) ---
       onAuthStateChanged(auth, (user) => {
           setTimeout(() => {
               if (user) {
@@ -146,10 +127,10 @@
                   document.getElementById('splash-screen').style.display = 'none';
                   document.getElementById('main-auth-container').style.display = 'flex';
               }
-          }, 3000); // 3 soniya Splash turadi
+          }, 3000); // 3 soniya splash ko'rinadi
       });
 
-      // --- 2. ASOSIY AUTH FUNKSIYASI ---
+      // --- ASOSIY AUTH FUNKSIYASI ---
       window.handleAuth = async () => {
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
@@ -157,34 +138,23 @@
         const btn = document.getElementById('submit-btn');
         const mode = btn.getAttribute('data-mode');
 
-        if (!email || !password) return alert("Hamma maydonni to'ldiring!");
-
-        btn.innerText = "Kutilmoqda...";
-        btn.disabled = true;
-
         try {
             if (mode === 'login') {
                 await signInWithEmailAndPassword(auth, email, password);
                 localStorage.setItem("user_logged_in", "true");
                 window.location.replace("home.html");
             } else {
-                if (!fullname) { 
-                    alert("F.I.SH kiriting!"); 
-                    btn.innerText = "DAVOM ETISH";
-                    btn.disabled = false;
-                    return; 
-                }
+                // RO'YXATDAN O'TISH
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                // Ismni Firebase profiliga yozish
                 await updateProfile(userCredential.user, { displayName: fullname });
                 
                 localStorage.setItem("user_logged_in", "true");
                 alert("Muvaffaqiyatli ro'yxatdan o'tdingiz!");
-                window.location.replace("home.html"); // RO'YXATDAN O'TGANDA HOMEGA O'TISH
+                window.location.replace("home.html");
             }
         } catch (error) {
             alert("Xatolik: " + error.message);
-            btn.innerText = "DAVOM ETISH";
-            btn.disabled = false;
         }
       };
     </script>
@@ -225,7 +195,6 @@
     </div>
 
     <script>
-        // Formani almashtirish funksiyasi
         function toggleMode() {
             const title = document.getElementById('form-title');
             const btn = document.getElementById('submit-btn');
@@ -239,12 +208,14 @@
                 btn.setAttribute('data-mode', 'signup');
                 toggleText.innerHTML = "Akkauntingiz bormi? <span onclick='toggleMode()'>Kirish</span>";
                 nameGroup.style.display = "block";
+                document.getElementById('fullname').required = true;
             } else {
                 title.innerText = "Kirish";
                 btn.innerText = "KIRISH";
                 btn.setAttribute('data-mode', 'login');
                 toggleText.innerHTML = "Akkauntingiz yo'qmi? <span onclick='toggleMode()'>Ro'yxatdan o'tish</span>";
                 nameGroup.style.display = "none";
+                document.getElementById('fullname').required = false;
             }
         }
     </script>
