@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xabarlarim - DTM Quiz</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background: #0f2027; color: white; min-height: 100vh; padding-top: 70px; }
+
+        /* HEADER */
+        .header {
+            position: fixed; top: 0; width: 100%; background: #1a2a33;
+            padding: 15px 20px; display: flex; align-items: center; gap: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3); z-index: 1000;
+        }
+        .back-btn { cursor: pointer; font-size: 20px; text-decoration: none; color: white; }
+
+        /* MESSAGES LIST */
+        .container { padding: 20px; max-width: 600px; margin: 0 auto; }
+        .message-card {
+            background: rgba(255, 255, 255, 0.05); border-radius: 15px;
+            padding: 15px; margin-bottom: 15px; border-left: 4px solid #00d2ff;
+            animation: slideIn 0.3s ease-out;
+        }
+        .message-card.unread { border-left-color: #ff4b2b; background: rgba(255, 75, 43, 0.05); }
+        .msg-title { font-weight: bold; font-size: 16px; margin-bottom: 5px; color: #00d2ff; }
+        .msg-body { font-size: 14px; opacity: 0.9; line-height: 1.4; }
+        .msg-time { font-size: 10px; opacity: 0.5; margin-top: 10px; text-align: right; }
+
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .empty-state { text-align: center; margin-top: 50px; opacity: 0.5; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <a href="home.html" class="back-btn">⬅️</a>
+        <h2>Xabarlarim</h2>
+    </div>
+
+    <div class="container" id="messages-container">
+        <div class="empty-state">Yuklanmoqda...</div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, query, where, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyA2G8cD0JezEKXRCtKLYiZL0bzDyTp06Vs",
+            authDomain: "quiz-app-3692d.firebaseapp.com",
+            projectId: "quiz-app-3692d",
+            storageBucket: "quiz-app-3692d.firebasestorage.app",
+            messagingSenderId: "526836020845",
+            appId: "1:526836020845:android:3ea991380c104c75e8b164"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                listenToMessages(user.uid);
+            } else {
+                window.location.replace("index.html");
+            }
+        });
+
+        function listenToMessages(uid) {
+            const msgQuery = query(
+                collection(db, "messages"),
+                where("userId", "==", uid), // Faqat shu foydalanuvchiga tegishli xabarlar
+                orderBy("createdAt", "desc")
+            );
+
+            onSnapshot(msgQuery, (snapshot) => {
+                const container = document.getElementById('messages-container');
+                container.innerHTML = "";
+
+                if (snapshot.empty) {
+                    container.innerHTML = '<div class="empty-state">Hozircha xabarlar yo‘q</div>';
+                    return;
+                }
+
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const date = data.createdAt?.toDate().toLocaleString('uz-UZ') || "Hozir";
+                    
+                    const card = document.createElement('div');
+                    card.className = `message-card ${data.status === 'unread' ? 'unread' : ''}`;
+                    card.innerHTML = `
+                        <div class="msg-title">${data.title}</div>
+                        <div class="msg-body">${data.text}</div>
+                        <div class="msg-time">${date}</div>
+                    `;
+                    container.appendChild(card);
+                });
+            });
+        }
+    </script>
+</body>
+</html>
