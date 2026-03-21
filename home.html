@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asosiy Sahifa - Profil (Bepul talqin)</title>
+    <title>Asosiy Sahifa - Profil</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body {
@@ -18,8 +18,9 @@
             background: rgba(255, 255, 255, 0.1);
             padding: 5px 15px; border-radius: 50px;
             cursor: pointer; border: 1px solid rgba(255,255,255,0.2);
-            z-index: 10;
+            z-index: 10; transition: 0.3s;
         }
+        .top-header:hover { background: rgba(255, 255, 255, 0.2); }
         .top-profile-img {
             width: 40px; height: 40px; border-radius: 50%;
             object-fit: cover; border: 2px solid #00d2ff;
@@ -29,35 +30,46 @@
         .modal {
             display: none; position: fixed; z-index: 100;
             left: 0; top: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
             align-items: center; justify-content: center;
         }
         .modal-content {
             background: #1a2a33; padding: 30px; border-radius: 20px;
             width: 90%; max-width: 400px; text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .edit-avatar-wrapper {
+            position: relative; width: 100px; height: 100px; margin: 0 auto 15px;
         }
         .edit-avatar {
             width: 100px; height: 100px; border-radius: 50%;
-            margin-bottom: 15px; border: 3px solid #00d2ff; cursor: pointer;
-            object-fit: cover;
+            border: 3px solid #00d2ff; cursor: pointer; object-fit: cover;
         }
+        .camera-icon {
+            position: absolute; bottom: 0; right: 0; background: #00d2ff;
+            width: 30px; height: 30px; border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; font-size: 14px;
+        }
+
         input[type="text"], input[type="email"] {
             width: 100%; padding: 12px; margin: 10px 0;
             border-radius: 8px; border: none; outline: none;
-            background: #2c3e50; color: white;
+            background: #2c3e50; color: white; font-size: 16px;
         }
-        input[type="email"] { background: #333; color: #888; }
+        /* Email o'zgartirib bo'lmaydigan qismi */
+        input[type="email"] { background: #121d25; color: #7f8c8d; cursor: not-allowed; }
         
         .save-btn {
-            background: #00d2ff; color: white; padding: 10px 20px;
-            border: none; border-radius: 8px; cursor: pointer; width: 100%; margin-bottom: 10px;
-            font-weight: bold;
+            background: #00d2ff; color: white; padding: 12px;
+            border: none; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 10px;
+            font-weight: bold; transition: 0.3s;
         }
         .logout-btn {
-            background: #ff4b2b; color: white; padding: 8px 15px;
+            background: #ff4b2b; color: white; padding: 12px;
             border: none; border-radius: 8px; cursor: pointer; width: 100%;
-            font-weight: bold;
+            font-weight: bold; margin-top: 10px;
         }
+        .close-link { display: block; margin-top: 15px; color: #bdc3c7; cursor: pointer; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -67,30 +79,35 @@
         <img src="https://via.placeholder.com/150" id="header-img" class="top-profile-img">
     </div>
 
-    <div style="display: flex; height: 100vh; align-items: center; justify-content: center;">
-        <h2>Xush kelibsiz!</h2>
+    <div style="display: flex; height: 100vh; align-items: center; justify-content: center; text-align: center;">
+        <div>
+            <h1>Xush kelibsiz!</h1>
+            <p style="opacity: 0.7; margin-top: 10px;">DTM Quiz tizimiga xush kelibsiz.</p>
+        </div>
     </div>
 
     <div id="editModal" class="modal">
         <div class="modal-content">
             <h3>Profilni tahrirlash</h3>
-            <label for="file-input">
-                <img src="https://via.placeholder.com/150" id="edit-preview" class="edit-avatar" title="Rasm almashtirish">
-            </label>
+            
+            <div class="edit-avatar-wrapper" onclick="document.getElementById('file-input').click()">
+                <img src="https://via.placeholder.com/150" id="edit-preview" class="edit-avatar">
+                <div class="camera-icon">📷</div>
+            </div>
             <input type="file" id="file-input" style="display: none;" accept="image/*">
             
             <input type="text" id="edit-name" placeholder="F.I.SH">
-            <input type="email" id="edit-email" readonly>
+            <input type="email" id="edit-email" readonly title="Emailni o'zgartirib bo'lmaydi">
             
             <button class="save-btn" id="btn-save" onclick="saveProfile()">SAQLASH</button>
             <button class="logout-btn" onclick="logoutUser()">CHIQUV</button>
-            <button onclick="closeModal()" style="background:none; color:white; border:none; margin-top:10px; cursor:pointer; opacity:0.6;">Yopish</button>
+            <span class="close-link" onclick="closeModal()">Yopish</span>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, updateProfile, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -108,11 +125,14 @@
 
         let currentUser = null;
 
+        // --- 1. FOYDALANUVCHI MA'LUMOTLARINI YUKLASH ---
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
+                // Firestore'dan shaxsiy ma'lumotlarni olish
                 const docSnap = await getDoc(doc(db, "users", user.uid));
-                let photoData = user.photoURL || "https://via.placeholder.com/150";
+                
+                let photoData = "https://via.placeholder.com/150";
                 let nameData = user.displayName || "Foydalanuvchi";
 
                 if (docSnap.exists()) {
@@ -120,66 +140,54 @@
                     nameData = docSnap.data().fio || nameData;
                 }
 
+                // UI ni yangilash
                 document.getElementById('header-name').innerText = nameData;
                 document.getElementById('header-img').src = photoData;
                 document.getElementById('edit-name').value = nameData;
                 document.getElementById('edit-email').value = user.email;
                 document.getElementById('edit-preview').src = photoData;
             } else {
-                // Tizimdan chiqilsa, xotirani ham tozalaymiz
-                localStorage.removeItem("user_logged_in");
-                window.location.replace("auth.html");
+                // Agar login qilmagan bo'lsa index.html ga qaytaradi
+                window.location.replace("index.html");
             }
         });
 
+        // --- 2. MODALNI BOSHQARISH ---
         window.openModal = () => document.getElementById('editModal').style.display = 'flex';
         window.closeModal = () => document.getElementById('editModal').style.display = 'none';
 
-        // --- MUHIM: CHIQISH FUNKSIYASI ---
+        // --- 3. CHIQUV FUNKSIYASI ---
         window.logoutUser = () => {
             if(confirm("Tizimdan chiqishni xohlaysizmi?")) {
                 signOut(auth).then(() => {
-                    // XOTIRADAGI MUHRNI O'CHIRISH
                     localStorage.removeItem("user_logged_in");
-                    window.location.replace("auth.html");
-                }).catch((error) => {
-                    alert("Chiqishda xatolik: " + error.message);
-                });
+                    window.location.replace("index.html");
+                }).catch((error) => alert("Xatolik: " + error.message));
             }
         };
 
+        // --- 4. PROFILNI SAQLASH (BASE64 FORMATDA) ---
         window.saveProfile = async () => {
             const newName = document.getElementById('edit-name').value;
-            const fileInput = document.getElementById('file-input');
-            const file = fileInput.files[0];
             const btn = document.getElementById('btn-save');
+            const previewImg = document.getElementById('edit-preview').src;
 
-            if(!newName) { alert("Ismni kiriting!"); return; }
+            if(!newName) return alert("F.I.SH maydonini to'ldiring!");
 
             btn.disabled = true;
             btn.innerText = "Saqlanmoqda...";
 
             try {
-                let base64Image = document.getElementById('edit-preview').src;
-                if (file) {
-                    base64Image = await new Promise((resolve, reject) => {
-                        const reader = new FileReader();
-                        reader.onload = (e) => resolve(e.target.result);
-                        reader.onerror = reject;
-                        reader.readAsDataURL(file);
-                    });
-                }
-
-                await updateProfile(auth.currentUser, { displayName: newName });
+                // Firestore-ga hamma ma'lumotni (shu jumladan rasmni matn ko'rinishida) saqlaymiz
                 await setDoc(doc(db, "users", currentUser.uid), {
                     fio: newName,
-                    photo: base64Image,
+                    photo: previewImg, // Bu yerda rasm Base64 matn ko'rinishida bo'ladi
                     email: currentUser.email,
                     updatedAt: new Date()
                 }, { merge: true });
 
                 alert("Profil muvaffaqiyatli saqlandi!");
-                location.reload();
+                location.reload(); // Sahifani yangilash
             } catch (error) {
                 alert("Xatolik: " + error.message);
                 btn.disabled = false;
@@ -187,11 +195,20 @@
             }
         };
 
+        // --- 5. TELEFONDAN RASM TANLASH ---
         document.getElementById('file-input').onchange = (e) => {
-            if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            if (file) {
+                // Rasm hajmi juda katta bo'lmasligi uchun (Firestore limiti uchun)
+                if (file.size > 1048576) { // 1MB dan oshsa
+                    alert("Rasm hajmi juda katta! Iltimos, kichikroq rasm tanlang.");
+                    return;
+                }
                 const reader = new FileReader();
-                reader.onload = () => document.getElementById('edit-preview').src = reader.result;
-                reader.readAsDataURL(e.target.files[0]);
+                reader.onload = () => {
+                    document.getElementById('edit-preview').src = reader.result;
+                };
+                reader.readAsDataURL(file);
             }
         };
     </script>
