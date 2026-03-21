@@ -87,6 +87,18 @@
         /* MAXSUS CHIQUV TUGMALARI */
         .confirm-btn-red { background: #ff4b2b; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; flex: 1; }
         .cancel-btn-grey { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 12px; border-radius: 10px; cursor: pointer; flex: 1; }
+
+        /* TOAST BILDIRISHNOMA */
+        #toast {
+            position: fixed; bottom: 30px; left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #00d2ff; color: white;
+            padding: 12px 25px; border-radius: 50px;
+            font-weight: bold; font-size: 14px;
+            box-shadow: 0 5px 15px rgba(0,210,255,0.3);
+            transition: 0.5s ease; z-index: 3000;
+        }
+        #toast.show { transform: translateX(-50%) translateY(0); }
     </style>
 </head>
 <body>
@@ -100,6 +112,8 @@
         <h1>Xush kelibsiz!</h1>
         <p style="opacity: 0.5; margin-top: 10px;">DTM Quiz tizimi siz uchun tayyor.</p>
     </div>
+
+    <div id="toast">Muvaffaqiyatli saqlandi!</div>
 
     <div id="profileModal" class="modal">
         <div class="modal-content">
@@ -182,6 +196,7 @@
         window.updateName = async () => {
             const newName = document.getElementById('input-name').value;
             const btn = document.getElementById('save-btn');
+            const toast = document.getElementById('toast');
             if(!newName) return alert("Ism kiriting!");
 
             btn.disabled = true;
@@ -193,8 +208,20 @@
                     lastUpdate: new Date()
                 }, { merge: true });
                 
-                alert("Yangilandi!");
-                location.reload();
+                // UI ni darhol yangilash
+                document.getElementById('top-name').innerText = newName;
+                document.getElementById('top-initials').innerText = newName.charAt(0).toUpperCase();
+                
+                // Toast ko'rsatish
+                toast.classList.add('show');
+                
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    toggleModal(false);
+                    btn.disabled = false;
+                    btn.innerText = "SAQLASH";
+                }, 2000);
+                
             } catch (e) {
                 alert("Xato: " + e.message);
                 btn.disabled = false;
@@ -202,9 +229,8 @@
             }
         };
 
-        // --- YANGI LOGOUT MANTIQI ---
         window.openLogoutModal = () => {
-            toggleModal(false); // Profil modalini yopish
+            toggleModal(false);
             document.getElementById('logoutModal').style.display = 'flex';
         };
 
