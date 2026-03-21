@@ -4,44 +4,82 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Xabarlarim - DTM Quiz</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        body { background: #0f2027; color: white; min-height: 100vh; padding-top: 70px; }
+        body { 
+            background: #0f2027; 
+            background: linear-gradient(to bottom, #2c5364, #203a43, #0f2027);
+            color: white; min-height: 100vh; padding-top: 80px; 
+        }
 
-        /* HEADER */
+        /* --- HEADER --- */
         .header {
-            position: fixed; top: 0; width: 100%; background: #1a2a33;
-            padding: 15px 20px; display: flex; align-items: center; gap: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3); z-index: 1000;
+            position: fixed; top: 0; width: 100%; background: rgba(26, 42, 51, 0.95);
+            backdrop-filter: blur(10px); padding: 15px 20px; 
+            display: flex; align-items: center; justify-content: space-between;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 1000;
         }
-        .back-btn { cursor: pointer; font-size: 20px; text-decoration: none; color: white; }
-
-        /* MESSAGES LIST */
-        .container { padding: 20px; max-width: 600px; margin: 0 auto; }
-        .message-card {
-            background: rgba(255, 255, 255, 0.05); border-radius: 15px;
-            padding: 15px; margin-bottom: 15px; border-left: 4px solid #00d2ff;
-            animation: slideIn 0.3s ease-out;
+        .back-btn { 
+            cursor: pointer; font-size: 22px; text-decoration: none; color: white;
+            transition: 0.3s; width: 40px; height: 40px; display: flex; 
+            align-items: center; justify-content: center; border-radius: 50%;
         }
-        .message-card.unread { border-left-color: #ff4b2b; background: rgba(255, 75, 43, 0.05); }
-        .msg-title { font-weight: bold; font-size: 16px; margin-bottom: 5px; color: #00d2ff; }
-        .msg-body { font-size: 14px; opacity: 0.9; line-height: 1.4; }
-        .msg-time { font-size: 10px; opacity: 0.5; margin-top: 10px; text-align: right; }
+        .back-btn:hover { background: rgba(255,255,255,0.1); }
 
-        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* --- CONTAINER --- */
+        .container { padding: 15px; max-width: 500px; margin: 0 auto; }
         
-        .empty-state { text-align: center; margin-top: 50px; opacity: 0.5; }
+        /* --- MESSAGE CARD --- */
+        .message-card {
+            background: rgba(255, 255, 255, 0.08); border-radius: 20px;
+            padding: 18px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.1);
+            position: relative; overflow: hidden; transition: 0.3s;
+            animation: slideUp 0.4s ease-out forwards;
+        }
+        .message-card:hover { transform: translateY(-3px); background: rgba(255, 255, 255, 0.12); }
+
+        /* Shaxsiy xabarlar (Moviy) */
+        .message-card.private { border-left: 5px solid #00d2ff; }
+        /* Umumiy xabarlar (Oltin) */
+        .message-card.public { border-left: 5px solid #ffd700; }
+
+        .msg-badge {
+            font-size: 10px; font-weight: 600; text-transform: uppercase;
+            padding: 4px 10px; border-radius: 20px; display: inline-block;
+            margin-bottom: 10px; letter-spacing: 0.5px;
+        }
+        .badge-private { background: rgba(0, 210, 255, 0.2); color: #00d2ff; }
+        .badge-public { background: rgba(255, 215, 0, 0.2); color: #ffd700; }
+
+        .msg-title { font-weight: 600; font-size: 17px; margin-bottom: 6px; display: block; }
+        .msg-body { font-size: 14px; opacity: 0.85; line-height: 1.6; white-space: pre-wrap; }
+        .msg-time { font-size: 11px; opacity: 0.4; margin-top: 15px; text-align: right; font-weight: 300; }
+
+        @keyframes slideUp { 
+            from { opacity: 0; transform: translateY(20px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        
+        .empty-state { 
+            text-align: center; margin-top: 100px; 
+            padding: 40px; border-radius: 20px; background: rgba(255,255,255,0.03);
+        }
+        .empty-icon { font-size: 50px; display: block; margin-bottom: 10px; opacity: 0.3; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <a href="home.html" class="back-btn">⬅️</a>
-        <h2>Xabarlarim</h2>
-    </div>
+        <a href="home.html" class="back-btn">⬅</a>
+        <h2 style="font-size: 18px; font-weight: 600;">Bildirishnomalar</h2>
+        <div style="width: 40px;"></div> </div>
 
     <div class="container" id="messages-container">
-        <div class="empty-state">Yuklanmoqda...</div>
+        <div class="empty-state">
+            <span class="empty-icon">⏳</span>
+            <p>Xabarlar yuklanmoqda...</p>
+        </div>
     </div>
 
     <script type="module">
@@ -71,9 +109,10 @@
         });
 
         function listenToMessages(uid) {
+            // DR. RAHMONOV: Bu yerda ham foydalanuvchining ID-si, ham "all" xabarlari olinadi
             const msgQuery = query(
                 collection(db, "messages"),
-                where("userId", "==", uid), // Faqat shu foydalanuvchiga tegishli xabarlar
+                where("userId", "in", [uid, "all"]),
                 orderBy("createdAt", "desc")
             );
 
@@ -82,23 +121,41 @@
                 container.innerHTML = "";
 
                 if (snapshot.empty) {
-                    container.innerHTML = '<div class="empty-state">Hozircha xabarlar yo‘q</div>';
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <span class="empty-icon">📭</span>
+                            <p>Hozircha xabarlar mavjud emas</p>
+                        </div>`;
                     return;
                 }
 
                 snapshot.forEach((doc) => {
                     const data = doc.data();
-                    const date = data.createdAt?.toDate().toLocaleString('uz-UZ') || "Hozir";
+                    const date = data.createdAt?.toDate().toLocaleString('uz-UZ', { 
+                        hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' 
+                    }) || "Hozir";
+                    
+                    const isPublic = data.userId === "all";
                     
                     const card = document.createElement('div');
-                    card.className = `message-card ${data.status === 'unread' ? 'unread' : ''}`;
+                    card.className = `message-card ${isPublic ? 'public' : 'private'}`;
+                    
                     card.innerHTML = `
+                        <span class="msg-badge ${isPublic ? 'badge-public' : 'badge-private'}">
+                            ${isPublic ? '📢 Tizim' : '📩 Shaxsiy'}
+                        </span>
                         <div class="msg-title">${data.title}</div>
                         <div class="msg-body">${data.text}</div>
                         <div class="msg-time">${date}</div>
                     `;
                     container.appendChild(card);
                 });
+            }, (error) => {
+                console.error("Firebase error:", error);
+                document.getElementById('messages-container').innerHTML = `
+                    <div class="empty-state" style="color: #ff4b2b;">
+                        Xabarlarni yuklashda xatolik yuz berdi.
+                    </div>`;
             });
         }
     </script>
