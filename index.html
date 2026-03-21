@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DTM Tizimi - Kirish va Ro'yxatdan o'tish</title>
+    <title>DTM Tizimi - Index</title>
     
     <style>
-        /* --- 1. DIZAYN VA SPLASH STYILLARI --- */
+        /* --- DIZAYN (Splash va Form) --- */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
 
         body {
@@ -24,7 +24,7 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* Splash ekrani (🎓) */
+        /* Splash ekrani */
         #splash-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364);
@@ -45,7 +45,7 @@
         }
         @keyframes loading { 0% { left: -100%; } 100% { left: 100%; } }
 
-        /* Login formasi (Boshida display: none) */
+        /* Login/Signup formasi containeri */
         #main-auth-container {
             display: none; width: 100%; height: 100%;
             align-items: center; justify-content: center;
@@ -100,47 +100,46 @@
       const app = initializeApp(firebaseConfig);
       const auth = getAuth(app);
 
-      // --- MUHIM: STATUS TEKSHIRUV ---
-      if (localStorage.getItem("user_logged_in") === "true") {
-          // Agar xotirada bo'lsa, splashni 3 soniya ko'rsatib homega yuboradi
+      // --- LOGIN HOLATINI TEKSHIRISH ---
+      onAuthStateChanged(auth, (user) => {
+          // Splash chiroyli ko'rinishi uchun 3 soniya kutamiz
           setTimeout(() => {
-              window.location.replace("home.html");
+              if (user) {
+                  // Agar foydalanuvchi tizimda bo'lsa
+                  localStorage.setItem("user_logged_in", "true");
+                  window.location.replace("home.html");
+              } else {
+                  // Agar kirmagan bo'lsa, splashni yopib formani ochamiz
+                  document.getElementById('splash-screen').style.display = 'none';
+                  document.getElementById('main-auth-container').style.display = 'flex';
+              }
           }, 3000);
-      } else {
-          // Xotirada bo'lmasa, Firebase javobini kutadi
-          onAuthStateChanged(auth, (user) => {
-              setTimeout(() => {
-                  if (user) {
-                      localStorage.setItem("user_logged_in", "true");
-                      window.location.replace("home.html");
-                  } else {
-                      document.getElementById('splash-screen').style.display = 'none';
-                      document.getElementById('main-auth-container').style.display = 'flex';
-                  }
-              }, 3000);
-          });
-      }
+      });
 
+      // --- ASOSIY FUNKSIYA (Kirish va Ro'yxatdan o'tish) ---
       window.handleAuth = async () => {
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
         const fullname = document.getElementById('fullname').value;
         const btn = document.getElementById('submit-btn');
-        const isLoginMode = btn.getAttribute('data-mode') === 'login';
+        const mode = btn.getAttribute('data-mode');
 
         try {
-            if (isLoginMode) {
+            if (mode === 'login') {
+                // KIRISH
                 await signInWithEmailAndPassword(auth, email, password);
                 localStorage.setItem("user_logged_in", "true");
                 window.location.replace("home.html");
             } else {
+                // RO'YXATDAN O'TISH
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                // Ismni Firebase profilga saqlash
+                
+                // Ismni Firebase profiliga qo'shish
                 await updateProfile(userCredential.user, { displayName: fullname });
                 
                 localStorage.setItem("user_logged_in", "true");
                 alert("Muvaffaqiyatli ro'yxatdan o'tdingiz!");
-                window.location.replace("home.html");
+                window.location.replace("home.html"); // BU JOYI ENDI ANIQ ISHLAYDI
             }
         } catch (error) {
             alert("Xatolik: " + error.message);
@@ -153,8 +152,8 @@
     <div id="splash-screen">
         <div class="loader-container">
             <div class="logo-icon">🎓</div>
-            <h1 style="letter-spacing: 3px;">DTM QUIZ</h1>
-            <p style="opacity: 0.6; font-size: 14px; margin-top: 5px;">Xush kelibsiz, Doktor!</p>
+            <h1 style="letter-spacing: 3px; color: white;">DTM QUIZ</h1>
+            <p style="opacity: 0.6; font-size: 14px; margin-top: 5px; color: white;">Xush kelibsiz, Doktor!</p>
             <div class="loading-bar"></div>
         </div>
     </div>
