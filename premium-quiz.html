@@ -7,7 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: #0f2027; color: white; padding: 15px; min-height: 100vh; overflow: hidden; user-select: none; }
+        body { background: #0f2027; color: white; padding: 15px; min-height: 100vh; overflow-x: hidden; user-select: none; }
 
         /* --- TOP BAR --- */
         .top-bar {
@@ -21,7 +21,7 @@
 
         .container { width: 100%; max-width: 600px; margin: 0 auto; }
 
-        /* --- MODAL (Manzil yashirilgan) --- */
+        /* --- MODAL --- */
         #custom-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.92); z-index: 9999; align-items: center; justify-content: center;
@@ -34,7 +34,7 @@
         .btn-confirm { flex: 1; padding: 12px; background: #ff4b2b; border: none; border-radius: 12px; color: white; font-weight: bold; cursor: pointer; }
         .btn-cancel { flex: 1; padding: 12px; background: #333; border: none; border-radius: 12px; color: white; font-weight: bold; cursor: pointer; }
 
-        /* --- SELECTION & QUIZ BOX --- */
+        /* --- BOXES --- */
         #selection-box, #quiz-box { background: #1a2a33; padding: 25px; border-radius: 25px; border: 1px solid rgba(255, 215, 0, 0.1); }
         .subject-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0; }
         .sub-card { 
@@ -59,7 +59,7 @@
     <div id="custom-modal">
         <div class="modal-content">
             <h3 style="color:#ffd700">Imtihonni to'xtatish?</h3>
-            <p style="margin-top:10px; font-size:14px; opacity:0.8;">Premium urinish yakunlanadi va natija saqlanmaydi.</p>
+            <p style="margin-top:10px; font-size:14px; opacity:0.8;">Chiqib ketsangiz, natijangiz saqlanmaydi.</p>
             <div class="modal-btns">
                 <button class="btn-confirm" onclick="window.location.replace('home.html')">Chiqish</button>
                 <button class="btn-cancel" onclick="closeModal()">Qolish</button>
@@ -75,14 +75,14 @@
     <div class="container">
         <div id="selection-box">
             <h2 style="color:#ffd700; margin-bottom: 5px;">Mutaxassislik</h2>
-            <p style="font-size: 12px; opacity: 0.7;">Ikkita asosiy fanni tanlang:</p>
+            <p style="font-size: 12px; opacity: 0.7;">Blok fanlaringizni tanlang (2 ta):</p>
             <div class="subject-grid" id="main-subjects"></div>
             <button class="btn-main" id="start-btn" onclick="preparePremiumQuiz()" disabled>IMTIHONNI BOSHLASH</button>
         </div>
 
         <div id="quiz-box" style="display:none;">
             <div id="display-subject" style="color:#ffd700; font-size:12px; margin-bottom:10px; font-weight:bold; text-transform: uppercase;">YUKLANMOQDA...</div>
-            <div class="question" id="q-text" style="font-size:18px; min-height:80px; margin-bottom: 20px;">...</div>
+            <div class="question" id="q-text" style="font-size:18px; min-height:80px; margin-bottom: 20px;">Savol yuklanmoqda...</div>
             <div id="options-container"></div>
             <button class="btn-main" id="next-btn" onclick="processNext()" disabled>KEYINGI SAVOL</button>
         </div>
@@ -140,13 +140,13 @@
             btn.disabled = true;
 
             const mandatory = ["Matematika", "Ona tili", "Tarix"];
+            allQuestions = []; // Tozalash
             
             try {
-                // Majburiy fanlar (3x10 = 30 savol)
+                // Majburiy fanlar
                 for(let f of mandatory) await fetchQuestions(f, 10, 1.1);
-                // Mutaxassislik 1 (30 savol)
+                // Tanlangan fanlar
                 await fetchQuestions(selectedMainSubjects[0], 30, 3.1);
-                // Mutaxassislik 2 (30 savol)
                 await fetchQuestions(selectedMainSubjects[1], 30, 2.1);
                 
                 if(allQuestions.length > 0) {
@@ -155,20 +155,22 @@
                     startTimer();
                     showQuestion();
                 } else {
-                    showToast("Premium savollar topilmadi! Bazani tekshiring.");
+                    showToast("Premium savollar topilmadi!");
                     setTimeout(() => location.reload(), 2000);
                 }
             } catch (e) {
-                showToast("Xatolik: Internetni tekshiring!");
+                showToast("Yuklashda xatolik yuz berdi.");
+                btn.disabled = false;
+                btn.innerText = "QAYTA URINISH";
             }
         };
 
         async function fetchQuestions(subject, count, ball) {
-            // MUHIM: Admin paneldagi 'Premium Testlar' nomi bilan bir xil bo'lishi shart
+            // Admin panelda "premium" deb saqlangan barcha testlarni yuklaydi
             const q = query(
                 collection(db, "quizzes"), 
                 where("subject", "==", subject), 
-                where("type", "==", "Premium Testlar"), 
+                where("type", "==", "premium"), // Admin kodi bilan moslandi
                 limit(count)
             );
             const snap = await getDocs(q);
@@ -187,7 +189,7 @@
             document.getElementById('next-btn').disabled = true;
 
             ["A", "B", "C", "D"].forEach(key => {
-                if(q.options[key]) {
+                if(q.options && q.options[key]) {
                     const div = document.createElement('div');
                     div.className = "option";
                     div.innerText = `${key}) ${q.options[key]}`;
@@ -205,8 +207,7 @@
         window.processNext = () => {
             const q = allQuestions[currentIndex];
             userAnswers.push({
-                id: q.id,
-                choice: window.currentChoice,
+                subject: q.subject,
                 isCorrect: window.currentChoice === q.correctAnswer,
                 ball: window.currentChoice === q.correctAnswer ? q.ball : 0
             });
@@ -215,28 +216,20 @@
             if(currentIndex < allQuestions.length) {
                 showQuestion();
             } else {
-                finishQuiz();
+                localStorage.setItem('premiumResult', JSON.stringify(userAnswers));
+                window.location.replace('result.html');
             }
         };
 
-        function finishQuiz() {
-            // Natijalarni vaqtinchalik saqlash (Natija sahifasi uchun)
-            localStorage.setItem('lastQuizResult', JSON.stringify(userAnswers));
-            window.location.replace('result.html');
-        }
-
         function startTimer() {
-            const display = document.getElementById('timer-display');
             const timer = setInterval(() => {
                 let m = Math.floor(timeLeft / 60);
                 let s = timeLeft % 60;
-                display.innerText = `${m}:${s < 10 ? '0'+s : s}`;
-                
-                if (timeLeft <= 0) {
+                document.getElementById('timer-display').innerText = `${m}:${s < 10 ? '0'+s : s}`;
+                if (timeLeft-- <= 0) {
                     clearInterval(timer);
-                    finishQuiz();
+                    window.location.replace('result.html');
                 }
-                timeLeft--;
             }, 1000);
         }
 
