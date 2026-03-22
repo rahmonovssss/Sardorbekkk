@@ -159,7 +159,7 @@
                     const data = userDoc.data();
                     document.getElementById('top-name').innerText = data.fio || "Foydalanuvchi";
                     document.getElementById('top-initials').innerText = (data.fio || "U").charAt(0).toUpperCase();
-                    document.getElementById('user-balance').innerText = (data.balance || 0).toLocaleString() + " so'm";
+                    document.getElementById('user-balance').innerText = (data.balance || 100000).toLocaleString() + " so'm";
                     document.getElementById('notif-count').innerText = data.notifCount || 0;
                     document.getElementById('input-name').value = data.fio || "";
                 }
