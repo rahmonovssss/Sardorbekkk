@@ -3,103 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Asosiy Sahifa - DTM Quiz</title>
+    <title>Asosiy Sahifa - Dr. Rahmonov</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; -webkit-tap-highlight-color: transparent; }
-        
         body { height: 100vh; background: #0f2027; color: white; overflow-x: hidden; }
 
-        /* --- 1. HEADER --- */
+        /* --- HEADER --- */
         .header {
             position: fixed; top: 0; left: 0; width: 100%; 
             padding: 15px 20px; display: flex; justify-content: space-between; 
             align-items: center; background: rgba(15, 32, 39, 0.95); 
-            backdrop-filter: blur(10px); z-index: 1000;
+            backdrop-filter: blur(10px); z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.05);
         }
-
         .notif-btn {
             width: 42px; height: 42px; background: rgba(255, 255, 255, 0.08);
-            border-radius: 50%; display: flex; align-items: center; 
-            justify-content: center; cursor: pointer; position: relative;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative;
         }
         .notif-badge {
             position: absolute; top: -2px; right: -2px; background: #ff4b2b;
-            color: white; font-size: 10px; padding: 2px 6px; 
-            border-radius: 50%; border: 2px solid #0f2027;
+            color: white; font-size: 10px; padding: 2px 6px; border-radius: 50%; border: 2px solid #0f2027;
         }
-
         .top-profile-container {
-            display: flex; align-items: center; gap: 10px;
-            background: rgba(255, 255, 255, 0.08); padding: 5px 12px; 
-            border-radius: 50px; border: 1px solid rgba(255, 255, 255, 0.1);
-            cursor: pointer;
+            display: flex; align-items: center; gap: 10px; background: rgba(255, 255, 255, 0.08); 
+            padding: 5px 12px; border-radius: 50px; cursor: pointer;
         }
-
         .mini-avatar {
-            width: 32px; height: 32px; background: #00d2ff;
-            border-radius: 50%; display: flex; align-items: center; 
-            justify-content: center; font-weight: 600; font-size: 15px;
+            width: 32px; height: 32px; background: #00d2ff; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; font-weight: 600;
         }
 
-        /* --- 2. ASOSIY KONTENT --- */
-        .main-content {
-            padding: 90px 20px 30px; text-align: center;
-            max-width: 600px; margin: 0 auto;
-        }
-
+        /* --- CONTENT --- */
+        .main-content { padding: 100px 20px 30px; max-width: 600px; margin: 0 auto; text-align: center; }
+        
         .balance-card {
             background: linear-gradient(135deg, #00d2ff, #3a7bd5);
-            padding: 25px; border-radius: 25px; margin-bottom: 25px;
-            text-align: left; box-shadow: 0 10px 25px rgba(0, 210, 255, 0.25);
+            padding: 25px; border-radius: 25px; margin-bottom: 25px; text-align: left;
+            box-shadow: 0 10px 25px rgba(0, 210, 255, 0.2);
         }
-        .balance-card h3 { font-size: 13px; opacity: 0.8; font-weight: 400; }
-        .balance-card h1 { font-size: 36px; margin: 8px 0; }
+        .balance-card h3 { font-size: 13px; opacity: 0.8; }
+        .balance-card h1 { font-size: 32px; margin: 5px 0; }
 
         .grid-menu { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
-
         .menu-item {
             background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08);
-            padding: 25px 15px; border-radius: 22px; transition: 0.3s; cursor: pointer;
-            display: flex; flex-direction: column; align-items: center; gap: 12px;
+            padding: 25px 15px; border-radius: 22px; cursor: pointer; transition: 0.3s;
+            display: flex; flex-direction: column; align-items: center; gap: 10px;
         }
         .menu-item:active { transform: scale(0.95); background: rgba(0, 210, 255, 0.1); }
-        .menu-item i { font-size: 32px; font-style: normal; }
-        .premium { border-color: rgba(255, 215, 0, 0.4) !important; color: #ffd700; }
+        .menu-item i { font-size: 30px; font-style: normal; }
+        .premium { border: 1px solid #ffd700 !important; color: #ffd700; }
 
-        /* --- 3. MODALLAR --- */
+        /* --- MODALS --- */
         .modal {
-            display: none; position: fixed; top: 0; left: 0; 
-            width: 100%; height: 100%; background: rgba(0,0,0,0.85);
-            align-items: center; justify-content: center; z-index: 2000;
-            backdrop-filter: blur(5px);
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 2000;
         }
-        .modal-content {
-            background: #1a2a33; padding: 30px; border-radius: 25px;
-            width: 90%; max-width: 350px; text-align: center;
-        }
-        .edit-input {
-            width: 100%; padding: 14px; background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.15); border-radius: 12px;
-            color: white; margin-bottom: 15px; outline: none; text-align: center;
-        }
-        .btn-update {
-            width: 100%; padding: 14px; background: #00d2ff;
-            border: none; border-radius: 12px; color: white; font-weight: 600; cursor: pointer;
-        }
-        .btn-logout {
-            width: 100%; margin-top: 10px; padding: 12px; background: transparent; 
-            border: 1px solid #ff4b2b; color: #ff4b2b; border-radius: 12px; font-weight: 600; cursor: pointer;
-        }
+        .modal-content { background: #1a2a33; padding: 25px; border-radius: 25px; width: 90%; max-width: 350px; text-align: center; }
+        .edit-input { width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: white; margin-bottom: 15px; outline: none; }
+        .btn-update { width: 100%; padding: 12px; background: #00d2ff; border: none; border-radius: 10px; color: white; font-weight: 600; cursor: pointer; }
+        .btn-logout { width: 100%; margin-top: 10px; padding: 12px; background: transparent; border: 1px solid #ff4b2b; color: #ff4b2b; border-radius: 10px; cursor: pointer; }
 
-        /* --- 4. TOAST (Xatosiz variant) --- */
+        /* --- TOAST --- */
         #toast {
-            position: fixed; bottom: -100px; left: 50%;
-            transform: translateX(-50%);
-            background: #ffd700; color: #000; padding: 14px 28px;
-            border-radius: 50px; transition: bottom 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-            z-index: 3000; font-weight: 600; box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+            position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%);
+            background: #ffd700; color: #000; padding: 12px 25px; border-radius: 50px;
+            transition: 0.5s; z-index: 3000; font-weight: 600; font-size: 14px;
         }
         #toast.show { bottom: 40px; }
     </style>
@@ -120,7 +89,7 @@
         <div class="balance-card">
             <h3>Mening balansim</h3>
             <h1 id="user-balance">0 so'm</h1>
-            <p style="font-size: 12px; cursor: pointer; margin-top: 10px;" onclick="showToast('To\'lov tizimi tez kunda...')">💳 To'ldirish</p>
+            <p style="font-size: 12px; cursor: pointer; margin-top: 10px; text-decoration: underline;" onclick="showToast('To\'lov tizimi tez kunda...')">💳 Balansni to'ldirish</p>
         </div>
 
         <div class="grid-menu">
@@ -133,7 +102,7 @@
             <div class="menu-item" onclick="location.href='messages.html'">
                 <i>✉️</i><span>Xabarlarim</span>
             </div>
-            <div class="menu-item" onclick="location.href='https://t.me/Sardorbek_Rahmonov'">
+            <div class="menu-item" onclick="window.open('https://t.me/Sardorbek_Rahmonov', '_blank')">
                 <i>🎧</i><span>Yordam</span>
             </div>
         </div>
@@ -143,21 +112,21 @@
 
     <div id="profileModal" class="modal">
         <div class="modal-content">
-            <h3 style="color:#ffd700; margin-bottom:15px;">Profil Sozlamalari</h3>
-            <input type="text" id="input-name" class="edit-input">
+            <h3 style="color:#ffd700; margin-bottom:15px;">Profil</h3>
+            <input type="text" id="input-name" class="edit-input" placeholder="FIO kiriting">
             <button class="btn-update" onclick="updateName()">SAQLASH</button>
-            <button class="btn-logout" onclick="openLogoutModal()">🚪 TIZIMDAN CHIQISH</button>
-            <p onclick="toggleModal(false)" style="margin-top:20px; cursor:pointer; font-size:13px; opacity:0.6;">Yopish</p>
+            <button class="btn-logout" onclick="openLogoutModal()">🚪 CHIQISH</button>
+            <p onclick="toggleModal(false)" style="margin-top:15px; cursor:pointer; font-size:12px; opacity:0.5;">Yopish</p>
         </div>
     </div>
 
     <div id="logoutModal" class="modal">
-        <div class="modal-content" style="border-top: 4px solid #ff4b2b;">
-            <h3>Chiqish</h3>
-            <p style="margin: 20px 0; opacity:0.8;">Haqiqatan ham chiqmoqchimisiz?</p>
+        <div class="modal-content">
+            <h3>Tizimdan chiqish?</h3>
+            <p style="margin: 15px 0; opacity:0.7; font-size:14px;">Haqiqatan ham chiqmoqchimisiz?</p>
             <div style="display:flex; gap:10px;">
-                <button onclick="closeLogoutModal()" style="flex:1; padding:12px; border-radius:10px; border:none; background:#eee;">YO'Q</button>
-                <button onclick="confirmLogout()" style="flex:1; padding:12px; border-radius:10px; border:none; background:#ff4b2b; color:white; font-weight:600;">HA</button>
+                <button onclick="closeLogoutModal()" style="flex:1; padding:10px; border-radius:10px; border:none; background:#333; color:white;">YO'Q</button>
+                <button onclick="confirmLogout()" style="flex:1; padding:10px; border-radius:10px; border:none; background:#ff4b2b; color:white; font-weight:bold;">HA</button>
             </div>
         </div>
     </div>
@@ -165,7 +134,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2G8cD0JezEKXRCtKLYiZL0bzDyTp06Vs",
@@ -179,22 +148,41 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        let userUid = null;
+        let currentUser = null;
 
+        // Ma'lumotlarni yuklash
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                userUid = user.uid;
-                const docSnap = await getDoc(doc(db, "users", user.uid));
-                if (docSnap.exists()) {
-                    const d = docSnap.data();
-                    document.getElementById('top-name').innerText = d.fio || "Foydalanuvchi";
-                    document.getElementById('top-initials').innerText = (d.fio || "F").charAt(0).toUpperCase();
-                    document.getElementById('user-balance').innerText = (d.balance || 0).toLocaleString() + " so'm";
-                    document.getElementById('notif-count').innerText = d.notifCount || 0;
-                    document.getElementById('input-name').value = d.fio || "";
+                currentUser = user;
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (userDoc.exists()) {
+                    const data = userDoc.data();
+                    document.getElementById('top-name').innerText = data.fio || "Foydalanuvchi";
+                    document.getElementById('top-initials').innerText = (data.fio || "U").charAt(0).toUpperCase();
+                    document.getElementById('user-balance').innerText = (data.balance || 0).toLocaleString() + " so'm";
+                    document.getElementById('notif-count').innerText = data.notifCount || 0;
+                    document.getElementById('input-name').value = data.fio || "";
                 }
-            } else { window.location.href = "index.html"; }
+            } else { window.location.replace("index.html"); }
         });
+
+        // Testni boshlash logikasi
+        window.startQuiz = (type) => {
+            if (type === 'free') {
+                showToast("Bepul testlar yuklanmoqda...");
+                setTimeout(() => window.location.href = "quiz.html", 1200);
+            } else {
+                const balanceStr = document.getElementById('user-balance').innerText;
+                const balance = parseInt(balanceStr.replace(/\D/g, '')) || 0;
+
+                if (balance < 2000) {
+                    showToast("Balans yetarli emas (Min. 2000 so'm) 💳");
+                } else {
+                    showToast("Premium test yuklanmoqda... 💎");
+                    setTimeout(() => window.location.href = "premium-quiz.html", 1200);
+                }
+            }
+        };
 
         window.showToast = (text) => {
             const t = document.getElementById('toast');
@@ -206,22 +194,16 @@
         window.openLogoutModal = () => { toggleModal(false); document.getElementById('logoutModal').style.display = 'flex'; };
         window.closeLogoutModal = () => document.getElementById('logoutModal').style.display = 'none';
 
-        window.confirmLogout = async () => {
-            await signOut(auth);
-            window.location.href = "index.html";
-        };
+        window.confirmLogout = async () => { await signOut(auth); window.location.replace("index.html"); };
 
         window.updateName = async () => {
-            const n = document.getElementById('input-name').value;
-            if(!n) return;
-            await setDoc(doc(db, "users", userUid), { fio: n }, { merge: true });
-            showToast("Profil yangilandi!");
-            setTimeout(() => location.reload(), 1000);
-        };
-
-        window.startQuiz = (type) => {
-            showToast(type === 'free' ? "Bepul testlar yuklanmoqda..." : "Premium test tekshirilmoqda...");
-            setTimeout(() => window.location.href = `quiz.html?type=${type}`, 1500);
+            const newName = document.getElementById('input-name').value;
+            if(!newName || !currentUser) return;
+            try {
+                await updateDoc(doc(db, "users", currentUser.uid), { fio: newName });
+                showToast("Ism muvaffaqiyatli o'zgartirildi!");
+                setTimeout(() => location.reload(), 1000);
+            } catch(e) { showToast("Xatolik yuz berdi!"); }
         };
     </script>
 </body>
