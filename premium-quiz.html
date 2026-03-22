@@ -88,7 +88,6 @@
 
         <div id="subject-dashboard">
             <h3 style="color:#ffd700; margin-bottom: 5px;">Fanlar ro'yxati</h3>
-            <p style="font-size: 12px; opacity: 0.7;">Fanlarni ixtiyoriy tartibda ishlashingiz mumkin:</p>
             <div class="dashboard-grid" id="dashboard-items"></div>
             <button class="btn-main" id="final-submit-btn" style="display:none; background:#00ff00;" onclick="submitAll()">NATIJANI KO'RISH</button>
         </div>
@@ -119,18 +118,20 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // MODAL FUNKSIYALARI
         window.openModal = () => document.getElementById('custom-modal').style.display = 'flex';
         window.closeModal = () => document.getElementById('custom-modal').style.display = 'none';
-        window.exitToHome = () => window.location.replace('home.html');
+        window.exitToHome = () => {
+            localStorage.removeItem('exam_end_time');
+            window.location.replace('home.html');
+        };
 
         let selectedSubjects = [];
         let allExamData = {};
         let examStatus = {};
         let currentSubject = "";
         let currentQIndex = 0;
-        let timeLeft = 90 * 60; // 90 minutga o'zgartirildi
         let userResults = [];
+        let timerInterval;
 
         const subjectsList = ["Matematika", "Ona tili", "Tarix", "Kimyo", "Biologiya", "Ingiliz tili", "Huquq", "Geografiya", "Fizika"];
 
@@ -175,13 +176,37 @@
 
                 document.getElementById('selection-box').style.display = 'none';
                 document.getElementById('top-nav').style.display = 'flex';
+                
+                startRealtimeTimer();
                 renderDashboard();
-                startTimer();
             } catch (e) {
-                alert("Internet xatosi!");
+                alert("Xato!");
                 location.reload();
             }
         };
+
+        function startRealtimeTimer() {
+            let endTime = localStorage.getItem('exam_end_time');
+            if (!endTime) {
+                endTime = Date.now() + (90 * 60 * 1000);
+                localStorage.setItem('exam_end_time', endTime);
+            }
+
+            timerInterval = setInterval(() => {
+                const now = Date.now();
+                const distance = endTime - now;
+
+                if (distance <= 0) {
+                    clearInterval(timerInterval);
+                    localStorage.removeItem('exam_end_time');
+                    submitAll();
+                } else {
+                    const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                    const s = Math.floor((distance % (1000 * 60)) / 1000);
+                    document.getElementById('timer-display').innerText = `${m}:${s < 10 ? '0'+s : s}`;
+                }
+            }, 1000);
+        }
 
         function renderDashboard() {
             document.getElementById('subject-dashboard').style.display = 'block';
@@ -193,20 +218,12 @@
             Object.keys(allExamData).forEach(name => {
                 const isDone = examStatus[name];
                 if(!isDone) allDone = false;
-
                 const card = document.createElement('div');
                 card.className = `subject-status-card ${isDone ? 'completed' : ''}`;
-                card.innerHTML = `
-                    <div>
-                        <div class="subject-name">${name}</div>
-                        <div style="font-size:12px; opacity:0.6;">${allExamData[name].length} ta savol</div>
-                    </div>
-                    <span class="status-badge ${isDone ? 'badge-done' : 'badge-wait'}">${isDone ? 'TAMOM' : 'BOSHLASH'}</span>
-                `;
+                card.innerHTML = `<div><div class="subject-name">${name}</div></div><span class="status-badge ${isDone ? 'badge-done' : 'badge-wait'}">${isDone ? 'TAMOM' : 'BOSHLASH'}</span>`;
                 if(!isDone) card.onclick = () => startSubject(name);
                 container.appendChild(card);
             });
-
             if(allDone) document.getElementById('final-submit-btn').style.display = 'block';
         }
 
@@ -221,11 +238,9 @@
         function showQuestion() {
             const questions = allExamData[currentSubject];
             const q = questions[currentQIndex];
-
             document.getElementById('current-subject-name').innerText = currentSubject;
             document.getElementById('q-counter').innerText = `${currentQIndex + 1} / ${questions.length}`;
             document.getElementById('q-text').innerText = q.question;
-
             const optContainer = document.getElementById('options-container');
             optContainer.innerHTML = "";
             document.getElementById('next-btn').disabled = true;
@@ -247,35 +262,19 @@
         window.nextQuestion = () => {
             const questions = allExamData[currentSubject];
             const q = questions[currentQIndex];
-
             userResults.push({
                 subject: q.subject,
                 isCorrect: window.userChoice === q.correctAnswer,
                 ball: window.userChoice === q.correctAnswer ? q.ball : 0
             });
-
             currentQIndex++;
-            if(currentQIndex < questions.length) {
-                showQuestion();
-            } else {
-                examStatus[currentSubject] = true;
-                renderDashboard();
-            }
+            if(currentQIndex < questions.length) showQuestion();
+            else { examStatus[currentSubject] = true; renderDashboard(); }
         };
 
-        function startTimer() {
-            const timer = setInterval(() => {
-                let m = Math.floor(timeLeft / 60);
-                let s = timeLeft % 60;
-                document.getElementById('timer-display').innerText = `${m}:${s < 10 ? '0'+s : s}`;
-                if (timeLeft-- <= 0) {
-                    clearInterval(timer);
-                    submitAll();
-                }
-            }, 1000);
-        }
-
         window.submitAll = () => {
+            clearInterval(timerInterval);
+            localStorage.removeItem('exam_end_time');
             localStorage.setItem('premiumResult', JSON.stringify(userResults));
             window.location.replace('result.html');
         };
