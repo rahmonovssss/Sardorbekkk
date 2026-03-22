@@ -21,6 +21,19 @@
 
         .container { max-width: 600px; margin: 0 auto; }
 
+        /* --- MODAL STYLE --- */
+        #custom-modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 9999; align-items: center; justify-content: center;
+        }
+        .modal-content {
+            background: #1a2a33; padding: 30px; border-radius: 25px; text-align: center;
+            width: 85%; max-width: 380px; border: 1px solid #00d2ff;
+        }
+        .modal-btns { display: flex; gap: 10px; margin-top: 25px; }
+        .btn-confirm { flex: 1; padding: 12px; background: #ff4b2b; border: none; border-radius: 12px; color: white; font-weight: bold; cursor: pointer; }
+        .btn-cancel { flex: 1; padding: 12px; background: #333; border: none; border-radius: 12px; color: white; font-weight: bold; cursor: pointer; }
+
         /* --- DASHBOARD --- */
         #subject-dashboard { display: none; }
         .dashboard-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-top: 20px; }
@@ -49,8 +62,19 @@
 </head>
 <body>
 
+    <div id="custom-modal">
+        <div class="modal-content">
+            <h3 style="color:#00d2ff">Testni to'xtatish?</h3>
+            <p style="margin-top:10px; font-size:14px; opacity:0.8;">Chiqib ketsangiz natijangiz saqlanmaydi.</p>
+            <div class="modal-btns">
+                <button class="btn-confirm" onclick="window.location.replace('home.html')">Chiqish</button>
+                <button class="btn-cancel" onclick="closeModal()">Qolish</button>
+            </div>
+        </div>
+    </div>
+
     <div class="top-bar" id="top-nav" style="display:none;">
-        <button class="exit-btn" onclick="location.href='home.html'">Tugatish</button>
+        <button class="exit-btn" onclick="openModal()">✖ Chiqish</button>
         <div class="timer" id="timer-display">90:00</div>
     </div>
 
@@ -81,6 +105,7 @@
     </div>
 
     <script type="module">
+        // ... (Firebase importlari va config o'zgarishsiz)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, getDocs, query, where, limit } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
@@ -94,6 +119,15 @@
         };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+
+        // MODAL FUNKSIYALARI
+        window.openModal = () => document.getElementById('custom-modal').style.display = 'flex';
+        window.closeModal = () => document.getElementById('custom-modal').style.display = 'none';
+
+        // TASODIFAN "ORQAGA" BOSILSA OGOHLANTIRISH
+        window.onbeforeunload = function() {
+            return "Test jarayoni to'xtatiladi. Rostdan ham chiqmoqchimisiz?";
+        };
 
         let selectedSubjects = [];
         let allExamData = {};
@@ -245,6 +279,7 @@
         }
 
         window.submitAll = () => {
+            window.onbeforeunload = null; // Sahifadan chiqishda ogohlantirishni o'chirish
             localStorage.setItem('freeResult', JSON.stringify(userResults));
             window.location.replace('result.html');
         };
