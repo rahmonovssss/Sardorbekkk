@@ -17,11 +17,11 @@
             border-bottom: 2px solid #00d2ff; margin-bottom: 20px;
         }
         .timer { color: #00d2ff; font-size: 18px; font-weight: 700; }
-        .exit-btn { background: rgba(255, 75, 43, 0.1); color: #ff4b2b; border: 1px solid #ff4b2b; padding: 5px 12px; border-radius: 8px; cursor: pointer; }
+        .exit-btn { background: rgba(255, 75, 43, 0.1); color: #ff4b2b; border: 1px solid #ff4b2b; padding: 5px 12px; border-radius: 8px; cursor: pointer; font-weight: 600; }
 
         .container { max-width: 600px; margin: 0 auto; }
 
-        /* --- MODAL STYLE --- */
+        /* --- MAXSUS MODAL --- */
         #custom-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.9); z-index: 9999; align-items: center; justify-content: center;
@@ -50,13 +50,13 @@
 
         /* --- QUIZ BOX --- */
         #quiz-box { display: none; background: #1a2a33; padding: 25px; border-radius: 25px; border: 1px solid rgba(0, 210, 255, 0.1); }
-        .option { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 15px; cursor: pointer; margin-bottom: 12px; }
+        .option { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 15px; cursor: pointer; margin-bottom: 12px; transition: 0.2s; }
         .option.selected { background: #00d2ff; color: #000; font-weight: bold; border-color: #00d2ff; }
         
         .btn-main { width: 100%; padding: 18px; border-radius: 15px; border: none; background: #00d2ff; color: #000; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .btn-main:disabled { opacity: 0.3; }
 
-        .sub-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 15px; border-radius: 12px; cursor: pointer; text-align: center; }
+        .sub-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 15px; border-radius: 12px; cursor: pointer; text-align: center; font-size: 13px; }
         .sub-card.selected { border-color: #00d2ff; background: rgba(0, 210, 255, 0.1); color: #00d2ff; }
     </style>
 </head>
@@ -67,7 +67,7 @@
             <h3 style="color:#00d2ff">Testni to'xtatish?</h3>
             <p style="margin-top:10px; font-size:14px; opacity:0.8;">Chiqib ketsangiz natijangiz saqlanmaydi.</p>
             <div class="modal-btns">
-                <button class="btn-confirm" onclick="window.location.replace('home.html')">Chiqish</button>
+                <button class="btn-confirm" onclick="exitToHome()">Chiqish</button>
                 <button class="btn-cancel" onclick="closeModal()">Qolish</button>
             </div>
         </div>
@@ -105,7 +105,6 @@
     </div>
 
     <script type="module">
-        // ... (Firebase importlari va config o'zgarishsiz)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, getDocs, query, where, limit } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
@@ -123,11 +122,7 @@
         // MODAL FUNKSIYALARI
         window.openModal = () => document.getElementById('custom-modal').style.display = 'flex';
         window.closeModal = () => document.getElementById('custom-modal').style.display = 'none';
-
-        // TASODIFAN "ORQAGA" BOSILSA OGOHLANTIRISH
-        window.onbeforeunload = function() {
-            return "Test jarayoni to'xtatiladi. Rostdan ham chiqmoqchimisiz?";
-        };
+        window.exitToHome = () => window.location.replace('home.html');
 
         let selectedSubjects = [];
         let allExamData = {};
@@ -139,6 +134,7 @@
 
         const subjectsList = ["Matematika", "Ona tili", "Tarix", "Kimyo", "Biologiya", "Ingiliz tili", "Huquq", "Geografiya", "Fizika"];
 
+        // Fanlarni ro'yxatga chiqarish
         const listDiv = document.getElementById('main-subjects-list');
         subjectsList.forEach(s => {
             const d = document.createElement('div');
@@ -174,7 +170,6 @@
                     const snap = await getDocs(q);
                     let questions = [];
                     snap.forEach(doc => questions.push({...doc.data(), id: doc.id, ball: item.ball}));
-                    
                     allExamData[item.name] = questions;
                     examStatus[item.name] = false;
                 }
@@ -184,7 +179,7 @@
                 renderDashboard();
                 startTimer();
             } catch (e) {
-                alert("Xatolik: Internet aloqasini tekshiring!");
+                alert("Internet xatosi yuz berdi!");
                 location.reload();
             }
         };
@@ -270,16 +265,18 @@
         };
 
         function startTimer() {
-            setInterval(() => {
+            const timer = setInterval(() => {
                 let m = Math.floor(timeLeft / 60);
                 let s = timeLeft % 60;
                 document.getElementById('timer-display').innerText = `${m}:${s < 10 ? '0'+s : s}`;
-                if (timeLeft-- <= 0) submitAll();
+                if (timeLeft-- <= 0) {
+                    clearInterval(timer);
+                    submitAll();
+                }
             }, 1000);
         }
 
         window.submitAll = () => {
-            window.onbeforeunload = null; // Sahifadan chiqishda ogohlantirishni o'chirish
             localStorage.setItem('freeResult', JSON.stringify(userResults));
             window.location.replace('result.html');
         };
