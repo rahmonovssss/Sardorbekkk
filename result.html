@@ -7,26 +7,29 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        body { background: #0f2027; color: white; padding: 20px; min-height: 100vh; text-align: center; }
+        body { background: #0f2027; color: white; padding: 20px; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
         
-        .result-container { max-width: 500px; margin: 0 auto; background: #1a2a33; padding: 30px; border-radius: 25px; border: 1px solid #ffd700; }
-        .score-big { font-size: 48px; font-weight: 700; color: #ffd700; margin: 15px 0; }
+        .result-container { width: 100%; max-width: 500px; background: #1a2a33; padding: 30px; border-radius: 25px; border: 1px solid #ffd700; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; }
+        .score-big { font-size: 56px; font-weight: 700; color: #ffd700; margin: 10px 0; text-shadow: 0 0 15px rgba(255,215,0,0.3); }
+        .max-score { font-size: 16px; opacity: 0.6; margin-bottom: 25px; }
         
-        .stats-table { width: 100%; margin-top: 20px; border-collapse: collapse; }
-        .stats-table th, .stats-table td { padding: 12px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 14px; }
-        .stats-table th { color: #ffd700; }
+        .stats-table { width: 100%; margin-top: 10px; border-collapse: collapse; background: rgba(255,255,255,0.02); border-radius: 15px; overflow: hidden; }
+        .stats-table th, .stats-table td { padding: 15px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; }
+        .stats-table th { color: #ffd700; background: rgba(255,215,0,0.05); text-transform: uppercase; letter-spacing: 1px; }
 
-        .btn-home { display: block; width: 100%; padding: 15px; margin-top: 25px; background: #ffd700; color: #000; text-decoration: none; border-radius: 12px; font-weight: bold; }
-        .correct { color: #00ff00; }
-        .wrong { color: #ff4b2b; }
+        .btn-home { display: block; width: 100%; padding: 16px; margin-top: 30px; background: #ffd700; color: #000; text-decoration: none; border-radius: 15px; font-weight: bold; transition: 0.3s; }
+        .btn-home:active { transform: scale(0.98); }
+        
+        .correct-val { color: #00ff00; font-weight: 600; }
+        .ball-val { color: #fff; font-weight: 600; }
     </style>
 </head>
 <body>
 
     <div class="result-container">
-        <h2 style="color: #ffd700;">Imtihon Yakunlandi</h2>
-        <p style="opacity: 0.8; font-size: 13px;">Umumiy to'plangan ball:</p>
+        <h2 style="color: #ffd700; letter-spacing: 1px;">IMTIHON NATIJASI</h2>
         <div class="score-big" id="total-score">0.0</div>
+        <div class="max-score">Umumiy ball (Maksimal: 189.0)</div>
 
         <table class="stats-table">
             <thead>
@@ -40,21 +43,22 @@
                 </tbody>
         </table>
 
-        <a href="home.html" class="btn-home">BOSH SAHIFAGA QAYTISH</a>
+        <a href="home.html" class="btn-home">ASOSIY MENYUGA QAYTISH</a>
     </div>
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
+            // LocalStorage dan ma'lumotni olish
             const results = JSON.parse(localStorage.getItem('premiumResult') || "[]");
             const statsBody = document.getElementById('stats-body');
             const totalScoreElem = document.getElementById('total-score');
 
             if (results.length === 0) {
-                statsBody.innerHTML = "<tr><td colspan='3'>Ma'lumot topilmadi</td></tr>";
+                statsBody.innerHTML = "<tr><td colspan='3' style='text-align:center'>Natijalar topilmadi</td></tr>";
                 return;
             }
 
-            // Fanlar bo'yicha guruhlash
+            // Fanlar bo'yicha guruhlash va hisoblash
             const summary = {};
             let totalBall = 0;
 
@@ -64,22 +68,24 @@
                 }
                 if (res.isCorrect) {
                     summary[res.subject].correct += 1;
+                    // res.ball qiymati asosiy sahifadan 1.1, 2.1 yoki 3.1 bo'lib keladi
                     summary[res.subject].score += res.ball;
                     totalBall += res.ball;
                 }
             });
 
-            // Jadvalni to'ldirish
-            for (const sub in summary) {
+            // Jadvalni chiroyli ko'rinishda to'ldirish
+            Object.keys(summary).forEach(subject => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${sub}</td>
-                    <td class="correct">${summary[sub].correct} ta</td>
-                    <td>${summary[sub].score.toFixed(1)}</td>
+                    <td>${subject}</td>
+                    <td class="correct-val">${summary[subject].correct} ta</td>
+                    <td class="ball-val">${summary[subject].score.toFixed(1)}</td>
                 `;
                 statsBody.appendChild(row);
-            }
+            });
 
+            // Yakuniy ballni chiqarish (Maksimal 189.0 bo'lishi tekshirildi)
             totalScoreElem.innerText = totalBall.toFixed(1);
         });
     </script>
