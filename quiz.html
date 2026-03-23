@@ -34,30 +34,38 @@
         .btn-confirm { flex: 1; padding: 12px; background: #ff4b2b; border: none; border-radius: 12px; color: white; font-weight: bold; cursor: pointer; }
         .btn-cancel { flex: 1; padding: 12px; background: #333; border: none; border-radius: 12px; color: white; font-weight: bold; cursor: pointer; }
 
+        /* --- SELECTION BOX --- */
+        .sub-card { 
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); 
+            padding: 15px; border-radius: 12px; cursor: pointer; text-align: center; 
+            font-size: 14px; position: relative; transition: 0.2s;
+        }
+        .sub-card.selected { border-color: #00d2ff; background: rgba(0, 210, 255, 0.1); color: #00d2ff; font-weight: 600; }
+        .block-label { 
+            position: absolute; top: -8px; right: -5px; background: #00d2ff; color: #000; 
+            font-size: 10px; padding: 2px 6px; border-radius: 5px; font-weight: 800; display: none;
+        }
+        .sub-card.selected .block-label { display: block; }
+
         /* --- DASHBOARD --- */
         #subject-dashboard { display: none; }
         .dashboard-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-top: 20px; }
         .subject-status-card {
             background: #1a2a33; padding: 20px; border-radius: 18px; border: 1px solid rgba(255,255,255,0.1);
-            display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.3s;
+            display: flex; justify-content: space-between; align-items: center; cursor: pointer;
         }
         .subject-status-card.completed { opacity: 0.6; border-color: #00ff00; pointer-events: none; }
-        .subject-status-card.active { border-color: #00d2ff; background: rgba(0, 210, 255, 0.05); }
-        .subject-name { font-weight: 600; font-size: 15px; }
         .status-badge { padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: bold; }
         .badge-wait { background: #444; color: #ccc; }
         .badge-done { background: #00ff00; color: #000; }
 
         /* --- QUIZ BOX --- */
         #quiz-box { display: none; background: #1a2a33; padding: 25px; border-radius: 25px; border: 1px solid rgba(0, 210, 255, 0.1); }
-        .option { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 15px; cursor: pointer; margin-bottom: 12px; transition: 0.2s; }
+        .option { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 15px; cursor: pointer; margin-bottom: 12px; }
         .option.selected { background: #00d2ff; color: #000; font-weight: bold; border-color: #00d2ff; }
         
         .btn-main { width: 100%; padding: 18px; border-radius: 15px; border: none; background: #00d2ff; color: #000; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .btn-main:disabled { opacity: 0.3; }
-
-        .sub-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 15px; border-radius: 12px; cursor: pointer; text-align: center; font-size: 13px; }
-        .sub-card.selected { border-color: #00d2ff; background: rgba(0, 210, 255, 0.1); color: #00d2ff; }
     </style>
 </head>
 <body>
@@ -80,15 +88,20 @@
 
     <div class="container">
         <div id="selection-box">
-            <h2 style="color:#00d2ff; margin-bottom: 10px;">Bepul Blokli Test</h2>
-            <p style="font-size: 13px; opacity: 0.7; margin-bottom: 20px;">2 ta mutaxassislik fanini tanlang:</p>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;" id="main-subjects-list"></div>
-            <button class="btn-main" id="start-btn" onclick="startFreeImtihon()" disabled style="margin-top:25px;">TESTNI BOSHLASH</button>
+            <h2 style="color:#00d2ff; margin-bottom: 10px;">Bepul Blok Test</h2>
+            <p style="font-size: 13px; opacity: 0.7; margin-bottom: 20px;">Fanlarni tanlash tartibi ballarni belgilaydi:</p>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;" id="main-subjects-list"></div>
+            
+            <div style="margin-top: 20px; font-size: 12px; background: rgba(0, 210, 255, 0.05); padding: 10px; border-radius: 10px; border: 1px dashed #00d2ff;">
+                <p>1-tanlangan: <b>3.1 ball</b> (30 ta savol)</p>
+                <p>2-tanlangan: <b>2.1 ball</b> (30 ta savol)</p>
+            </div>
+
+            <button class="btn-main" id="start-btn" onclick="startFreeImtihon()" disabled style="margin-top:20px;">TESTNI BOSHLASH</button>
         </div>
 
         <div id="subject-dashboard">
             <h3 style="color:#00d2ff; margin-bottom: 5px;">Fanlar ro'yxati</h3>
-            <p style="font-size: 12px; opacity: 0.7;">Fanlarni ixtiyoriy tartibda ishlashingiz mumkin:</p>
             <div class="dashboard-grid" id="dashboard-items"></div>
             <button class="btn-main" id="final-submit-btn" style="display:none; background:#00ff00;" onclick="submitAll()">NATIJANI KO'RISH</button>
         </div>
@@ -119,35 +132,41 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // MODAL FUNKSIYALARI
         window.openModal = () => document.getElementById('custom-modal').style.display = 'flex';
         window.closeModal = () => document.getElementById('custom-modal').style.display = 'none';
-        window.exitToHome = () => window.location.replace('home.html');
+        window.exitToHome = () => { sessionStorage.removeItem('free_end_time'); window.location.replace('home.html'); };
 
         let selectedSubjects = [];
         let allExamData = {};
         let examStatus = {};
         let currentSubject = "";
         let currentQIndex = 0;
-        let timeLeft = 90 * 60;
         let userResults = [];
+        let timerId;
 
         const subjectsList = ["Matematika", "Ona tili", "Tarix", "Kimyo", "Biologiya", "Ingiliz tili", "Huquq", "Geografiya", "Fizika"];
 
-        // Fanlarni ro'yxatga chiqarish
         const listDiv = document.getElementById('main-subjects-list');
         subjectsList.forEach(s => {
             const d = document.createElement('div');
             d.className = 'sub-card';
-            d.innerText = s;
+            d.innerHTML = `${s} <span class="block-label"></span>`;
             d.onclick = () => {
-                if(selectedSubjects.includes(s)) {
-                    selectedSubjects = selectedSubjects.filter(x => x !== s);
+                const index = selectedSubjects.indexOf(s);
+                if(index > -1) {
+                    selectedSubjects.splice(index, 1);
                     d.classList.remove('selected');
                 } else if(selectedSubjects.length < 2) {
                     selectedSubjects.push(s);
                     d.classList.add('selected');
                 }
+                
+                document.querySelectorAll('.sub-card').forEach(card => {
+                    const name = card.innerText.split('\n')[0].trim();
+                    const sIndex = selectedSubjects.indexOf(name);
+                    const label = card.querySelector('.block-label');
+                    if(sIndex > -1) label.innerText = (sIndex + 1) + "-blok";
+                });
                 document.getElementById('start-btn').disabled = (selectedSubjects.length !== 2);
             };
             listDiv.appendChild(d);
@@ -160,8 +179,8 @@
                 { name: "Ona tili (Majburiy)", subject: "Ona tili", type: "free_mandatory", count: 10, ball: 1.1 },
                 { name: "Matematika (Majburiy)", subject: "Matematika", type: "free_mandatory", count: 10, ball: 1.1 },
                 { name: "Tarix (Majburiy)", subject: "Tarix", type: "free_mandatory", count: 10, ball: 1.1 },
-                { name: selectedSubjects[0], subject: selectedSubjects[0], type: "free", count: 30, ball: 3.1 },
-                { name: selectedSubjects[1], subject: selectedSubjects[1], type: "free", count: 30, ball: 2.1 }
+                { name: selectedSubjects[0] + " (1-blok)", subject: selectedSubjects[0], type: "free", count: 30, ball: 3.1 },
+                { name: selectedSubjects[1] + " (2-blok)", subject: selectedSubjects[1], type: "free", count: 30, ball: 2.1 }
             ];
 
             try {
@@ -176,10 +195,17 @@
 
                 document.getElementById('selection-box').style.display = 'none';
                 document.getElementById('top-nav').style.display = 'flex';
+                
+                let endTime = sessionStorage.getItem('free_end_time');
+                if (!endTime) {
+                    endTime = Date.now() + (90 * 60 * 1000);
+                    sessionStorage.setItem('free_end_time', endTime);
+                }
+                
                 renderDashboard();
-                startTimer();
+                startTimer(parseInt(endTime));
             } catch (e) {
-                alert("Internet xatosi yuz berdi!");
+                alert("Xatolik!");
                 location.reload();
             }
         };
@@ -189,48 +215,34 @@
             document.getElementById('quiz-box').style.display = 'none';
             const container = document.getElementById('dashboard-items');
             container.innerHTML = "";
-
             let allDone = true;
             Object.keys(allExamData).forEach(name => {
                 const isDone = examStatus[name];
                 if(!isDone) allDone = false;
-
                 const card = document.createElement('div');
                 card.className = `subject-status-card ${isDone ? 'completed' : ''}`;
-                card.innerHTML = `
-                    <div>
-                        <div class="subject-name">${name}</div>
-                        <div style="font-size:12px; opacity:0.6;">${allExamData[name].length} ta savol</div>
-                    </div>
-                    <span class="status-badge ${isDone ? 'badge-done' : 'badge-wait'}">${isDone ? 'TAMOM' : 'BOSHLASH'}</span>
-                `;
+                card.innerHTML = `<div><div class="subject-name">${name}</div><div style="font-size:11px; opacity:0.6;">${allExamData[name].length} ta savol</div></div><span class="status-badge ${isDone ? 'badge-done' : 'badge-wait'}">${isDone ? 'OK' : 'BOSHLASH'}</span>`;
                 if(!isDone) card.onclick = () => startSubject(name);
                 container.appendChild(card);
             });
-
             if(allDone) document.getElementById('final-submit-btn').style.display = 'block';
         }
 
         function startSubject(name) {
-            currentSubject = name;
-            currentQIndex = 0;
+            currentSubject = name; currentQIndex = 0;
             document.getElementById('subject-dashboard').style.display = 'none';
             document.getElementById('quiz-box').style.display = 'block';
             showQuestion();
         }
 
         function showQuestion() {
-            const questions = allExamData[currentSubject];
-            const q = questions[currentQIndex];
-
+            const q = allExamData[currentSubject][currentQIndex];
             document.getElementById('current-subject-name').innerText = currentSubject;
-            document.getElementById('q-counter').innerText = `${currentQIndex + 1} / ${questions.length}`;
+            document.getElementById('q-counter').innerText = `${currentQIndex + 1}/${allExamData[currentSubject].length}`;
             document.getElementById('q-text').innerText = q.question;
-
             const optContainer = document.getElementById('options-container');
             optContainer.innerHTML = "";
             document.getElementById('next-btn').disabled = true;
-
             ["A", "B", "C", "D"].forEach(key => {
                 const div = document.createElement('div');
                 div.className = "option";
@@ -247,36 +259,29 @@
 
         window.nextQuestion = () => {
             const questions = allExamData[currentSubject];
-            const q = questions[currentQIndex];
-
             userResults.push({
-                subject: q.subject,
-                isCorrect: window.userChoice === q.correctAnswer,
-                ball: window.userChoice === q.correctAnswer ? q.ball : 0
+                subject: currentSubject,
+                isCorrect: window.userChoice === questions[currentQIndex].correctAnswer,
+                ball: window.userChoice === questions[currentQIndex].correctAnswer ? questions[currentQIndex].ball : 0
             });
-
             currentQIndex++;
-            if(currentQIndex < questions.length) {
-                showQuestion();
-            } else {
-                examStatus[currentSubject] = true;
-                renderDashboard();
-            }
+            if(currentQIndex < questions.length) showQuestion();
+            else { examStatus[currentSubject] = true; renderDashboard(); }
         };
 
-        function startTimer() {
-            const timer = setInterval(() => {
-                let m = Math.floor(timeLeft / 60);
-                let s = timeLeft % 60;
+        function startTimer(endTime) {
+            timerId = setInterval(() => {
+                const distance = endTime - Date.now();
+                if (distance <= 0) { clearInterval(timerId); submitAll(); return; }
+                const m = Math.floor(distance / 60000);
+                const s = Math.floor((distance % 60000) / 1000);
                 document.getElementById('timer-display').innerText = `${m}:${s < 10 ? '0'+s : s}`;
-                if (timeLeft-- <= 0) {
-                    clearInterval(timer);
-                    submitAll();
-                }
             }, 1000);
         }
 
         window.submitAll = () => {
+            clearInterval(timerId);
+            sessionStorage.removeItem('free_end_time');
             localStorage.setItem('freeResult', JSON.stringify(userResults));
             window.location.replace('result.html');
         };
