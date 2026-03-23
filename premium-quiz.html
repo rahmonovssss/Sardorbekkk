@@ -122,15 +122,18 @@
         // MODAL FUNKSIYALARI
         window.openModal = () => document.getElementById('custom-modal').style.display = 'flex';
         window.closeModal = () => document.getElementById('custom-modal').style.display = 'none';
-        window.exitToHome = () => window.location.replace('home.html');
+        window.exitToHome = () => {
+            sessionStorage.removeItem('premium_end_time');
+            window.location.replace('home.html');
+        };
 
         let selectedSubjects = [];
         let allExamData = {};
         let examStatus = {};
         let currentSubject = "";
         let currentQIndex = 0;
-        let timeLeft = 90 * 60; // 90 minutga o'zgartirildi
         let userResults = [];
+        let timerId;
 
         const subjectsList = ["Matematika", "Ona tili", "Tarix", "Kimyo", "Biologiya", "Ingiliz tili", "Huquq", "Geografiya", "Fizika"];
 
@@ -175,8 +178,16 @@
 
                 document.getElementById('selection-box').style.display = 'none';
                 document.getElementById('top-nav').style.display = 'flex';
+                
+                // --- VAQTNI BOSHQARISH (sessionStorage) ---
+                let endTime = sessionStorage.getItem('premium_end_time');
+                if (!endTime) {
+                    endTime = Date.now() + (90 * 60 * 1000); // 90 minut
+                    sessionStorage.setItem('premium_end_time', endTime);
+                }
+                
                 renderDashboard();
-                startTimer();
+                startTimer(parseInt(endTime));
             } catch (e) {
                 alert("Internet xatosi!");
                 location.reload();
@@ -263,19 +274,29 @@
             }
         };
 
-        function startTimer() {
-            const timer = setInterval(() => {
-                let m = Math.floor(timeLeft / 60);
-                let s = timeLeft % 60;
-                document.getElementById('timer-display').innerText = `${m}:${s < 10 ? '0'+s : s}`;
-                if (timeLeft-- <= 0) {
-                    clearInterval(timer);
+        function startTimer(endTime) {
+            if (timerId) clearInterval(timerId); // Takrorlanmasligi uchun
+            
+            timerId = setInterval(() => {
+                const now = Date.now();
+                const distance = endTime - now;
+
+                if (distance <= 0) {
+                    clearInterval(timerId);
+                    sessionStorage.removeItem('premium_end_time');
                     submitAll();
+                    return;
                 }
+
+                const m = Math.floor(distance / (1000 * 60));
+                const s = Math.floor((distance % (1000 * 60)) / 1000);
+                document.getElementById('timer-display').innerText = `${m}:${s < 10 ? '0'+s : s}`;
             }, 1000);
         }
 
         window.submitAll = () => {
+            clearInterval(timerId);
+            sessionStorage.removeItem('premium_end_time');
             localStorage.setItem('premiumResult', JSON.stringify(userResults));
             window.location.replace('result.html');
         };
