@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To'lovlar - Dr. Rahmonov</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background: #0f2027; color: white; padding: 20px; }
+        .header { display: flex; align-items: center; gap: 15px; margin-bottom: 30px; }
+        .pay-item { 
+            background: rgba(255, 255, 255, 0.03); border-left: 4px solid #00d2ff;
+            padding: 15px; border-radius: 12px; margin-bottom: 12px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .pay-item.out { border-left-color: #ff4b2b; }
+        .amount { font-weight: 700; color: #00d2ff; }
+        .amount.minus { color: #ff4b2b; }
+    </style>
+</head>
+<body>
+    <div class="header"><a href="home.html" style="text-decoration:none;">⬅️</a> <h2>To'lovlar Tarixi</h2></div>
+    <div id="pay-list">
+        <div class="pay-item">
+            <div><strong>Hisob to'ldirildi</strong><br><small>Hozircha bo'sh</small></div>
+            <div class="amount">+0 so'm</div>
+        </div>
+    </div>
+</body>
+</html>
