@@ -7,35 +7,27 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@dotlottie/player-component@latest/dist/dotlottie-player.mjs" type="module"></script>
     <style>
+        /* Avvalgi stillar o'zgarishsiz qoladi */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background: #0f2027; color: white; overflow-x: hidden; min-height: 100vh; }
-
-        .header {
-            position: fixed; top: 0; left: 0; width: 100%; 
-            padding: 15px 20px; display: flex; justify-content: space-between; 
-            align-items: center; background: rgba(15, 32, 39, 0.95); 
-            backdrop-filter: blur(10px); z-index: 1000; border-bottom: 1px solid rgba(0, 210, 255, 0.2);
-        }
+        .header { position: fixed; top: 0; left: 0; width: 100%; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; background: rgba(15, 32, 39, 0.95); backdrop-filter: blur(10px); z-index: 1000; border-bottom: 1px solid rgba(0, 210, 255, 0.2); }
         .notif-btn { width: 42px; height: 42px; background: rgba(255, 255, 255, 0.08); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; }
         .notif-badge { position: absolute; top: -2px; right: -2px; background: #ff4b2b; color: white; font-size: 10px; padding: 2px 6px; border-radius: 50%; border: 2px solid #0f2027; }
         .top-profile-container { display: flex; align-items: center; gap: 10px; background: rgba(0, 210, 255, 0.1); padding: 5px 15px; border-radius: 50px; cursor: pointer; border: 1px solid rgba(0, 210, 255, 0.3); }
         .mini-avatar { width: 32px; height: 32px; background: linear-gradient(45deg, #00d2ff, #3a7bd5); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; }
-
         .main-content { padding: 100px 20px 30px; max-width: 600px; margin: 0 auto; }
         .balance-card { background: linear-gradient(135deg, #00d2ff, #3a7bd5); padding: 25px; border-radius: 25px; margin-bottom: 25px; box-shadow: 0 10px 25px rgba(0, 210, 255, 0.3); position: relative; overflow: hidden; }
         .balance-card h3 { font-size: 13px; opacity: 0.9; font-weight: 300; }
         .balance-card h1 { font-size: 32px; margin: 5px 0; font-weight: 600; }
-
         .grid-menu { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
         .menu-item { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.07); padding: 22px 15px; border-radius: 22px; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; gap: 12px; }
         .menu-item:active { transform: scale(0.96); background: rgba(0, 210, 255, 0.08); }
         .menu-item i { font-size: 32px; font-style: normal; }
         .premium { border: 1px solid #ffd700 !important; color: #ffd700; }
-
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(5px); }
         .modal-content { background: #1a2a33; padding: 25px; border-radius: 30px; width: 92%; max-width: 380px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
         .profile-sticker { width: 100px; height: 100px; margin: 0 auto 10px; }
-        .user-id-badge { background: #ffd700; color: #000; padding: 3px 12px; border-radius: 8px; font-weight: 800; font-size: 14px; display: inline-block; margin-bottom: 10px; }
+        .user-id-badge { background: #ffd700; color: #000; padding: 4px 15px; border-radius: 8px; font-weight: 800; font-size: 15px; display: inline-block; margin-bottom: 10px; text-transform: none; }
         .edit-input { width: 100%; padding: 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; color: white; margin-bottom: 12px; outline: none; }
         .btn-update { width: 100%; padding: 14px; background: #00d2ff; border: none; border-radius: 15px; color: #000; font-weight: 700; cursor: pointer; margin-bottom: 15px; }
         .profile-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
@@ -93,7 +85,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, updateDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2G8cD0JezEKXRCtKLYiZL0bzDyTp06Vs",
@@ -109,6 +101,28 @@
         const db = getFirestore(app);
         let currentUser = null;
 
+        // --- HARFLAR VA RAQAMLAR ARALASH NOYOB ID YARATISH ---
+        async function generateMixedUniqueId(length = 6) {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let isUnique = false;
+            let finalID = '';
+
+            while (!isUnique) {
+                finalID = '';
+                for (let i = 0; i < length; i++) {
+                    finalID += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+
+                // Bazada tekshirish
+                const q = query(collection(db, "users"), where("studentID", "==", finalID));
+                const snap = await getDocs(q);
+                if (snap.empty) {
+                    isUnique = true;
+                }
+            }
+            return finalID;
+        }
+
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
@@ -119,9 +133,9 @@
                     const data = userDoc.data();
                     let studentID = data.studentID;
 
-                    // ID yaratish (agar yo'q bo'lsa)
                     if (!studentID) {
-                        studentID = Math.floor(100000 + Math.random() * 900000);
+                        showToast("Yangi ID yaratilmoqda...");
+                        studentID = await generateMixedUniqueId(6);
                         await updateDoc(userDocRef, { studentID: studentID });
                     }
 
