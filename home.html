@@ -82,7 +82,7 @@
                 <dotlottie-player src="https://lottie.host/5b47a61d-6161-4608-8e6b-67e324c47841/T88XGOf6m6.json" background="transparent" speed="1" loop autoplay></dotlottie-player>
             </div>
             
-            <div class="user-id-badge" id="user-id-display">ID: ...</div>
+            <div class="user-id-badge" id="user-id-display">ID: yuklanmoqda...</div>
             <span id="user-email-display" class="email-label">email@example.com</span>
             
             <input type="text" id="input-name" class="edit-input" placeholder="Ismingiz">
@@ -100,11 +100,11 @@
 
     <div id="logoutModal" class="modal">
         <div class="modal-content" style="max-width: 320px;">
-            <div style="font-size: 40px; margin-bottom: 10px;">⚠️</div>
+            <div style="font-size: 40px; margin-bottom: 10px;">❗️</div>
             <h3 style="margin-bottom: 20px; font-size: 16px;">Akkauntdan chiqmoqchimisiz?</h3>
             <div class="btn-action-row">
                 <button class="btn-sub" onclick="closeLogoutConfirm()">BEKOR QILISH</button>
-                <button class="btn-main" style="background: #ff4b2b; color: white;" onclick="finalLogout()">OK</button>
+                <button class="btn-main" style="background: #ff4b2b; color: white;" onclick="finalLogout()">Chiqish</button>
             </div>
         </div>
     </div>
@@ -129,8 +129,15 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        function generateID() {
-            return Math.random().toString(36).substring(2, 8).toUpperCase();
+                function generateID() {
+            // Ham katta, ham kichik harflar va raqamlar to'plami
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let result = '';
+            // 8 belgili takrorlanmaydigan unikal ID yaratish
+            for (let i = 0; i < 8; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
         }
 
         onAuthStateChanged(auth, async (user) => {
