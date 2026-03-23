@@ -5,16 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Asosiy Sahifa - Dr. Rahmonov</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@dotlottie/player-component@latest/dist/dotlottie-player.mjs" type="module"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { height: 100vh; background: #0f2027; color: white; overflow-x: hidden; }
+        body { background: #0f2027; color: white; overflow-x: hidden; min-height: 100vh; }
 
         /* --- HEADER --- */
         .header {
             position: fixed; top: 0; left: 0; width: 100%; 
             padding: 15px 20px; display: flex; justify-content: space-between; 
             align-items: center; background: rgba(15, 32, 39, 0.95); 
-            backdrop-filter: blur(10px); z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px); z-index: 1000; border-bottom: 1px solid rgba(0, 210, 255, 0.2);
         }
         .notif-btn {
             width: 42px; height: 42px; background: rgba(255, 255, 255, 0.08);
@@ -25,50 +26,76 @@
             color: white; font-size: 10px; padding: 2px 6px; border-radius: 50%; border: 2px solid #0f2027;
         }
         .top-profile-container {
-            display: flex; align-items: center; gap: 10px; background: rgba(255, 255, 255, 0.08); 
-            padding: 5px 12px; border-radius: 50px; cursor: pointer;
+            display: flex; align-items: center; gap: 10px; background: rgba(0, 210, 255, 0.1); 
+            padding: 5px 15px; border-radius: 50px; cursor: pointer; border: 1px solid rgba(0, 210, 255, 0.3);
         }
         .mini-avatar {
-            width: 32px; height: 32px; background: #00d2ff; border-radius: 50%; 
-            display: flex; align-items: center; justify-content: center; font-weight: 600;
+            width: 32px; height: 32px; background: linear-gradient(45deg, #00d2ff, #3a7bd5); border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px;
         }
 
         /* --- CONTENT --- */
-        .main-content { padding: 100px 20px 30px; max-width: 600px; margin: 0 auto; text-align: center; }
+        .main-content { padding: 100px 20px 30px; max-width: 600px; margin: 0 auto; }
         
         .balance-card {
             background: linear-gradient(135deg, #00d2ff, #3a7bd5);
-            padding: 25px; border-radius: 25px; margin-bottom: 25px; text-align: left;
-            box-shadow: 0 10px 25px rgba(0, 210, 255, 0.2);
+            padding: 25px; border-radius: 25px; margin-bottom: 25px;
+            box-shadow: 0 10px 25px rgba(0, 210, 255, 0.3);
+            position: relative; overflow: hidden;
         }
-        .balance-card h3 { font-size: 13px; opacity: 0.8; }
-        .balance-card h1 { font-size: 32px; margin: 5px 0; }
+        .balance-card::after { content: ''; position: absolute; right: -20px; top: -20px; width: 100px; height: 100px; background: rgba(255,255,255,0.1); border-radius: 50%; }
+        .balance-card h3 { font-size: 13px; opacity: 0.9; font-weight: 300; }
+        .balance-card h1 { font-size: 32px; margin: 5px 0; font-weight: 600; }
 
         .grid-menu { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
         .menu-item {
-            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08);
-            padding: 25px 15px; border-radius: 22px; cursor: pointer; transition: 0.3s;
-            display: flex; flex-direction: column; align-items: center; gap: 10px;
+            background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.07);
+            padding: 22px 15px; border-radius: 22px; cursor: pointer; transition: 0.2s;
+            display: flex; flex-direction: column; align-items: center; gap: 12px;
         }
-        .menu-item:active { transform: scale(0.95); background: rgba(0, 210, 255, 0.1); }
-        .menu-item i { font-size: 30px; font-style: normal; }
-        .premium { border: 1px solid #ffd700 !important; color: #ffd700; }
+        .menu-item:active { transform: scale(0.96); background: rgba(0, 210, 255, 0.08); }
+        .menu-item i { font-size: 32px; font-style: normal; }
+        .menu-item span { font-size: 14px; font-weight: 500; }
+        .premium { border: 1px solid #ffd700 !important; background: rgba(255, 215, 0, 0.02) !important; color: #ffd700; }
 
         /* --- MODALS --- */
         .modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 2000;
+            background: rgba(0,0,0,0.9); align-items: center; justify-content: center; z-index: 2000;
+            backdrop-filter: blur(5px);
         }
-        .modal-content { background: #1a2a33; padding: 25px; border-radius: 25px; width: 90%; max-width: 350px; text-align: center; }
-        .edit-input { width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: white; margin-bottom: 15px; outline: none; }
-        .btn-update { width: 100%; padding: 12px; background: #00d2ff; border: none; border-radius: 10px; color: white; font-weight: 600; cursor: pointer; }
-        .btn-logout { width: 100%; margin-top: 10px; padding: 12px; background: transparent; border: 1px solid #ff4b2b; color: #ff4b2b; border-radius: 10px; cursor: pointer; }
+        .modal-content { 
+            background: #1a2a33; padding: 25px; border-radius: 30px; width: 92%; max-width: 380px; 
+            text-align: center; border: 1px solid rgba(255,255,255,0.1);
+            max-height: 90vh; overflow-y: auto;
+        }
+        .profile-sticker { width: 100px; height: 100px; margin: 0 auto 10px; }
+        .user-email-label { font-size: 12px; color: #00d2ff; opacity: 0.8; margin-bottom: 20px; display: block; }
+        
+        .edit-input { 
+            width: 100%; padding: 14px; background: rgba(255,255,255,0.05); 
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; 
+            color: white; margin-bottom: 12px; outline: none; font-size: 14px;
+        }
+        .edit-input:disabled { opacity: 0.5; border-style: dashed; }
+
+        .btn-update { width: 100%; padding: 14px; background: #00d2ff; border: none; border-radius: 15px; color: #000; font-weight: 700; cursor: pointer; margin-bottom: 15px; }
+        
+        /* Modal ichidagi kichik tugmalar */
+        .profile-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .action-btn { 
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); 
+            padding: 12px; border-radius: 12px; color: white; font-size: 12px; cursor: pointer;
+            display: flex; flex-direction: column; align-items: center; gap: 5px;
+        }
+
+        .btn-logout { width: 100%; padding: 12px; background: transparent; border: 1px solid #ff4b2b; color: #ff4b2b; border-radius: 12px; cursor: pointer; font-weight: 600; }
 
         /* --- TOAST --- */
         #toast {
             position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%);
             background: #ffd700; color: #000; padding: 12px 25px; border-radius: 50px;
-            transition: 0.5s; z-index: 3000; font-weight: 600; font-size: 14px;
+            transition: 0.5s; z-index: 3000; font-weight: 600; font-size: 14px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
         #toast.show { bottom: 40px; }
     </style>
@@ -80,7 +107,7 @@
             <i>🔔</i><span class="notif-badge" id="notif-count">0</span>
         </div>
         <div class="top-profile-container" onclick="toggleModal(true)">
-            <span id="top-name">Yuklanmoqda...</span>
+            <span id="top-name" style="font-size: 13px; font-weight: 600;">...</span>
             <div class="mini-avatar" id="top-initials">?</div>
         </div>
     </header>
@@ -89,7 +116,7 @@
         <div class="balance-card">
             <h3>Mening balansim</h3>
             <h1 id="user-balance">0 so'm</h1>
-            <p style="font-size: 12px; cursor: pointer; margin-top: 10px; text-decoration: underline;" onclick="showToast('To\'lov tizimi tez kunda...')">💳 Balansni to'ldirish</p>
+            <p style="font-size: 12px; cursor: pointer; margin-top: 10px; display: inline-block; background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px;" onclick="showToast('To\'lov tizimi tez kunda...')">💳 Balansni to'ldirish</p>
         </div>
 
         <div class="grid-menu">
@@ -99,11 +126,14 @@
             <div class="menu-item premium" onclick="startQuiz('paid')">
                 <i>💎</i><span>Premium Testlar</span>
             </div>
+            <div class="menu-item" onclick="location.href='statistics.html'">
+                <i>📊</i><span>Statistika</span>
+            </div>
             <div class="menu-item" onclick="location.href='messages.html'">
                 <i>✉️</i><span>Xabarlarim</span>
             </div>
-            <div class="menu-item" onclick="window.open('https://t.me/Sardorbek_Rahmonov', '_blank')">
-                <i>🎧</i><span>Yordam</span>
+            <div class="menu-item" onclick="window.open('https://t.me/Sardorbek_Rahmonov', '_blank')" style="grid-column: span 2;">
+                <i>🎧</i><span>Texnik yordam (Telegram)</span>
             </div>
         </div>
     </div>
@@ -112,21 +142,38 @@
 
     <div id="profileModal" class="modal">
         <div class="modal-content">
-            <h3 style="color:#ffd700; margin-bottom:15px;">Profil</h3>
+            <div class="profile-sticker">
+                <dotlottie-player src="https://lottie.host/5b47a61d-6161-4608-8e6b-67e324c47841/T88XGOf6m6.json" background="transparent" speed="1" style="width: 100px; height: 100px;" loop autoplay></dotlottie-player>
+            </div>
+            <h3 style="color:#ffd700; margin-bottom:5px;">Profil Ma'lumotlari</h3>
+            <span id="user-email-display" class="user-email-label">email@example.com</span>
+            
             <input type="text" id="input-name" class="edit-input" placeholder="FIO kiriting">
-            <button class="btn-update" onclick="updateName()">SAQLASH</button>
-            <button class="btn-logout" onclick="openLogoutModal()">🚪 CHIQISH</button>
-            <p onclick="toggleModal(false)" style="margin-top:15px; cursor:pointer; font-size:12px; opacity:0.5;">Yopish</p>
+            <input type="text" id="input-email" class="edit-input" disabled style="margin-bottom: 20px;">
+            
+            <button class="btn-update" onclick="updateName()">O'ZGARIŞLARNI SAQLASH</button>
+
+            <div class="profile-actions">
+                <div class="action-btn" onclick="location.href='results-history.html'">
+                    <i>📜</i><span>Natijalar</span>
+                </div>
+                <div class="action-btn" onclick="location.href='payments.html'">
+                    <i>💸</i><span>To'lovlar</span>
+                </div>
+            </div>
+
+            <button class="btn-logout" onclick="openLogoutModal()">🚪 TIZIMDAN CHIQISH</button>
+            <p onclick="toggleModal(false)" style="margin-top:20px; cursor:pointer; font-size:13px; opacity:0.6;">Yopish</p>
         </div>
     </div>
 
     <div id="logoutModal" class="modal">
         <div class="modal-content">
             <h3>Tizimdan chiqish?</h3>
-            <p style="margin: 15px 0; opacity:0.7; font-size:14px;">Haqiqatan ham chiqmoqchimisiz?</p>
+            <p style="margin: 15px 0; opacity:0.7; font-size:14px;">Haqiqatan ham profilni tark etmoqchimisiz?</p>
             <div style="display:flex; gap:10px;">
-                <button onclick="closeLogoutModal()" style="flex:1; padding:10px; border-radius:10px; border:none; background:#333; color:white;">YO'Q</button>
-                <button onclick="confirmLogout()" style="flex:1; padding:10px; border-radius:10px; border:none; background:#ff4b2b; color:white; font-weight:bold;">HA</button>
+                <button onclick="closeLogoutModal()" style="flex:1; padding:12px; border-radius:15px; border:none; background:#333; color:white;">YO'Q</button>
+                <button onclick="confirmLogout()" style="flex:1; padding:12px; border-radius:15px; border:none; background:#ff4b2b; color:white; font-weight:bold;">HA, CHIQISH</button>
             </div>
         </div>
     </div>
@@ -150,38 +197,49 @@
         const db = getFirestore(app);
         let currentUser = null;
 
-        // Ma'lumotlarni yuklash
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
+                document.getElementById('input-email').value = user.email;
+                document.getElementById('user-email-display').innerText = user.email;
+                
                 const userDoc = await getDoc(doc(db, "users", user.uid));
                 if (userDoc.exists()) {
                     const data = userDoc.data();
-                    document.getElementById('top-name').innerText = data.fio || "Foydalanuvchi";
-                    document.getElementById('top-initials').innerText = (data.fio || "U").charAt(0).toUpperCase();
-                    document.getElementById('user-balance').innerText = (data.balance || 100000).toLocaleString() + " so'm";
+                    const fio = data.fio || "Foydalanuvchi";
+                    document.getElementById('top-name').innerText = fio;
+                    document.getElementById('top-initials').innerText = fio.charAt(0).toUpperCase();
+                    document.getElementById('user-balance').innerText = (data.balance || 0).toLocaleString() + " so'm";
                     document.getElementById('notif-count').innerText = data.notifCount || 0;
-                    document.getElementById('input-name').value = data.fio || "";
+                    document.getElementById('input-name').value = fio;
                 }
             } else { window.location.replace("index.html"); }
         });
 
-        // Testni boshlash logikasi
         window.startQuiz = (type) => {
             if (type === 'free') {
                 showToast("Bepul testlar yuklanmoqda...");
-                setTimeout(() => window.location.href = "quiz.html", 1200);
+                setTimeout(() => window.location.href = "quiz.html", 1000);
             } else {
                 const balanceStr = document.getElementById('user-balance').innerText;
                 const balance = parseInt(balanceStr.replace(/\D/g, '')) || 0;
-
                 if (balance < 2000) {
                     showToast("Balans yetarli emas (Min. 2000 so'm) 💳");
                 } else {
                     showToast("Premium test yuklanmoqda... 💎");
-                    setTimeout(() => window.location.href = "premium-quiz.html", 1200);
+                    setTimeout(() => window.location.href = "premium-quiz.html", 1000);
                 }
             }
+        };
+
+        window.updateName = async () => {
+            const newName = document.getElementById('input-name').value;
+            if(!newName || !currentUser) return;
+            try {
+                await updateDoc(doc(db, "users", currentUser.uid), { fio: newName });
+                showToast("Ma'lumotlar saqlandi! ✅");
+                setTimeout(() => location.reload(), 1000);
+            } catch(e) { showToast("Xatolik!"); }
         };
 
         window.showToast = (text) => {
@@ -193,18 +251,7 @@
         window.toggleModal = (s) => document.getElementById('profileModal').style.display = s ? 'flex' : 'none';
         window.openLogoutModal = () => { toggleModal(false); document.getElementById('logoutModal').style.display = 'flex'; };
         window.closeLogoutModal = () => document.getElementById('logoutModal').style.display = 'none';
-
         window.confirmLogout = async () => { await signOut(auth); window.location.replace("index.html"); };
-
-        window.updateName = async () => {
-            const newName = document.getElementById('input-name').value;
-            if(!newName || !currentUser) return;
-            try {
-                await updateDoc(doc(db, "users", currentUser.uid), { fio: newName });
-                showToast("Ism muvaffaqiyatli o'zgartirildi!");
-                setTimeout(() => location.reload(), 1000);
-            } catch(e) { showToast("Xatolik yuz berdi!"); }
-        };
     </script>
 </body>
 </html>
