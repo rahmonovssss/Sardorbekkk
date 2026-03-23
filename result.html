@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Natija - Dr. Rahmonov</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background: #0f2027; color: white; padding: 20px; min-height: 100vh; text-align: center; }
+        
+        .result-container { max-width: 500px; margin: 0 auto; background: #1a2a33; padding: 30px; border-radius: 25px; border: 1px solid #ffd700; }
+        .score-big { font-size: 48px; font-weight: 700; color: #ffd700; margin: 15px 0; }
+        
+        .stats-table { width: 100%; margin-top: 20px; border-collapse: collapse; }
+        .stats-table th, .stats-table td { padding: 12px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 14px; }
+        .stats-table th { color: #ffd700; }
+
+        .btn-home { display: block; width: 100%; padding: 15px; margin-top: 25px; background: #ffd700; color: #000; text-decoration: none; border-radius: 12px; font-weight: bold; }
+        .correct { color: #00ff00; }
+        .wrong { color: #ff4b2b; }
+    </style>
+</head>
+<body>
+
+    <div class="result-container">
+        <h2 style="color: #ffd700;">Imtihon Yakunlandi</h2>
+        <p style="opacity: 0.8; font-size: 13px;">Umumiy to'plangan ball:</p>
+        <div class="score-big" id="total-score">0.0</div>
+
+        <table class="stats-table">
+            <thead>
+                <tr>
+                    <th>Fan nomi</th>
+                    <th>To'g'ri</th>
+                    <th>Ball</th>
+                </tr>
+            </thead>
+            <tbody id="stats-body">
+                </tbody>
+        </table>
+
+        <a href="home.html" class="btn-home">BOSH SAHIFAGA QAYTISH</a>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const results = JSON.parse(localStorage.getItem('premiumResult') || "[]");
+            const statsBody = document.getElementById('stats-body');
+            const totalScoreElem = document.getElementById('total-score');
+
+            if (results.length === 0) {
+                statsBody.innerHTML = "<tr><td colspan='3'>Ma'lumot topilmadi</td></tr>";
+                return;
+            }
+
+            // Fanlar bo'yicha guruhlash
+            const summary = {};
+            let totalBall = 0;
+
+            results.forEach(res => {
+                if (!summary[res.subject]) {
+                    summary[res.subject] = { correct: 0, score: 0 };
+                }
+                if (res.isCorrect) {
+                    summary[res.subject].correct += 1;
+                    summary[res.subject].score += res.ball;
+                    totalBall += res.ball;
+                }
+            });
+
+            // Jadvalni to'ldirish
+            for (const sub in summary) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${sub}</td>
+                    <td class="correct">${summary[sub].correct} ta</td>
+                    <td>${summary[sub].score.toFixed(1)}</td>
+                `;
+                statsBody.appendChild(row);
+            }
+
+            totalScoreElem.innerText = totalBall.toFixed(1);
+        });
+    </script>
+</body>
+</html>
