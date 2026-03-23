@@ -221,7 +221,7 @@
                 if(!isDone) allDone = false;
                 const card = document.createElement('div');
                 card.className = `subject-status-card ${isDone ? 'completed' : ''}`;
-                card.innerHTML = `<div><div class="subject-name">${name}</div><div style="font-size:11px; opacity:0.6;">${allExamData[name].length} ta savol</div></div><span class="status-badge ${isDone ? 'badge-done' : 'badge-wait'}">${isDone ? 'OK' : 'BOSHLASH'}</span>`;
+                card.innerHTML = `<div><div class="subject-name">${name}</div><div style="font-size:11px; opacity:0.6;">${allExamData[name].length} ta savol</div></div><span class="status-badge ${isDone ? 'badge-done' : 'badge-wait'}">${isDone ? 'Tugallangan: 'BOSHLASH'}</span>`;
                 if(!isDone) card.onclick = () => startSubject(name);
                 container.appendChild(card);
             });
