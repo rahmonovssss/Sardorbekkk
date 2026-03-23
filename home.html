@@ -5,9 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Asosiy Sahifa - Dr. Rahmonov</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@dotlottie/player-component@latest/dist/dotlottie-player.mjs" type="module"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { height: 100vh; background: #0f2027; color: white; overflow-x: hidden; }
+        body { background: #0f2027; color: white; overflow-x: hidden; min-height: 100vh; }
 
         /* --- HEADER --- */
         .header {
@@ -16,60 +17,40 @@
             align-items: center; background: rgba(15, 32, 39, 0.95); 
             backdrop-filter: blur(10px); z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.05);
         }
-        .notif-btn {
-            width: 42px; height: 42px; background: rgba(255, 255, 255, 0.08);
-            border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative;
-        }
-        .notif-badge {
-            position: absolute; top: -2px; right: -2px; background: #ff4b2b;
-            color: white; font-size: 10px; padding: 2px 6px; border-radius: 50%; border: 2px solid #0f2027;
-        }
-        .top-profile-container {
-            display: flex; align-items: center; gap: 10px; background: rgba(255, 255, 255, 0.08); 
-            padding: 5px 12px; border-radius: 50px; cursor: pointer;
-        }
-        .mini-avatar {
-            width: 32px; height: 32px; background: #00d2ff; border-radius: 50%; 
-            display: flex; align-items: center; justify-content: center; font-weight: 600;
-        }
+        .notif-btn { width: 42px; height: 42px; background: rgba(255, 255, 255, 0.08); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; }
+        .notif-badge { position: absolute; top: -2px; right: -2px; background: #ff4b2b; color: white; font-size: 10px; padding: 2px 6px; border-radius: 50%; border: 2px solid #0f2027; }
+        .top-profile-container { display: flex; align-items: center; gap: 10px; background: rgba(255, 255, 255, 0.08); padding: 5px 12px; border-radius: 50px; cursor: pointer; }
+        .mini-avatar { width: 32px; height: 32px; background: #00d2ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; }
 
         /* --- CONTENT --- */
         .main-content { padding: 100px 20px 30px; max-width: 600px; margin: 0 auto; text-align: center; }
-        
-        .balance-card {
-            background: linear-gradient(135deg, #00d2ff, #3a7bd5);
-            padding: 25px; border-radius: 25px; margin-bottom: 25px; text-align: left;
-            box-shadow: 0 10px 25px rgba(0, 210, 255, 0.2);
-        }
+        .balance-card { background: linear-gradient(135deg, #00d2ff, #3a7bd5); padding: 25px; border-radius: 25px; margin-bottom: 25px; text-align: left; box-shadow: 0 10px 25px rgba(0, 210, 255, 0.2); }
         .balance-card h3 { font-size: 13px; opacity: 0.8; }
         .balance-card h1 { font-size: 32px; margin: 5px 0; }
 
         .grid-menu { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
-        .menu-item {
-            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08);
-            padding: 25px 15px; border-radius: 22px; cursor: pointer; transition: 0.3s;
-            display: flex; flex-direction: column; align-items: center; gap: 10px;
-        }
+        .menu-item { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08); padding: 25px 15px; border-radius: 22px; cursor: pointer; transition: 0.3s; display: flex; flex-direction: column; align-items: center; gap: 10px; }
         .menu-item:active { transform: scale(0.95); background: rgba(0, 210, 255, 0.1); }
         .menu-item i { font-size: 30px; font-style: normal; }
         .premium { border: 1px solid #ffd700 !important; color: #ffd700; }
 
         /* --- MODALS --- */
-        .modal {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 2000;
-        }
-        .modal-content { background: #1a2a33; padding: 25px; border-radius: 25px; width: 90%; max-width: 350px; text-align: center; }
-        .edit-input { width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: white; margin-bottom: 15px; outline: none; }
-        .btn-update { width: 100%; padding: 12px; background: #00d2ff; border: none; border-radius: 10px; color: white; font-weight: 600; cursor: pointer; }
-        .btn-logout { width: 100%; margin-top: 10px; padding: 12px; background: transparent; border: 1px solid #ff4b2b; color: #ff4b2b; border-radius: 10px; cursor: pointer; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(5px); }
+        .modal-content { background: #1a2a33; padding: 25px; border-radius: 25px; width: 92%; max-width: 360px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
+        
+        .profile-sticker { width: 90px; height: 90px; margin: 0 auto 10px; }
+        .email-text { font-size: 11px; color: #00d2ff; margin-bottom: 15px; display: block; opacity: 0.7; }
+        .edit-input { width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: white; margin-bottom: 15px; outline: none; text-align: center; }
+        .btn-update { width: 100%; padding: 12px; background: #00d2ff; border: none; border-radius: 10px; color: #000; font-weight: 600; cursor: pointer; }
+        
+        /* Profil ichidagi tarix tugmalari */
+        .history-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0; }
+        .hist-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 10px; border-radius: 12px; color: white; font-size: 12px; cursor: pointer; }
+        
+        .btn-logout { width: 100%; padding: 12px; background: transparent; border: 1px solid #ff4b2b; color: #ff4b2b; border-radius: 10px; cursor: pointer; font-weight: 600; }
 
         /* --- TOAST --- */
-        #toast {
-            position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%);
-            background: #ffd700; color: #000; padding: 12px 25px; border-radius: 50px;
-            transition: 0.5s; z-index: 3000; font-weight: 600; font-size: 14px;
-        }
+        #toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: #ffd700; color: #000; padding: 12px 25px; border-radius: 50px; transition: 0.5s; z-index: 3000; font-weight: 600; font-size: 14px; }
         #toast.show { bottom: 40px; }
     </style>
 </head>
@@ -80,7 +61,7 @@
             <i>🔔</i><span class="notif-badge" id="notif-count">0</span>
         </div>
         <div class="top-profile-container" onclick="toggleModal(true)">
-            <span id="top-name">Yuklanmoqda...</span>
+            <span id="top-name">...</span>
             <div class="mini-avatar" id="top-initials">?</div>
         </div>
     </header>
@@ -93,28 +74,31 @@
         </div>
 
         <div class="grid-menu">
-            <div class="menu-item" onclick="startQuiz('free')">
-                <i>🎁</i><span>Bepul Testlar</span>
-            </div>
-            <div class="menu-item premium" onclick="startQuiz('paid')">
-                <i>💎</i><span>Premium Testlar</span>
-            </div>
-            <div class="menu-item" onclick="location.href='messages.html'">
-                <i>✉️</i><span>Xabarlarim</span>
-            </div>
-            <div class="menu-item" onclick="window.open('https://t.me/Sardorbek_Rahmonov', '_blank')">
-                <i>🎧</i><span>Yordam</span>
-            </div>
+            <div class="menu-item" onclick="startQuiz('free')"><i>🎁</i><span>Bepul Test</span></div>
+            <div class="menu-item premium" onclick="startQuiz('paid')"><i>💎</i><span>Premium</span></div>
+            <div class="menu-item" onclick="location.href='statistics.html'"><i>📊</i><span>Statistika</span></div>
+            <div class="menu-item" onclick="location.href='leaderboard.html'"><i>🏆</i><span>Liderlar</span></div>
+            <div class="menu-item" onclick="location.href='messages.html'"><i>✉️</i><span>Xabarlarim</span></div>
+            <div class="menu-item" onclick="window.open('https://t.me/Sardorbek_Rahmonov', '_blank')"><i>🎧</i><span>Yordam</span></div>
         </div>
     </div>
 
-    <div id="toast">Bildirishnoma!</div>
-
     <div id="profileModal" class="modal">
         <div class="modal-content">
-            <h3 style="color:#ffd700; margin-bottom:15px;">Profil</h3>
+            <div class="profile-sticker">
+                <dotlottie-player src="https://lottie.host/5b47a61d-6161-4608-8e6b-67e324c47841/T88XGOf6m6.json" background="transparent" speed="1" loop autoplay></dotlottie-player>
+            </div>
+            <h3 style="color:#ffd700; margin-bottom:5px;">Profil</h3>
+            <span id="user-email-display" class="email-text">yuklanmoqda...</span>
+            
             <input type="text" id="input-name" class="edit-input" placeholder="FIO kiriting">
             <button class="btn-update" onclick="updateName()">SAQLASH</button>
+
+            <div class="history-grid">
+                <button class="hist-btn" onclick="location.href='results-history.html'">📜 Natijalarim</button>
+                <button class="hist-btn" onclick="location.href='payments.html'">💸 To'lovlarim</button>
+            </div>
+
             <button class="btn-logout" onclick="openLogoutModal()">🚪 CHIQISH</button>
             <p onclick="toggleModal(false)" style="margin-top:15px; cursor:pointer; font-size:12px; opacity:0.5;">Yopish</p>
         </div>
@@ -125,11 +109,13 @@
             <h3>Tizimdan chiqish?</h3>
             <p style="margin: 15px 0; opacity:0.7; font-size:14px;">Haqiqatan ham chiqmoqchimisiz?</p>
             <div style="display:flex; gap:10px;">
-                <button onclick="closeLogoutModal()" style="flex:1; padding:10px; border-radius:10px; border:none; background:#333; color:white;">YO'Q</button>
-                <button onclick="confirmLogout()" style="flex:1; padding:10px; border-radius:10px; border:none; background:#ff4b2b; color:white; font-weight:bold;">HA</button>
+                <button onclick="closeLogoutModal()" style="flex:1; padding:10px; border-radius:10px; border:none; background:#333; color:white; cursor:pointer;">YO'Q</button>
+                <button onclick="confirmLogout()" style="flex:1; padding:10px; border-radius:10px; border:none; background:#ff4b2b; color:white; font-weight:bold; cursor:pointer;">HA</button>
             </div>
         </div>
     </div>
+
+    <div id="toast">Bildirishnoma!</div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -150,7 +136,6 @@
         const db = getFirestore(app);
         let currentUser = null;
 
-        // Ma'lumotlarni yuklash
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
@@ -159,29 +144,17 @@
                     const data = userDoc.data();
                     document.getElementById('top-name').innerText = data.fio || "Foydalanuvchi";
                     document.getElementById('top-initials').innerText = (data.fio || "U").charAt(0).toUpperCase();
-                    document.getElementById('user-balance').innerText = (data.balance || 100000).toLocaleString() + " so'm";
+                    document.getElementById('user-balance').innerText = (data.balance || 0).toLocaleString() + " so'm";
                     document.getElementById('notif-count').innerText = data.notifCount || 0;
                     document.getElementById('input-name').value = data.fio || "";
+                    document.getElementById('user-email-display').innerText = user.email;
                 }
             } else { window.location.replace("index.html"); }
         });
 
-        // Testni boshlash logikasi
         window.startQuiz = (type) => {
-            if (type === 'free') {
-                showToast("Bepul testlar yuklanmoqda...");
-                setTimeout(() => window.location.href = "quiz.html", 1200);
-            } else {
-                const balanceStr = document.getElementById('user-balance').innerText;
-                const balance = parseInt(balanceStr.replace(/\D/g, '')) || 0;
-
-                if (balance < 2000) {
-                    showToast("Balans yetarli emas (Min. 2000 so'm) 💳");
-                } else {
-                    showToast("Premium test yuklanmoqda... 💎");
-                    setTimeout(() => window.location.href = "premium-quiz.html", 1200);
-                }
-            }
+            showToast("Yuklanmoqda...");
+            setTimeout(() => window.location.href = (type === 'free' ? "quiz.html" : "premium-quiz.html"), 1000);
         };
 
         window.showToast = (text) => {
@@ -193,7 +166,6 @@
         window.toggleModal = (s) => document.getElementById('profileModal').style.display = s ? 'flex' : 'none';
         window.openLogoutModal = () => { toggleModal(false); document.getElementById('logoutModal').style.display = 'flex'; };
         window.closeLogoutModal = () => document.getElementById('logoutModal').style.display = 'none';
-
         window.confirmLogout = async () => { await signOut(auth); window.location.replace("index.html"); };
 
         window.updateName = async () => {
@@ -201,9 +173,9 @@
             if(!newName || !currentUser) return;
             try {
                 await updateDoc(doc(db, "users", currentUser.uid), { fio: newName });
-                showToast("Ism muvaffaqiyatli o'zgartirildi!");
-                setTimeout(() => location.reload(), 1000);
-            } catch(e) { showToast("Xatolik yuz berdi!"); }
+                showToast("Ism saqlandi! ✅");
+                setTimeout(() => location.reload(), 800);
+            } catch(e) { showToast("Xatolik!"); }
         };
     </script>
 </body>
