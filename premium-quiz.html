@@ -83,7 +83,7 @@
 
     <div class="top-bar" id="top-nav" style="display:none;">
         <button class="exit-btn" onclick="openModal()">✖ Chiqish</button>
-        <div class="timer" id="timer-display">90:00</div>
+        <div class="timer" id="timer-display">90:00⏱️</div>
     </div>
 
     <div class="container">
@@ -232,7 +232,7 @@
                         <div class="subject-name">${name}</div>
                         <div style="font-size:11px; opacity:0.6;">${allExamData[name].length} ta savol</div>
                     </div>
-                    <span class="status-badge ${isDone ? 'badge-done' : 'badge-wait'}">${isDone ? 'OK' : 'BOSHLASH'}</span>
+                    <span class="status-badge ${isDone ? 'badge-done' : 'badge-wait'}">${isDone ? 'Tugallangan✅️: 'BOSHLASH📚'}</span>
                 `;
                 if(!isDone) card.onclick = () => startSubject(name);
                 container.appendChild(card);
