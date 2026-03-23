@@ -128,18 +128,20 @@
                 
                 let data = snap.exists() ? snap.data() : {};
                 
-                // Agar ID yo'q bo'lmasa, yaratish va bazaga yozish
                 if (!data.studentID) {
                     data.studentID = generateID();
                     await setDoc(userRef, { studentID: data.studentID }, { merge: true });
                 }
 
+                // Agar bazada FIO bo'lmasa, Google dagi ismini qo'yish
+                const displayName = data.fio || user.displayName || "Foydalanuvchi";
+
                 document.getElementById('user-id-display').innerText = "ID: " + data.studentID;
-                document.getElementById('top-name').innerText = data.fio || "Foydalanuvchi";
-                document.getElementById('top-initials').innerText = (data.fio || "U")[0].toUpperCase();
+                document.getElementById('top-name').innerText = displayName;
+                document.getElementById('top-initials').innerText = displayName[0].toUpperCase();
                 document.getElementById('user-balance').innerText = (data.balance || 0).toLocaleString() + " so'm";
                 document.getElementById('user-email-display').innerText = user.email;
-                document.getElementById('input-name').value = data.fio || "";
+                document.getElementById('input-name').value = data.fio || user.displayName || "";
             } else {
                 window.location.replace("index.html");
             }
@@ -161,7 +163,12 @@
             setTimeout(() => location.reload(), 800);
         };
 
-        window.logout = () => signOut(auth).then(() => window.location.replace("index.html"));
+        // --- CHIQUVCHI QISMI (TASDIQLASH BILAN) ---
+        window.logout = () => {
+            if(confirm("Akkauntdan chiqmoqchimisiz?")) {
+                signOut(auth).then(() => window.location.replace("index.html"));
+            }
+        };
 
         window.startQuiz = (type) => {
             showToast("Yuklanmoqda...");
