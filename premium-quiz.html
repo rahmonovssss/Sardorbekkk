@@ -123,7 +123,7 @@
         window.openModal = () => document.getElementById('custom-modal').style.display = 'flex';
         window.closeModal = () => document.getElementById('custom-modal').style.display = 'none';
         window.exitToHome = () => {
-            localStorage.removeItem('premium_end_time');
+            sessionStorage.removeItem('premium_end_time');
             window.location.replace('home.html');
         };
 
@@ -179,15 +179,15 @@
                 document.getElementById('selection-box').style.display = 'none';
                 document.getElementById('top-nav').style.display = 'flex';
                 
-                // Real vaqt taymerini o'rnatish
-                let endTime = localStorage.getItem('premium_end_time');
+                // sessionStorage orqali vaqtni boshqarish (oyna yopilsa o'chadi)
+                let endTime = sessionStorage.getItem('premium_end_time');
                 if (!endTime) {
                     endTime = Date.now() + (90 * 60 * 1000);
-                    localStorage.setItem('premium_end_time', endTime);
+                    sessionStorage.setItem('premium_end_time', endTime);
                 }
                 
                 renderDashboard();
-                startTimer(endTime);
+                startTimer(parseInt(endTime));
             } catch (e) {
                 alert("Internet xatosi!");
                 location.reload();
@@ -281,7 +281,7 @@
 
                 if (distance <= 0) {
                     clearInterval(timerId);
-                    localStorage.removeItem('premium_end_time');
+                    sessionStorage.removeItem('premium_end_time');
                     submitAll();
                     return;
                 }
@@ -294,7 +294,7 @@
 
         window.submitAll = () => {
             clearInterval(timerId);
-            localStorage.removeItem('premium_end_time');
+            sessionStorage.removeItem('premium_end_time');
             localStorage.setItem('premiumResult', JSON.stringify(userResults));
             window.location.replace('result.html');
         };
