@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dr. Rahmonov - Shaxsiy Kabinet</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    
     <script src="https://unpkg.com/@dotlottie/player-component@latest/dist/dotlottie-player.mjs" type="module"></script>
+
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background: #0f2027; color: white; overflow-x: hidden; min-height: 100vh; }
@@ -20,36 +22,30 @@
         .top-profile-container { display: flex; align-items: center; gap: 10px; background: rgba(255, 255, 255, 0.08); padding: 5px 12px; border-radius: 50px; cursor: pointer; }
         .mini-avatar { width: 32px; height: 32px; background: #00d2ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; color: #000; }
 
-        /* --- ASOSIY CONTENT --- */
+        /* --- CONTENT --- */
         .main-content { padding: 100px 20px 30px; max-width: 600px; margin: 0 auto; text-align: center; }
-        .balance-card { background: linear-gradient(135deg, #00d2ff, #3a7bd5); padding: 25px; border-radius: 25px; margin-bottom: 25px; text-align: left; box-shadow: 0 10px 25px rgba(0, 210, 255, 0.2); }
-        .balance-card h3 { font-size: 13px; opacity: 0.8; }
-        .balance-card h1 { font-size: 30px; margin: 5px 0; }
+        .balance-card { background: linear-gradient(135deg, #00d2ff, #3a7bd5); padding: 25px; border-radius: 25px; margin-bottom: 25px; text-align: left; }
+        .balance-card h1 { font-size: 28px; margin: 5px 0; }
 
         .grid-menu { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
-        .menu-item { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08); padding: 25px 15px; border-radius: 22px; cursor: pointer; transition: 0.3s; display: flex; flex-direction: column; align-items: center; gap: 10px; }
-        .menu-item:active { transform: scale(0.95); background: rgba(0, 210, 255, 0.1); }
-        .menu-item i { font-size: 30px; font-style: normal; }
+        .menu-item { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08); padding: 20px; border-radius: 20px; cursor: pointer; text-align: center; }
+        .menu-item i { font-size: 28px; display: block; margin-bottom: 8px; font-style: normal; }
 
-        /* --- PROFIL MODAL --- */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(8px); }
-        .modal-content { background: #1a2a33; padding: 25px; border-radius: 30px; width: 92%; max-width: 380px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
+        /* --- MODAL --- */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(10px); }
+        .modal-content { background: #1a2a33; padding: 25px; border-radius: 30px; width: 90%; max-width: 370px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
         
-        .sticker-container { width: 100px; height: 100px; margin: 0 auto 10px; }
-        .user-id-badge { background: #ffd700; color: #000; padding: 4px 12px; border-radius: 8px; font-weight: 800; font-size: 14px; display: inline-block; margin-bottom: 10px; }
-        .email-readonly { font-size: 12px; color: #00d2ff; margin-bottom: 15px; opacity: 0.7; display: block; background: rgba(0, 210, 255, 0.05); padding: 5px; border-radius: 5px; }
+        .sticker-box { width: 110px; height: 110px; margin: 0 auto 10px; }
+        .user-id-badge { background: #ffd700; color: #000; padding: 5px 15px; border-radius: 10px; font-weight: 800; font-size: 14px; display: inline-block; margin-bottom: 12px; }
+        .email-label { font-size: 11px; color: #00d2ff; opacity: 0.8; margin-bottom: 15px; display: block; border: 1px solid rgba(0,210,255,0.2); padding: 5px; border-radius: 8px; }
         
-        .edit-input { width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: white; margin-bottom: 12px; outline: none; text-align: center; }
-        .btn-save { width: 100%; padding: 13px; background: #00d2ff; border: none; border-radius: 12px; color: #000; font-weight: 600; cursor: pointer; margin-bottom: 15px; }
+        .edit-input { width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: white; margin-bottom: 15px; outline: none; text-align: center; }
+        .btn-action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .btn-sub { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 10px; border-radius: 12px; color: white; font-size: 12px; cursor: pointer; }
         
-        /* Maxsus tugmalar dizayni */
-        .action-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        .btn-action { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 12px; border-radius: 15px; color: white; font-size: 12px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 5px; }
-        .btn-action i { font-size: 20px; font-style: normal; }
+        .btn-main { width: 100%; padding: 13px; background: #00d2ff; border: none; border-radius: 12px; color: #000; font-weight: 600; cursor: pointer; margin-bottom: 10px; }
+        .btn-out { width: 100%; padding: 10px; background: transparent; border: 1px solid #ff4b2b; color: #ff4b2b; border-radius: 12px; cursor: pointer; font-size: 13px; }
 
-        .btn-logout { width: 100%; padding: 12px; background: transparent; border: 1px solid #ff4b2b; color: #ff4b2b; border-radius: 12px; cursor: pointer; font-weight: 600; }
-
-        /* --- TOAST --- */
         #toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: #ffd700; color: #000; padding: 12px 25px; border-radius: 50px; transition: 0.5s; z-index: 3000; font-weight: 600; }
         #toast.show { bottom: 40px; }
     </style>
@@ -57,7 +53,7 @@
 <body>
 
     <header class="header">
-        <div onclick="location.href='messages.html'" style="cursor:pointer; font-size:20px;">🔔</div>
+        <div onclick="location.href='messages.html'" style="cursor:pointer;">🔔</div>
         <div class="top-profile-container" onclick="toggleModal(true)">
             <span id="top-name">...</span>
             <div class="mini-avatar" id="top-initials">?</div>
@@ -66,14 +62,14 @@
 
     <div class="main-content">
         <div class="balance-card">
-            <h3>Mening balansim</h3>
+            <h3>Balansim</h3>
             <h1 id="user-balance">0 so'm</h1>
-            <p style="font-size: 11px; margin-top: 5px; opacity: 0.8; text-decoration: underline; cursor: pointer;" onclick="showToast('To\'lov tizimi tez kunda...')">💳 Balansni to'ldirish</p>
+            <p style="font-size: 11px; cursor:pointer;" onclick="showToast('Tez kunda...')">💳 To'ldirish</p>
         </div>
 
         <div class="grid-menu">
             <div class="menu-item" onclick="startQuiz('free')"><i>🎁</i><span>Bepul Test</span></div>
-            <div class="menu-item" style="border: 1px solid #ffd700; color: #ffd700;" onclick="startQuiz('paid')"><i>💎</i><span>Premium</span></div>
+            <div class="menu-item" style="color:#ffd700;" onclick="startQuiz('paid')"><i>💎</i><span>Premium</span></div>
             <div class="menu-item" onclick="location.href='statistics.html'"><i>📊</i><span>Statistika</span></div>
             <div class="menu-item" onclick="location.href='leaderboard.html'"><i>🏆</i><span>Liderlar</span></div>
         </div>
@@ -81,24 +77,23 @@
 
     <div id="profileModal" class="modal">
         <div class="modal-content">
-            <div class="sticker-container">
+            <div class="sticker-box">
                 <dotlottie-player src="https://lottie.host/5b47a61d-6161-4608-8e6b-67e324c47841/T88XGOf6m6.json" background="transparent" speed="1" loop autoplay></dotlottie-player>
             </div>
             
             <div class="user-id-badge" id="user-id-display">ID: ...</div>
-            <h3 style="margin-bottom: 5px;">Profil</h3>
-            <span id="user-email-display" class="email-readonly">email@example.com</span>
+            <span id="user-email-display" class="email-label">email@example.com</span>
             
-            <input type="text" id="input-name" class="edit-input" placeholder="Ism Familiya">
-            <button class="btn-save" onclick="updateName()">SAQLASH</button>
+            <input type="text" id="input-name" class="edit-input" placeholder="Ismingiz">
+            <button class="btn-main" onclick="updateName()">SAQLASH</button>
 
-            <div class="action-buttons">
-                <div class="btn-action" onclick="location.href='results.html'"><i>📜</i><span>Natijalarim</span></div>
-                <div class="btn-action" onclick="location.href='payments.html'"><i>💸</i><span>To'lovlarim</span></div>
+            <div class="btn-action-row">
+                <button class="btn-sub" onclick="location.href='results.html'">📜 Tarix</button>
+                <button class="btn-sub" onclick="location.href='payments.html'">💸 To'lovlar</button>
             </div>
 
-            <button class="btn-logout" onclick="logout()">🚪 TIZIMDAN CHIQISH</button>
-            <p onclick="toggleModal(false)" style="margin-top:15px; cursor:pointer; font-size:12px; opacity:0.4;">Yopish</p>
+            <button class="btn-out" onclick="logout()">Chiqish</button>
+            <p onclick="toggleModal(false)" style="margin-top:15px; cursor:pointer; font-size:11px; opacity:0.4;">Yopish</p>
         </div>
     </div>
 
@@ -107,7 +102,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2G8cD0JezEKXRCtKLYiZL0bzDyTp06Vs",
@@ -121,74 +116,56 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        let currentUser = null;
 
-        // ID yaratish funksiyasi
-        function makeID(length) {
-            let result = '';
-            const characters = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-            for (let i = 0; i < length; i++) {
-                result += characters.charAt(Math.floor(Math.random() * characters.length));
-            }
-            return result;
+        function generateID() {
+            return Math.random().toString(36).substring(2, 8).toUpperCase();
         }
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                currentUser = user;
-                const userDocRef = doc(db, "users", user.uid);
-                const snap = await getDoc(userDocRef);
+                const userRef = doc(db, "users", user.uid);
+                const snap = await getDoc(userRef);
                 
-                if (snap.exists()) {
-                    const data = snap.data();
-                    let studentID = data.studentID;
-
-                    // ID mavjud bo'lmasa yangisini yaratish
-                    if (!studentID) {
-                        studentID = makeID(6);
-                        await updateDoc(userDocRef, { studentID: studentID });
-                    }
-
-                    document.getElementById('user-id-display').innerText = "ID: " + studentID;
-                    document.getElementById('top-name').innerText = data.fio || "Foydalanuvchi";
-                    document.getElementById('top-initials').innerText = (data.fio || "U")[0].toUpperCase();
-                    document.getElementById('user-balance').innerText = (data.balance || 0).toLocaleString() + " so'm";
-                    document.getElementById('user-email-display').innerText = user.email;
-                    document.getElementById('input-name').value = data.fio || "";
+                let data = snap.exists() ? snap.data() : {};
+                
+                // Agar ID yo'q bo'lmasa, yaratish va bazaga yozish
+                if (!data.studentID) {
+                    data.studentID = generateID();
+                    await setDoc(userRef, { studentID: data.studentID }, { merge: true });
                 }
+
+                document.getElementById('user-id-display').innerText = "ID: " + data.studentID;
+                document.getElementById('top-name').innerText = data.fio || "Foydalanuvchi";
+                document.getElementById('top-initials').innerText = (data.fio || "U")[0].toUpperCase();
+                document.getElementById('user-balance').innerText = (data.balance || 0).toLocaleString() + " so'm";
+                document.getElementById('user-email-display').innerText = user.email;
+                document.getElementById('input-name').value = data.fio || "";
             } else {
                 window.location.replace("index.html");
             }
         });
 
         window.toggleModal = (s) => document.getElementById('profileModal').style.display = s ? 'flex' : 'none';
-
-        window.showToast = (text) => {
+        
+        window.showToast = (txt) => {
             const t = document.getElementById('toast');
-            t.innerText = text; t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), 3000);
+            t.innerText = txt; t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2500);
         };
 
         window.updateName = async () => {
             const name = document.getElementById('input-name').value;
-            if(!name || !currentUser) return;
-            try {
-                await updateDoc(doc(db, "users", currentUser.uid), { fio: name });
-                showToast("Ma'lumotlar saqlandi! ✅");
-                setTimeout(() => location.reload(), 1000);
-            } catch(e) { showToast("Xatolik yuz berdi!"); }
+            if(!name) return;
+            await updateDoc(doc(db, "users", auth.currentUser.uid), { fio: name });
+            showToast("Saqlandi! ✅");
+            setTimeout(() => location.reload(), 800);
         };
 
-        window.logout = async () => {
-            if(confirm("Tizimdan chiqmoqchimisiz?")) {
-                await signOut(auth);
-                window.location.replace("index.html");
-            }
-        };
+        window.logout = () => signOut(auth).then(() => window.location.replace("index.html"));
 
         window.startQuiz = (type) => {
             showToast("Yuklanmoqda...");
-            setTimeout(() => window.location.href = (type === 'free' ? "quiz.html" : "premium-quiz.html"), 1200);
+            setTimeout(() => window.location.href = (type === 'free' ? "quiz.html" : "premium-quiz.html"), 1000);
         };
     </script>
 </body>
