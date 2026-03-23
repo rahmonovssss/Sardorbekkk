@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistika - Dr. Rahmonov</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background: #0f2027; color: white; padding: 20px; text-align: center; }
+        .stat-circle { 
+            width: 180px; height: 180px; border-radius: 50%; 
+            background: rgba(255,255,255,0.05); border: 8px solid #00d2ff;
+            margin: 40px auto; display: flex; flex-direction: column; 
+            justify-content: center; box-shadow: 0 0 30px rgba(0, 210, 255, 0.2);
+        }
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .stat-card { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 25px; border: 1px solid rgba(255,255,255,0.1); }
+        .stat-card h3 { color: #00d2ff; font-size: 24px; }
+    </style>
+</head>
+<body>
+    <a href="home.html" style="float:left; text-decoration:none; color:#00d2ff;">⬅️ Orqaga</a><br>
+    <div class="stat-circle">
+        <h1 id="total-count">0</h1>
+        <p>Umumiy Test</p>
+    </div>
+    <div class="stat-grid">
+        <div class="stat-card"><p>O'rtacha Ball</p><h3 id="avg-score">0</h3></div>
+        <div class="stat-card"><p>Eng Yuqori</p><h3 id="max-score">0</h3></div>
+    </div>
+</body>
+</html>
