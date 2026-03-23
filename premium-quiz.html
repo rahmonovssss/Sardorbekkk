@@ -34,30 +34,38 @@
         .btn-confirm { flex: 1; padding: 12px; background: #ff4b2b; border: none; border-radius: 12px; color: white; font-weight: bold; cursor: pointer; }
         .btn-cancel { flex: 1; padding: 12px; background: #333; border: none; border-radius: 12px; color: white; font-weight: bold; cursor: pointer; }
 
+        /* --- SELECTION BOX --- */
+        .sub-card { 
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); 
+            padding: 15px; border-radius: 12px; cursor: pointer; text-align: center; 
+            font-size: 14px; position: relative; transition: 0.2s;
+        }
+        .sub-card.selected { border-color: #ffd700; background: rgba(255,215,0,0.1); color: #ffd700; font-weight: 600; }
+        .block-label { 
+            position: absolute; top: -8px; right: -5px; background: #ffd700; color: #000; 
+            font-size: 10px; padding: 2px 6px; border-radius: 5px; font-weight: 800; display: none;
+        }
+        .sub-card.selected .block-label { display: block; }
+
         /* --- DASHBOARD --- */
         #subject-dashboard { display: none; }
         .dashboard-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-top: 20px; }
         .subject-status-card {
             background: #1a2a33; padding: 20px; border-radius: 18px; border: 1px solid rgba(255,255,255,0.1);
-            display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.3s;
+            display: flex; justify-content: space-between; align-items: center; cursor: pointer;
         }
         .subject-status-card.completed { opacity: 0.6; border-color: #00ff00; pointer-events: none; }
-        .subject-status-card.active { border-color: #ffd700; background: rgba(255,215,0,0.05); }
-        .subject-name { font-weight: 600; font-size: 15px; }
         .status-badge { padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: bold; }
         .badge-wait { background: #444; color: #ccc; }
         .badge-done { background: #00ff00; color: #000; }
 
         /* --- QUIZ BOX --- */
         #quiz-box { display: none; background: #1a2a33; padding: 25px; border-radius: 25px; border: 1px solid rgba(255,215,0,0.1); }
-        .option { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 15px; cursor: pointer; margin-bottom: 12px; transition: 0.2s; }
+        .option { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 15px; cursor: pointer; margin-bottom: 12px; }
         .option.selected { background: #ffd700; color: #000; font-weight: bold; border-color: #ffd700; }
         
         .btn-main { width: 100%; padding: 18px; border-radius: 15px; border: none; background: #ffd700; color: #000; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .btn-main:disabled { opacity: 0.3; }
-
-        .sub-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 15px; border-radius: 12px; cursor: pointer; text-align: center; font-size: 13px; }
-        .sub-card.selected { border-color: #ffd700; background: rgba(255,215,0,0.1); color: #ffd700; }
     </style>
 </head>
 <body>
@@ -81,14 +89,19 @@
     <div class="container">
         <div id="selection-box">
             <h2 style="color:#ffd700; margin-bottom: 10px;">Premium Blok Test</h2>
-            <p style="font-size: 13px; opacity: 0.7; margin-bottom: 20px;">2 ta mutaxassislik fanini tanlang:</p>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;" id="main-subjects-list"></div>
-            <button class="btn-main" id="start-btn" onclick="startImtihon()" disabled style="margin-top:25px;">IMTIHONNI BOSHLASH</button>
+            <p style="font-size: 13px; opacity: 0.7; margin-bottom: 20px;">Fanlarni tanlash tartibi ballarni belgilaydi:</p>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;" id="main-subjects-list"></div>
+            
+            <div style="margin-top: 20px; font-size: 12px; background: rgba(255,215,0,0.05); padding: 10px; border-radius: 10px; border: 1px dashed #ffd700;">
+                <p>1-tanlangan: <b>3.1 ball</b> (30 ta savol)</p>
+                <p>2-tanlangan: <b>2.1 ball</b> (30 ta savol)</p>
+            </div>
+
+            <button class="btn-main" id="start-btn" onclick="startImtihon()" disabled style="margin-top:20px;">IMTIHONNI BOSHLASH</button>
         </div>
 
         <div id="subject-dashboard">
             <h3 style="color:#ffd700; margin-bottom: 5px;">Fanlar ro'yxati</h3>
-            <p style="font-size: 12px; opacity: 0.7;">Fanlarni ixtiyoriy tartibda ishlashingiz mumkin:</p>
             <div class="dashboard-grid" id="dashboard-items"></div>
             <button class="btn-main" id="final-submit-btn" style="display:none; background:#00ff00;" onclick="submitAll()">NATIJANI KO'RISH</button>
         </div>
@@ -119,13 +132,9 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // MODAL FUNKSIYALARI
         window.openModal = () => document.getElementById('custom-modal').style.display = 'flex';
         window.closeModal = () => document.getElementById('custom-modal').style.display = 'none';
-        window.exitToHome = () => {
-            sessionStorage.removeItem('premium_end_time');
-            window.location.replace('home.html');
-        };
+        window.exitToHome = () => { sessionStorage.removeItem('premium_end_time'); window.location.replace('home.html'); };
 
         let selectedSubjects = [];
         let allExamData = {};
@@ -141,15 +150,27 @@
         subjectsList.forEach(s => {
             const d = document.createElement('div');
             d.className = 'sub-card';
-            d.innerText = s;
+            d.innerHTML = `${s} <span class="block-label"></span>`;
             d.onclick = () => {
-                if(selectedSubjects.includes(s)) {
-                    selectedSubjects = selectedSubjects.filter(x => x !== s);
+                const index = selectedSubjects.indexOf(s);
+                if(index > -1) {
+                    selectedSubjects.splice(index, 1);
                     d.classList.remove('selected');
                 } else if(selectedSubjects.length < 2) {
                     selectedSubjects.push(s);
                     d.classList.add('selected');
                 }
+                
+                // Blok raqamlarini yangilash
+                document.querySelectorAll('.sub-card').forEach(card => {
+                    const name = card.innerText.split('\n')[0].trim();
+                    const sIndex = selectedSubjects.indexOf(name);
+                    const label = card.querySelector('.block-label');
+                    if(sIndex > -1) {
+                        label.innerText = (sIndex + 1) + "-blok";
+                    }
+                });
+
                 document.getElementById('start-btn').disabled = (selectedSubjects.length !== 2);
             };
             listDiv.appendChild(d);
@@ -162,8 +183,8 @@
                 { name: "Ona tili (Majburiy)", subject: "Ona tili", type: "premium_mandatory", count: 10, ball: 1.1 },
                 { name: "Matematika (Majburiy)", subject: "Matematika", type: "premium_mandatory", count: 10, ball: 1.1 },
                 { name: "Tarix (Majburiy)", subject: "Tarix", type: "premium_mandatory", count: 10, ball: 1.1 },
-                { name: selectedSubjects[0], subject: selectedSubjects[0], type: "premium", count: 30, ball: 3.1 },
-                { name: selectedSubjects[1], subject: selectedSubjects[1], type: "premium", count: 30, ball: 2.1 }
+                { name: selectedSubjects[0] + " (1-blok)", subject: selectedSubjects[0], type: "premium", count: 30, ball: 3.1 },
+                { name: selectedSubjects[1] + " (2-blok)", subject: selectedSubjects[1], type: "premium", count: 30, ball: 2.1 }
             ];
 
             try {
@@ -179,17 +200,16 @@
                 document.getElementById('selection-box').style.display = 'none';
                 document.getElementById('top-nav').style.display = 'flex';
                 
-                // --- VAQTNI BOSHQARISH (sessionStorage) ---
                 let endTime = sessionStorage.getItem('premium_end_time');
                 if (!endTime) {
-                    endTime = Date.now() + (90 * 60 * 1000); // 90 minut
+                    endTime = Date.now() + (90 * 60 * 1000);
                     sessionStorage.setItem('premium_end_time', endTime);
                 }
                 
                 renderDashboard();
                 startTimer(parseInt(endTime));
             } catch (e) {
-                alert("Internet xatosi!");
+                alert("Xatolik: " + e.message);
                 location.reload();
             }
         };
@@ -210,9 +230,9 @@
                 card.innerHTML = `
                     <div>
                         <div class="subject-name">${name}</div>
-                        <div style="font-size:12px; opacity:0.6;">${allExamData[name].length} ta savol</div>
+                        <div style="font-size:11px; opacity:0.6;">${allExamData[name].length} ta savol</div>
                     </div>
-                    <span class="status-badge ${isDone ? 'badge-done' : 'badge-wait'}">${isDone ? 'TAMOM' : 'BOSHLASH'}</span>
+                    <span class="status-badge ${isDone ? 'badge-done' : 'badge-wait'}">${isDone ? 'OK' : 'BOSHLASH'}</span>
                 `;
                 if(!isDone) card.onclick = () => startSubject(name);
                 container.appendChild(card);
@@ -232,11 +252,9 @@
         function showQuestion() {
             const questions = allExamData[currentSubject];
             const q = questions[currentQIndex];
-
             document.getElementById('current-subject-name').innerText = currentSubject;
-            document.getElementById('q-counter').innerText = `${currentQIndex + 1} / ${questions.length}`;
+            document.getElementById('q-counter').innerText = `${currentQIndex + 1}/${questions.length}`;
             document.getElementById('q-text').innerText = q.question;
-
             const optContainer = document.getElementById('options-container');
             optContainer.innerHTML = "";
             document.getElementById('next-btn').disabled = true;
@@ -258,38 +276,22 @@
         window.nextQuestion = () => {
             const questions = allExamData[currentSubject];
             const q = questions[currentQIndex];
-
             userResults.push({
-                subject: q.subject,
+                subject: currentSubject,
                 isCorrect: window.userChoice === q.correctAnswer,
                 ball: window.userChoice === q.correctAnswer ? q.ball : 0
             });
-
             currentQIndex++;
-            if(currentQIndex < questions.length) {
-                showQuestion();
-            } else {
-                examStatus[currentSubject] = true;
-                renderDashboard();
-            }
+            if(currentQIndex < questions.length) showQuestion();
+            else { examStatus[currentSubject] = true; renderDashboard(); }
         };
 
         function startTimer(endTime) {
-            if (timerId) clearInterval(timerId); // Takrorlanmasligi uchun
-            
             timerId = setInterval(() => {
-                const now = Date.now();
-                const distance = endTime - now;
-
-                if (distance <= 0) {
-                    clearInterval(timerId);
-                    sessionStorage.removeItem('premium_end_time');
-                    submitAll();
-                    return;
-                }
-
-                const m = Math.floor(distance / (1000 * 60));
-                const s = Math.floor((distance % (1000 * 60)) / 1000);
+                const distance = endTime - Date.now();
+                if (distance <= 0) { clearInterval(timerId); submitAll(); return; }
+                const m = Math.floor(distance / 60000);
+                const s = Math.floor((distance % 60000) / 1000);
                 document.getElementById('timer-display').innerText = `${m}:${s < 10 ? '0'+s : s}`;
             }, 1000);
         }
