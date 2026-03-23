@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Testlar Tarixi - Dr. Rahmonov</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background: #0f2027; color: white; padding: 20px; }
+        .header { display: flex; align-items: center; gap: 10px; margin-bottom: 25px; }
+        .back-link { color: #00d2ff; text-decoration: none; font-size: 20px; }
+        
+        .history-card { 
+            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px; border-radius: 20px; margin-bottom: 15px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .score-badge { background: #00d2ff; color: #000; padding: 5px 12px; border-radius: 10px; font-weight: 700; }
+        .date-text { font-size: 11px; opacity: 0.5; display: block; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="home.html" class="back-link">⬅️</a>
+        <h2>Testlar Tarixi</h2>
+    </div>
+    <div id="history-list">
+        <p style="text-align: center; opacity: 0.5;">Yuklanmoqda...</p>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, query, where, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = { /* KONFIGURATSIYA */ };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const q = query(collection(db, "results"), where("userId", "==", user.uid), orderBy("timestamp", "desc"));
+                const snap = await getDocs(q);
+                const list = document.getElementById('history-list');
+                list.innerHTML = '';
+                
+                if (snap.empty) { list.innerHTML = '<p style="text-align: center;">Hali test topshirmagansiz</p>'; return; }
+
+                snap.forEach(doc => {
+                    const res = doc.data();
+                    list.innerHTML += `
+                        <div class="history-card">
+                            <div>
+                                <strong>${res.subject || 'Umumiy test'}</strong>
+                                <span class="date-text">${new Date(res.timestamp?.seconds * 1000).toLocaleDateString()}</span>
+                            </div>
+                            <div class="score-badge">${res.score} ball</div>
+                        </div>`;
+                });
+            }
+        });
+    </script>
+</body>
+</html>
