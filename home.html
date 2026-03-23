@@ -7,41 +7,58 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@dotlottie/player-component@latest/dist/dotlottie-player.mjs" type="module"></script>
     <style>
-        /* Avvalgi stillar o'zgarishsiz qoladi */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background: #0f2027; color: white; overflow-x: hidden; min-height: 100vh; }
-        .header { position: fixed; top: 0; left: 0; width: 100%; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; background: rgba(15, 32, 39, 0.95); backdrop-filter: blur(10px); z-index: 1000; border-bottom: 1px solid rgba(0, 210, 255, 0.2); }
+
+        /* --- HEADER --- */
+        .header {
+            position: fixed; top: 0; left: 0; width: 100%; 
+            padding: 15px 20px; display: flex; justify-content: space-between; 
+            align-items: center; background: rgba(15, 32, 39, 0.95); 
+            backdrop-filter: blur(10px); z-index: 1000; border-bottom: 1px solid rgba(0, 210, 255, 0.2);
+        }
         .notif-btn { width: 42px; height: 42px; background: rgba(255, 255, 255, 0.08); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; }
         .notif-badge { position: absolute; top: -2px; right: -2px; background: #ff4b2b; color: white; font-size: 10px; padding: 2px 6px; border-radius: 50%; border: 2px solid #0f2027; }
         .top-profile-container { display: flex; align-items: center; gap: 10px; background: rgba(0, 210, 255, 0.1); padding: 5px 15px; border-radius: 50px; cursor: pointer; border: 1px solid rgba(0, 210, 255, 0.3); }
         .mini-avatar { width: 32px; height: 32px; background: linear-gradient(45deg, #00d2ff, #3a7bd5); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; }
+
+        /* --- MAIN --- */
         .main-content { padding: 100px 20px 30px; max-width: 600px; margin: 0 auto; }
-        .balance-card { background: linear-gradient(135deg, #00d2ff, #3a7bd5); padding: 25px; border-radius: 25px; margin-bottom: 25px; box-shadow: 0 10px 25px rgba(0, 210, 255, 0.3); position: relative; overflow: hidden; }
+        .balance-card { background: linear-gradient(135deg, #00d2ff, #3a7bd5); padding: 25px; border-radius: 25px; margin-bottom: 25px; box-shadow: 0 10px 25px rgba(0, 210, 255, 0.3); position: relative; }
         .balance-card h3 { font-size: 13px; opacity: 0.9; font-weight: 300; }
         .balance-card h1 { font-size: 32px; margin: 5px 0; font-weight: 600; }
+
         .grid-menu { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
         .menu-item { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.07); padding: 22px 15px; border-radius: 22px; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; gap: 12px; }
         .menu-item:active { transform: scale(0.96); background: rgba(0, 210, 255, 0.08); }
         .menu-item i { font-size: 32px; font-style: normal; }
-        .premium { border: 1px solid #ffd700 !important; color: #ffd700; }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(5px); }
-        .modal-content { background: #1a2a33; padding: 25px; border-radius: 30px; width: 92%; max-width: 380px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
-        .profile-sticker { width: 100px; height: 100px; margin: 0 auto 10px; }
-        .user-id-badge { background: #ffd700; color: #000; padding: 4px 15px; border-radius: 8px; font-weight: 800; font-size: 15px; display: inline-block; margin-bottom: 10px; text-transform: none; }
-        .edit-input { width: 100%; padding: 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; color: white; margin-bottom: 12px; outline: none; }
-        .btn-update { width: 100%; padding: 14px; background: #00d2ff; border: none; border-radius: 15px; color: #000; font-weight: 700; cursor: pointer; margin-bottom: 15px; }
+        .premium { border: 1px solid #ffd700 !important; color: #ffd700; position: relative; overflow: hidden; }
+        .premium::after { content: '0 soʻm'; position: absolute; top: 5px; right: 5px; font-size: 9px; background: #ffd700; color: #000; padding: 2px 6px; border-radius: 5px; font-weight: 700; }
+
+        /* --- MODALS --- */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(8px); animation: fadeIn 0.3s ease; }
+        .modal-content { background: #1a2a33; padding: 25px; border-radius: 30px; width: 90%; max-width: 380px; text-align: center; border: 1px solid rgba(255,255,255,0.1); position: relative; }
+        .user-id-badge { background: #ffd700; color: #000; padding: 4px 15px; border-radius: 10px; font-weight: 800; font-size: 16px; margin-bottom: 15px; display: inline-block; letter-spacing: 1px; }
+        .edit-input { width: 100%; padding: 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; color: white; margin-bottom: 12px; outline: none; text-align: center; }
+        .btn-update { width: 100%; padding: 14px; background: #00d2ff; border: none; border-radius: 15px; color: #000; font-weight: 700; cursor: pointer; margin-bottom: 20px; }
+        
         .profile-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        .action-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 12px; border-radius: 12px; color: white; font-size: 12px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 5px; }
-        .btn-logout { width: 100%; padding: 12px; background: transparent; border: 1px solid #ff4b2b; color: #ff4b2b; border-radius: 12px; cursor: pointer; font-weight: 600; }
-        #toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: #ffd700; color: #000; padding: 12px 25px; border-radius: 50px; transition: 0.5s; z-index: 3000; font-weight: 600; }
+        .action-btn { background: rgba(255,255,255,0.05); padding: 12px; border-radius: 15px; color: white; font-size: 12px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); }
+        
+        .logout-confirm-btn { background: #ff4b2b; color: white; border: none; padding: 12px 25px; border-radius: 12px; font-weight: 600; cursor: pointer; margin-top: 10px; width: 100%; }
+        .cancel-btn { background: rgba(255,255,255,0.1); color: white; border: none; padding: 12px 25px; border-radius: 12px; cursor: pointer; margin-top: 10px; width: 100%; }
+
+        #toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: #ffd700; color: #000; padding: 12px 25px; border-radius: 50px; transition: 0.5s; z-index: 3000; font-weight: 700; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
         #toast.show { bottom: 40px; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
     </style>
 </head>
 <body>
 
     <header class="header">
         <div class="notif-btn" onclick="location.href='messages.html'"><i>🔔</i><span class="notif-badge" id="notif-count">0</span></div>
-        <div class="top-profile-container" onclick="toggleModal(true)">
+        <div class="top-profile-container" onclick="toggleModal('profileModal', true)">
             <span id="top-name" style="font-size: 13px; font-weight: 600;">...</span>
             <div class="mini-avatar" id="top-initials">?</div>
         </div>
@@ -51,7 +68,7 @@
         <div class="balance-card">
             <h3>Mening balansim</h3>
             <h1 id="user-balance">0 so'm</h1>
-            <p style="font-size: 12px; cursor: pointer; margin-top: 10px; background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; display: inline-block;" onclick="showToast('Tez kunda...')">💳 To'ldirish</p>
+            <p style="font-size: 12px; cursor: pointer; margin-top: 10px; background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; display: inline-block;" onclick="showToast('Toʻlov tizimi tez kunda...')">💳 To'ldirish</p>
         </div>
 
         <div class="grid-menu">
@@ -66,17 +83,25 @@
 
     <div id="profileModal" class="modal">
         <div class="modal-content">
-            <div class="profile-sticker"><dotlottie-player src="https://lottie.host/5b47a61d-6161-4608-8e6b-67e324c47841/T88XGOf6m6.json" background="transparent" speed="1" loop autoplay></dotlottie-player></div>
-            <div class="user-id-badge" id="user-id-display">ID: ......</div>
-            <p id="user-email-display" style="font-size: 11px; opacity: 0.6; margin-bottom: 15px;"></p>
-            <input type="text" id="input-name" class="edit-input" placeholder="FIO">
+            <div style="width: 80px; height: 80px; margin: 0 auto;"><dotlottie-player src="https://lottie.host/5b47a61d-6161-4608-8e6b-67e324c47841/T88XGOf6m6.json" speed="1" loop autoplay></dotlottie-player></div>
+            <div class="user-id-badge" id="user-id-display">...</div>
+            <input type="text" id="input-name" class="edit-input" placeholder="Ism Familiyangiz">
             <button class="btn-update" onclick="updateName()">SAQLASH</button>
             <div class="profile-actions">
-                <div class="action-btn" onclick="location.href='results-history.html'"><i>📜</i><span>Natijalar</span></div>
-                <div class="action-btn" onclick="location.href='payments.html'"><i>💸</i><span>To'lovlar</span></div>
+                <div class="action-btn" onclick="location.href='results-history.html'">📜 Natijalar</div>
+                <div class="action-btn" onclick="location.href='payments.html'">💸 To'lovlar</div>
             </div>
-            <button class="btn-logout" onclick="openLogoutModal()">🚪 CHIQISH</button>
-            <p onclick="toggleModal(false)" style="margin-top:15px; cursor:pointer; font-size:12px; opacity:0.5;">Yopish</p>
+            <p onclick="toggleModal('profileModal', false); toggleModal('logoutModal', true)" style="color:#ff4b2b; cursor:pointer; font-weight:600;">Tizimdan chiqish</p>
+            <p onclick="toggleModal('profileModal', false)" style="margin-top:15px; opacity:0.5; font-size:12px; cursor:pointer;">Yopish</p>
+        </div>
+    </div>
+
+    <div id="logoutModal" class="modal">
+        <div class="modal-content">
+            <h3>Chiqish</h3>
+            <p style="margin: 15px 0; opacity: 0.8;">Haqiqatan ham hisobingizdan chiqmoqchimisiz?</p>
+            <button class="logout-confirm-btn" onclick="confirmLogout()">HA, CHIQISH</button>
+            <button class="cancel-btn" onclick="toggleModal('logoutModal', false)">BEKOR QILISH</button>
         </div>
     </div>
 
@@ -101,26 +126,21 @@
         const db = getFirestore(app);
         let currentUser = null;
 
-        // --- HARFLAR VA RAQAMLAR ARALASH NOYOB ID YARATISH ---
-        async function generateMixedUniqueId(length = 6) {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        // --- HARFLAR VA RAQAMLAR ARALASH NOYOB ID ---
+        async function generateAlphanumericID(length = 6) {
+            const charset = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789"; // Oson adashiladigan O, 0, I, l olib tashlandi
+            let result = "";
             let isUnique = false;
-            let finalID = '';
-
             while (!isUnique) {
-                finalID = '';
+                result = "";
                 for (let i = 0; i < length; i++) {
-                    finalID += chars.charAt(Math.floor(Math.random() * chars.length));
+                    result += charset.charAt(Math.floor(Math.random() * charset.length));
                 }
-
-                // Bazada tekshirish
-                const q = query(collection(db, "users"), where("studentID", "==", finalID));
+                const q = query(collection(db, "users"), where("studentID", "==", result));
                 const snap = await getDocs(q);
-                if (snap.empty) {
-                    isUnique = true;
-                }
+                if (snap.empty) isUnique = true;
             }
-            return finalID;
+            return result;
         }
 
         onAuthStateChanged(auth, async (user) => {
@@ -134,8 +154,7 @@
                     let studentID = data.studentID;
 
                     if (!studentID) {
-                        showToast("Yangi ID yaratilmoqda...");
-                        studentID = await generateMixedUniqueId(6);
+                        studentID = await generateAlphanumericID(6);
                         await updateDoc(userDocRef, { studentID: studentID });
                     }
 
@@ -143,7 +162,6 @@
                     document.getElementById('top-name').innerText = data.fio || "Foydalanuvchi";
                     document.getElementById('top-initials').innerText = (data.fio || "U").charAt(0).toUpperCase();
                     document.getElementById('user-balance').innerText = (data.balance || 0).toLocaleString() + " so'm";
-                    document.getElementById('user-email-display').innerText = user.email;
                     document.getElementById('input-name').value = data.fio || "";
                 }
             } else { window.location.replace("index.html"); }
@@ -154,19 +172,22 @@
             if(!newName || !currentUser) return;
             try {
                 await updateDoc(doc(db, "users", currentUser.uid), { fio: newName });
-                showToast("Saqlandi! ✅");
+                showToast("Muvaffaqiyatli saqlandi! ✅");
                 setTimeout(() => location.reload(), 800);
             } catch(e) { showToast("Xatolik!"); }
         };
 
-        window.startQuiz = (t) => {
-            showToast("Yuklanmoqda...");
-            setTimeout(() => window.location.href = t === 'free' ? "quiz.html" : "premium-quiz.html", 1000);
+        window.startQuiz = (type) => {
+            if(type === 'paid') {
+                // Hozircha 0 so'm, shuning uchun to'g'ridan-to'g'ri o'tadi
+                window.location.href = "premium-quiz.html";
+            } else {
+                window.location.href = "quiz.html";
+            }
         };
 
         window.showToast = (txt) => { const t = document.getElementById('toast'); t.innerText = txt; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2500); };
-        window.toggleModal = (s) => document.getElementById('profileModal').style.display = s ? 'flex' : 'none';
-        window.openLogoutModal = () => { if(confirm("Chiqmoqchimisiz?")) confirmLogout(); };
+        window.toggleModal = (id, s) => document.getElementById(id).style.display = s ? 'flex' : 'none';
         window.confirmLogout = async () => { await signOut(auth); window.location.replace("index.html"); };
     </script>
 </body>
