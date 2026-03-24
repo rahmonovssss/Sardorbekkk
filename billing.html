@@ -3,36 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hisobni To'ldirish - Dr. Rahmonov</title>
+    <title>To'lov - Dr. Rahmonov</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        body { background: #0f2027; color: white; padding: 20px; text-align: center; }
-        .card { background: rgba(255,255,255,0.05); padding: 30px; border-radius: 25px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px); }
-        .input-box { width: 100%; padding: 15px; margin: 15px 0; border-radius: 12px; border: 1px solid #00d2ff; background: rgba(0,0,0,0.3); color: white; text-align: center; font-size: 16px; outline: none; }
-        .file-label { display: block; background: rgba(0,210,255,0.1); padding: 15px; border-radius: 12px; border: 1px dashed #00d2ff; cursor: pointer; margin-bottom: 20px; font-size: 13px; }
-        .pay-btn { width: 100%; padding: 18px; background: #00d2ff; border: none; border-radius: 15px; color: #000; font-weight: 700; cursor: pointer; transition: 0.3s; }
-        .pay-btn:active { transform: scale(0.95); }
-        #preview { width: 100px; height: 100px; object-fit: cover; border-radius: 10px; display: none; margin: 10px auto; }
-        #toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: #ffd700; color: #000; padding: 12px 25px; border-radius: 50px; transition: 0.5s; z-index: 3000; font-weight: 600; }
+        body { background: #0f2027; color: white; padding: 20px; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+        
+        .card { 
+            background: rgba(255, 255, 255, 0.05); 
+            backdrop-filter: blur(15px); 
+            padding: 30px; 
+            border-radius: 30px; 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            width: 100%; max-width: 400px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            animation: fadeIn 0.8s ease;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        h2 { color: #00d2ff; margin-bottom: 10px; font-weight: 600; }
+        p { font-size: 13px; opacity: 0.7; margin-bottom: 25px; }
+
+        .input-box { 
+            width: 100%; padding: 15px; margin-bottom: 20px; 
+            border-radius: 15px; border: 2px solid rgba(0, 210, 255, 0.3); 
+            background: rgba(0,0,0,0.2); color: white; 
+            font-size: 16px; outline: none; transition: 0.3s;
+        }
+        .input-box:focus { border-color: #00d2ff; box-shadow: 0 0 15px rgba(0, 210, 255, 0.2); }
+
+        .file-label { 
+            display: block; background: rgba(0, 210, 255, 0.1); 
+            padding: 20px; border-radius: 15px; border: 2px dashed #00d2ff; 
+            cursor: pointer; margin-bottom: 25px; font-size: 14px; color: #00d2ff;
+        }
+
+        #preview { 
+            width: 100%; max-height: 200px; object-fit: contain; 
+            border-radius: 10px; display: none; margin-bottom: 20px; 
+        }
+
+        .pay-btn { 
+            width: 100%; padding: 18px; background: #00d2ff; 
+            border: none; border-radius: 15px; color: #000; 
+            font-weight: 700; font-size: 16px; cursor: pointer; 
+            transition: 0.3s; box-shadow: 0 10px 20px rgba(0, 210, 255, 0.2);
+        }
+        .pay-btn:active { transform: scale(0.96); }
+
+        #toast { 
+            position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); 
+            background: #ffd700; color: #000; padding: 15px 30px; 
+            border-radius: 50px; font-weight: 600; transition: 0.5s; z-index: 9999;
+        }
         #toast.show { bottom: 40px; }
     </style>
 </head>
 <body>
 
     <div class="card">
-        <h2 style="color:#00d2ff; margin-bottom:10px;">To'lov So'rovi</h2>
-        <p style="font-size:12px; opacity:0.7; margin-bottom:20px;">Pulni o'tkazib, chekni yuklang</p>
+        <h2>To'lov So'rovi</h2>
+        <p>Iltimos, to'lovni amalga oshiring va chekni (skrinshot) yuklang.</p>
 
-        <input type="number" id="amount" class="input-box" placeholder="Summani yozing (masalan: 10000)">
+        <input type="number" id="amount" class="input-box" placeholder="Summa (masalan: 10000)">
         
-        <label for="screenshot" class="file-label">
-            📸 Skrinshot yuklash (Chek)
+        <label for="screenshot" class="file-label" id="label-text">
+            📸 Galereyadan chekni tanlang
             <input type="file" id="screenshot" accept="image/*" style="display:none;" onchange="previewImage(this)">
         </label>
+        
         <img id="preview" src="">
 
-        <button class="pay-btn" onclick="submitPayment()">ADMIN’GA YUBORISH</button>
+        <button class="pay-btn" id="submit-btn" onclick="submitPayment()">YUBORISH</button>
     </div>
 
     <div id="toast">Xabar!</div>
@@ -41,62 +84,102 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, collection, addDoc, doc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
-        const firebaseConfig = { /* SIZNING CONFIG */ };
+        // Firebase konfiguratsiyangizni shu yerga qo'ying
+        const firebaseConfig = { 
+            apiKey: "AIzaSyA2G8cD0JezEKXRCtKLYiZL0bzDyTp06Vs",
+            authDomain: "quiz-app-3692d.firebaseapp.com",
+            projectId: "quiz-app-3692d",
+            storageBucket: "quiz-app-3692d.firebasestorage.app",
+            messagingSenderId: "526836020845",
+            appId: "1:526836020845:android:3ea991380c104c75e8b164"
+        };
+
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const storage = getStorage(app);
 
         let userProfile = null;
+
+        // Telegram ma'lumotlari
+        const botToken = "5714791266:AAEpc1YGClxn0e5u9BReEsiWrr66APqSYbk"; 
+        const myChatId = "5769394153"; 
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 const snap = await getDoc(doc(db, "users", user.uid));
-                userProfile = snap.data();
-            } else { location.href = "index.html"; }
+                if (snap.exists()) {
+                    userProfile = snap.data();
+                }
+            } else { window.location.replace("index.html"); }
         });
 
         window.previewImage = (input) => {
             const pre = document.getElementById('preview');
-            if (input.files[0]) {
+            const labelText = document.getElementById('label-text');
+            if (input.files && input.files[0]) {
                 pre.src = URL.createObjectURL(input.files[0]);
                 pre.style.display = 'block';
+                labelText.innerText = "✅ Rasm tanlandi";
             }
-        }
+        };
 
         window.submitPayment = async () => {
             const amt = document.getElementById('amount').value;
             const file = document.getElementById('screenshot').files[0];
+            const btn = document.getElementById('submit-btn');
 
-            if (!amt || !file) return showToast("Barcha maydonlarni to'ldiring!");
-            
-            showToast("Chek yuklanmoqda...");
+            if (!amt || !file) {
+                showToast("Summa va chekni kiriting!");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "YUBORILMOQDA...";
+            showToast("Telegramga yuborilmoqda...");
+
+            // Telegramga yuborish (sendPhoto)
+            const formData = new FormData();
+            formData.append("chat_id", myChatId);
+            formData.append("photo", file);
+            formData.append("caption", `💰 YANGI TO'LOV SO'ROVI!\n\n👤 F.I.SH: ${userProfile ? userProfile.fio : 'Noma'lum'}\n🆔 ID: ${userProfile ? userProfile.studentID : '---'}\n💵 Summa: ${parseInt(amt).toLocaleString()} so'm\n📧 Email: ${auth.currentUser.email}\n\n⚠️ Tekshirib, Admin Paneldan balansni oshiring!`);
 
             try {
-                const sRef = ref(storage, `checks/${Date.now()}_${auth.currentUser.uid}`);
-                await uploadBytes(sRef, file);
-                const url = await getDownloadURL(sRef);
-
-                await addDoc(collection(db, "payment_requests"), {
-                    userId: auth.currentUser.uid,
-                    fio: userProfile.fio || "Ismsiz",
-                    email: auth.currentUser.email,
-                    amount: parseInt(amt),
-                    screenshot: url,
-                    status: "pending",
-                    timestamp: serverTimestamp()
+                const response = await fetch(`https://api.telegram.org/bot${botToken}/sendPhoto`, {
+                    method: "POST",
+                    body: formData
                 });
 
-                showToast("Muvaffaqiyatli yuborildi! ✅");
-                setTimeout(() => location.href = 'home.html', 2000);
-            } catch (e) {
-                showToast("Xatolik: " + e.message);
-            }
-        }
+                if (response.ok) {
+                    showToast("Muvaffaqiyatli yuborildi! ✅");
+                    
+                    // Firestore bazaga yozish (Admin panelda ko'rinishi uchun)
+                    await addDoc(collection(db, "payment_requests"), {
+                        userId: auth.currentUser.uid,
+                        fio: userProfile ? userProfile.fio : "Noma'lum",
+                        amount: parseInt(amt),
+                        status: "pending",
+                        timestamp: serverTimestamp()
+                    });
 
-        window.showToast = (txt) => { const t = document.getElementById('toast'); t.innerText = txt; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); };
+                    setTimeout(() => window.location.href = 'home.html', 2500);
+                } else {
+                    showToast("Xatolik! Bot sozlamalarini tekshiring.");
+                    btn.disabled = false;
+                    btn.innerText = "QAYTA URINISH";
+                }
+            } catch (e) {
+                showToast("Internet ulanishini tekshiring!");
+                btn.disabled = false;
+                btn.innerText = "YUBORISH";
+            }
+        };
+
+        window.showToast = (txt) => {
+            const t = document.getElementById('toast');
+            t.innerText = txt; t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        };
     </script>
 </body>
 </html>
