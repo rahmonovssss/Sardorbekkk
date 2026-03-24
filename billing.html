@@ -5,31 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>To'lov - Dr. Rahmonov</title>
     <style>
-        body { background: #0f2027; color: white; font-family: sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
-        .card { background: rgba(255,255,255,0.1); padding: 30px; border-radius: 20px; width: 100%; max-width: 350px; text-align: center; }
-        .input-box { width: 100%; padding: 12px; margin: 15px 0; border-radius: 10px; border: none; outline: none; text-align: center; }
-        .btn { background: #00d2ff; color: black; padding: 15px; border: none; border-radius: 10px; width: 100%; font-weight: bold; cursor: pointer; }
-        #preview { width: 100%; margin-top: 15px; border-radius: 10px; display: none; }
+        body { background: #0f2027; color: white; font-family: 'Poppins', sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; margin: 0; }
+        .card { background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); padding: 30px; border-radius: 20px; width: 100%; max-width: 380px; text-align: center; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 15px 35px rgba(0,0,0,0.5); }
+        h3 { color: #00d2ff; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
+        .input-box { width: 100%; padding: 15px; margin: 10px 0; border-radius: 12px; border: none; outline: none; text-align: center; font-size: 16px; background: rgba(255,255,255,0.9); color: #333; }
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.3s; margin-top: 10px; }
+        .btn-select { background: #555; color: white; margin-bottom: 10px; }
+        .btn-send { background: #00d2ff; color: #000; }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        #preview { width: 100%; margin-top: 20px; border-radius: 12px; display: none; border: 2px solid #00d2ff; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h3>To'lov qilish</h3>
-    <input type="number" id="amt" class="input-box" placeholder="Summani kiriting">
-    <input type="file" id="file" accept="image/*" style="display:none;" onchange="document.getElementById('preview').src=URL.createObjectURL(this.files[0]); document.getElementById('preview').style.display='block'">
-    <button class="btn" onclick="document.getElementById('file').click()" style="background: #555; color: white; margin-bottom: 10px;">📸 Chekni tanlash</button>
+    <h3>To'lovni Tasdiqlash</h3>
+    
+    <input type="number" id="amt" class="input-box" placeholder="To'lov summasi (so'm)">
+    
+    <input type="file" id="file" accept="image/*" style="display:none;" onchange="handleFile(this)">
+    <button class="btn btn-select" onclick="document.getElementById('file').click()">📸 CHEKNI TANLASH</button>
     
     <img id="preview">
     
-    <button class="btn" id="sendBtn" onclick="sendToBot()">ADMINGA YUBORISH</button>
+    <button class="btn btn-send" id="sendBtn" onclick="processPayment()">TASDIQLASHGA YUBORISH</button>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+    // Firebase sozlamalari
     const firebaseConfig = {
         apiKey: "AIzaSyA2G8cD0JezEKXRCtKLYiZL0bzDyTp06Vs",
         authDomain: "quiz-app-3692d.firebaseapp.com",
@@ -42,57 +49,96 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
+
     let userProfile = null;
 
+    // Foydalanuvchi ma'lumotlarini olish
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             const snap = await getDoc(doc(db, "users", user.uid));
             if (snap.exists()) userProfile = snap.data();
+        } else {
+            window.location.replace("index.html");
         }
     });
 
-    window.sendToBot = async () => {
+    // Rasm preview funksiyasi
+    window.handleFile = (input) => {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = document.getElementById('preview');
+                img.src = e.target.result;
+                img.style.display = 'block';
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    };
+
+    // TO'LOVNI YUBORISH (ASOSIY FUNKSIYA)
+    window.processPayment = async () => {
         const amount = document.getElementById('amt').value;
         const photo = document.getElementById('file').files[0];
         const btn = document.getElementById('sendBtn');
 
-        if(!amount || !photo) return alert("Hamma ma'lumotlarni kiriting!");
+        if(!amount || !photo) {
+            alert("Iltimos, summa va chek rasmiga e'tibor bering!");
+            return;
+        }
 
         btn.disabled = true;
         btn.innerText = "YUBORILMOQDA...";
 
-        const formData = new FormData();
-        formData.append("chat_id", "5769394153");
-        formData.append("photo", photo);
-        formData.append("caption", `💰 TO'LOV KELDI\n👤 Ism: ${userProfile?.fio || 'Noma\'lum'}\n🆔 ID: ${userProfile?.studentID || '---'}\n💵 Summa: ${amount} so'm`);
-        
-        // Tasdiqlash tugmalari
-        const keyboard = {
-            inline_keyboard: [[
-                { text: "✅ Tasdiqlash", callback_data: `approve_${auth.currentUser.uid}_${amount}` },
-                { text: "❌ Rad etish", callback_data: `reject_${auth.currentUser.uid}` }
-            ]]
-        };
-        formData.append("reply_markup", JSON.stringify(keyboard));
+        const uID = auth.currentUser.uid;
+        const ism = userProfile?.fio || 'Noma\'lum';
+        const sid = userProfile?.studentID || '---';
 
         try {
-            const res = await fetch(`https://api.telegram.org/bot5714791266:AAEpc1YGClxn0e5u9BReEsiWrr66APqSYbk/sendPhoto`, {
+            // 1. TELEGRAMGA YUBORISH (Xabar berish uchun)
+            const formData = new FormData();
+            formData.append("chat_id", "5769394153"); // Admin Chat ID
+            formData.append("photo", photo);
+            formData.append("caption", `💰 YANGI TO'LOV KELDI\n👤 Ism: ${ism}\n🆔 ID: ${sid}\n💵 Summa: ${amount} so'm`);
+            
+            // Telegram tugmalari (shunchaki ma'lumot uchun)
+            const keyboard = {
+                inline_keyboard: [[
+                    { text: "✅ Admin Paneldan tasdiqlash", url: "https://sizning-admin-link.uz" }
+                ]]
+            };
+            formData.append("reply_markup", JSON.stringify(keyboard));
+
+            const resTelegram = await fetch(`https://api.telegram.org/bot5714791266:AAEpc1YGClxn0e5u9BReEsiWrr66APqSYbk/sendPhoto`, {
                 method: "POST",
                 body: formData
             });
 
-            if(res.ok) {
-                alert("Yuborildi! Admin tasdiqlashini kuting.");
+            // 2. ADMIN ILOVASI (FIRESTORE) UCHUN SAQLASH
+            await addDoc(collection(db, "payment_requests"), {
+                userId: uID,
+                fio: ism,
+                studentID: sid,
+                amount: parseInt(amount),
+                status: "pending", // Admin panelda "Yangi" bo'limida chiqadi
+                timestamp: serverTimestamp()
+            });
+
+            if(resTelegram.ok) {
+                alert("Muvaffaqiyatli yuborildi! Admin tasdiqlashini kuting. ✅");
                 window.location.href = 'home.html';
             } else {
-                alert("Xato! Botga /start bosganingizni tekshiring.");
-                btn.disabled = false;
+                alert("Bazaga saqlandi, lekin Telegramga xabar bormadi.");
+                window.location.href = 'home.html';
             }
+
         } catch (e) {
-            alert("Internet xatosi!");
+            console.error(e);
+            alert("Xatolik yuz berdi! Internetni tekshiring.");
             btn.disabled = false;
+            btn.innerText = "QAYTA URINISH";
         }
     };
 </script>
+
 </body>
 </html>
