@@ -2,20 +2,58 @@
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>To'lov - Dr. Rahmonov</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        body { background: #0f2027; color: white; padding: 20px; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-        .card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px); padding: 30px; border-radius: 30px; border: 1px solid rgba(255, 255, 255, 0.1); width: 100%; max-width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); text-align: center; }
-        h2 { color: #00d2ff; margin-bottom: 10px; }
-        .input-box { width: 100%; padding: 15px; margin-bottom: 20px; border-radius: 15px; border: 2px solid rgba(0, 210, 255, 0.3); background: rgba(0,0,0,0.2); color: white; text-align: center; font-size: 16px; outline: none; }
-        .file-label { display: block; background: rgba(0, 210, 255, 0.1); padding: 20px; border-radius: 15px; border: 2px dashed #00d2ff; cursor: pointer; margin-bottom: 25px; color: #00d2ff; font-size: 14px; }
-        #preview { width: 100%; max-height: 180px; object-fit: contain; border-radius: 10px; display: none; margin-bottom: 20px; border: 1px solid #444; }
-        .pay-btn { width: 100%; padding: 18px; background: #00d2ff; border: none; border-radius: 15px; color: #000; font-weight: 700; cursor: pointer; transition: 0.3s; }
-        .pay-btn:disabled { background: #555; opacity: 0.7; }
-        #toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: #ffd700; color: #000; padding: 12px 25px; border-radius: 50px; font-weight: 600; transition: 0.5s; z-index: 9999; }
+        body { background: #0f2027; color: white; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+        
+        .card { 
+            background: rgba(255, 255, 255, 0.05); 
+            backdrop-filter: blur(15px); 
+            padding: 30px; 
+            border-radius: 25px; 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            width: 100%; max-width: 400px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            text-align: center;
+        }
+
+        h2 { color: #00d2ff; margin-bottom: 10px; font-weight: 600; }
+        p { font-size: 13px; opacity: 0.7; margin-bottom: 25px; }
+
+        .input-box { 
+            width: 100%; padding: 15px; margin-bottom: 20px; 
+            border-radius: 15px; border: 2px solid rgba(0, 210, 255, 0.3); 
+            background: rgba(0,0,0,0.2); color: white; 
+            font-size: 16px; outline: none; text-align: center;
+        }
+
+        .file-label { 
+            display: block; background: rgba(0, 210, 255, 0.1); 
+            padding: 20px; border-radius: 15px; border: 2px dashed #00d2ff; 
+            cursor: pointer; margin-bottom: 25px; font-size: 14px; color: #00d2ff;
+        }
+
+        #preview { 
+            width: 100%; max-height: 180px; object-fit: contain; 
+            border-radius: 10px; display: none; margin-bottom: 20px; border: 1px solid #444;
+        }
+
+        .pay-btn { 
+            width: 100%; padding: 18px; background: #00d2ff; 
+            border: none; border-radius: 15px; color: #000; 
+            font-weight: 700; font-size: 16px; cursor: pointer; 
+            transition: 0.3s;
+        }
+        .pay-btn:disabled { background: #555; cursor: not-allowed; }
+
+        #toast { 
+            position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); 
+            background: #ffd700; color: #000; padding: 12px 25px; 
+            border-radius: 50px; font-weight: 600; transition: 0.5s; z-index: 9999;
+        }
         #toast.show { bottom: 40px; }
     </style>
 </head>
@@ -23,9 +61,9 @@
 
     <div class="card">
         <h2>To'lov So'rovi</h2>
-        <p style="font-size: 12px; opacity: 0.7; margin-bottom: 20px;">Summani kiriting va chekni yuklang</p>
+        <p>To'lov miqdorini kiriting va chek rasmini yuklang.</p>
 
-        <input type="number" id="amount" class="input-box" placeholder="Summani kiriting (masalan: 5000)">
+        <input type="number" id="amount" class="input-box" placeholder="Summa (masalan: 10000)">
         
         <label for="screenshot" class="file-label" id="label-text">
             📸 Galereyadan chekni tanlang
@@ -34,7 +72,7 @@
         
         <img id="preview" src="">
 
-        <button class="pay-btn" id="submit-btn" onclick="submitPayment()">TASDIQLASHGA YUBORISH</button>
+        <button class="pay-btn" id="submit-btn" onclick="submitPayment()">ADMINGA YUBORISH</button>
     </div>
 
     <div id="toast">Xabar!</div>
@@ -44,7 +82,7 @@
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, collection, addDoc, doc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // google-services.json ma'lumotlari
+        // Firebase konfiguratsiyasi
         const firebaseConfig = {
             apiKey: "AIzaSyA2G8cD0JezEKXRCtKLYiZL0bzDyTp06Vs",
             authDomain: "quiz-app-3692d.firebaseapp.com",
@@ -62,16 +100,14 @@
         const botToken = "5714791266:AAEpc1YGClxn0e5u9BReEsiWrr66APqSYbk"; 
         const myChatId = "5769394153"; 
 
-        // Profil ma'lumotlarini yuklash
+        // Foydalanuvchi profilini yuklash
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 try {
                     const snap = await getDoc(doc(db, "users", user.uid));
-                    if (snap.exists()) {
-                        userProfile = snap.data();
-                    }
-                } catch (e) { console.error("Profil yuklanmadi:", e); }
-            } else { window.location.href = "index.html"; }
+                    if (snap.exists()) userProfile = snap.data();
+                } catch (e) { console.error("Profil xatosi:", e); }
+            } else { window.location.replace("index.html"); }
         });
 
         window.previewImage = (input) => {
@@ -80,7 +116,7 @@
             if (input.files && input.files[0]) {
                 pre.src = URL.createObjectURL(input.files[0]);
                 pre.style.display = 'block';
-                labelText.innerText = "✅ Chek tanlandi";
+                labelText.innerText = "✅ Rasm yuklandi";
             }
         };
 
@@ -97,15 +133,25 @@
             btn.disabled = true;
             btn.innerText = "YUBORILMOQDA...";
 
-            // Xavfsiz ma'lumot olish
             const ism = (userProfile && userProfile.fio) ? userProfile.fio : "Noma'lum";
-            const studentID = (userProfile && userProfile.studentID) ? userProfile.studentID : "ID yo'q";
-            const emailAddr = auth.currentUser ? auth.currentUser.email : "Email yo'q";
+            const sid = (userProfile && userProfile.studentID) ? userProfile.studentID : "ID_YOQ";
+            const uID = auth.currentUser.uid;
+
+            // Telegram uchun tugmalar (Inline Keyboard)
+            const keyboard = {
+                inline_keyboard: [
+                    [
+                        { text: "✅ Tasdiqlash", callback_data: `approve_${uID}_${amt}` },
+                        { text: "❌ Rad etish", callback_data: `reject_${uID}` }
+                    ]
+                ]
+            };
 
             const formData = new FormData();
             formData.append("chat_id", myChatId);
             formData.append("photo", file);
-            formData.append("caption", `💰 TO'LOV SO'ROVI\n\n👤 F.I.SH: ${ism}\n🆔 ID: ${studentID}\n💵 Summa: ${amt} so'm\n📧 Email: ${emailAddr}`);
+            formData.append("caption", `💰 TO'LOV SO'ROVI\n\n👤 F.I.SH: ${ism}\n🆔 ID: ${sid}\n💵 Summa: ${amt} so'm\n📧 Email: ${auth.currentUser.email}`);
+            formData.append("reply_markup", JSON.stringify(keyboard));
 
             try {
                 // 1. Telegramga yuborish
@@ -115,30 +161,26 @@
                 });
 
                 if (response.ok) {
-                    showToast("Telegramga yuborildi! ✅");
+                    // 2. Firestore bazaga yozish
+                    await addDoc(collection(db, "payment_requests"), {
+                        userId: uID,
+                        fio: ism,
+                        amount: parseInt(amt),
+                        status: "pending",
+                        timestamp: serverTimestamp()
+                    });
 
-                    // 2. Firestore-ga yozish
-                    try {
-                        await addDoc(collection(db, "payment_requests"), {
-                            userId: auth.currentUser.uid,
-                            fio: ism,
-                            amount: parseInt(amt),
-                            status: "pending",
-                            timestamp: serverTimestamp()
-                        });
-                    } catch (dbErr) { console.error("Baza xatosi:", dbErr); }
-
-                    showToast("Muvaffaqiyatli yakunlandi! ✅");
+                    showToast("Adminga yuborildi! ✅");
                     setTimeout(() => window.location.href = 'home.html', 2000);
                 } else {
-                    alert("Telegram xatosi: " + response.status + ". Botga /start bosganingizni tekshiring.");
+                    alert("Telegram xatosi: " + response.status);
                     btn.disabled = false;
                     btn.innerText = "QAYTA URINISH";
                 }
             } catch (e) {
-                showToast("Internet xatosi!");
+                showToast("Internet ulanishini tekshiring!");
                 btn.disabled = false;
-                btn.innerText = "TASDIQLASHGA YUBORISH";
+                btn.innerText = "ADMINGA YUBORISH";
             }
         };
 
