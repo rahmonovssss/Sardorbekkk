@@ -2,28 +2,32 @@
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Panel - Dr. Rahmonov</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To'lov - Dr. Rahmonov</title>
     <style>
-        body { background: #0f2027; color: white; font-family: sans-serif; padding: 20px; }
-        .card { 
-            background: #1e2a33; padding: 20px; border-radius: 15px; 
-            margin-bottom: 15px; border: 1px solid #00d2ff;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        .btn-ok { background: #4caf50; color: white; }
-        .btn-del { background: #ff4b2b; color: white; margin-left: 10px; }
-        .amount { color: #ffd700; font-size: 20px; font-weight: bold; }
+        body { background: #0f2027; color: white; font-family: sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; }
+        .card { background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); padding: 30px; border-radius: 20px; width: 100%; max-width: 380px; text-align: center; border: 1px solid rgba(255,255,255,0.2); }
+        .input-box { width: 100%; padding: 15px; margin: 10px 0; border-radius: 10px; border: none; text-align: center; font-size: 18px; box-sizing: border-box; }
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-send { background: #00d2ff; color: #000; }
+        #preview { width: 100%; margin-top: 15px; border-radius: 10px; display: none; max-height: 200px; object-fit: contain; }
     </style>
 </head>
 <body>
 
-    <h2>📩 Kelgan so'rovlar</h2>
-    <div id="request-list">Yuklanmoqda...</div>
+<div class="card">
+    <h3 id="user-display">Yuklanmoqda...</h3>
+    <input type="number" id="amt" class="input-box" placeholder="Summa (masalan: 5000)">
+    <input type="file" id="file" accept="image/*" style="display:none;">
+    <button class="btn" style="background:#444; color:white;" onclick="document.getElementById('file').click()">📸 CHEKNI TANLASH</button>
+    <img id="preview">
+    <button class="btn btn-send" id="sendBtn">TASDIQLASHGA YUBORISH</button>
+</div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, onSnapshot, doc, updateDoc, deleteDoc, increment, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyA2G8cD0JezEKXRCtKLYiZL0bzDyTp06Vs",
@@ -35,69 +39,77 @@
     };
 
     const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
     const db = getFirestore(app);
-    const colRef = collection(db, "payment_requests");
 
-    // 1. MA'LUMOTLARNI KO'RSATISH (Faqat 'pending' holatdagilar)
-    // Query ishlatamizki, tasdiqlanganlar ro'yxatdan o'zi yo'qolsin
-    const q = query(colRef, where("status", "==", "pending"));
+    let profile = null;
 
-    onSnapshot(q, (snapshot) => {
-        const listDiv = document.getElementById('request-list');
-        listDiv.innerHTML = ""; // Har safar tozalab yangitdan chiqaradi
-
-        if (snapshot.empty) {
-            listDiv.innerHTML = "Hozircha yangi so'rovlar yo'q.";
-            return;
+    // 1. Foydalanuvchini aniqlash
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            const snap = await getDoc(doc(db, "users", user.uid));
+            if (snap.exists()) {
+                profile = snap.data();
+                document.getElementById('user-display').innerText = profile.fio;
+            } else {
+                document.getElementById('user-display').innerText = "Profil topilmadi";
+            }
+        } else {
+            window.location.href = "index.html";
         }
-
-        snapshot.forEach((res) => {
-            const data = res.data();
-            listDiv.innerHTML += `
-                <div class="card">
-                    <div>
-                        <p><b>👤 Foydalanuvchi:</b> ${data.fio || 'Ismsiz'}</p>
-                        <p><b>🆔 ID:</b> ${data.userId}</p>
-                        <p class="amount">💰 ${data.amount} so'm</p>
-                    </div>
-                    <div>
-                        <button class="btn btn-ok" onclick="approve('${res.id}', '${data.userId}', ${data.amount})">TASDIQLASH</button>
-                        <button class="btn btn-del" onclick="removeReq('${res.id}')">O'CHIRISH</button>
-                    </div>
-                </div>
-            `;
-        });
     });
 
-    // 2. TASDIQLASH VA BALANSGA QO'SHISH
-    window.approve = async (docId, uID, summa) => {
-        if (!uID) return alert("Foydalanuvchi ID si yo'q!");
+    // 2. Rasm ko'rinishi
+    document.getElementById('file').onchange = (e) => {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            const img = document.getElementById('preview');
+            img.src = ev.target.result;
+            img.style.display = 'block';
+        };
+        reader.readAsDataURL(e.target.files[0]);
+    };
+
+    // 3. YUBORISH (Xatolar tuzatilgan variant)
+    document.getElementById('sendBtn').onclick = async () => {
+        const sum = document.getElementById('amt').value;
+        const photo = document.getElementById('file').files[0];
+        
+        if(!sum || !photo) return alert("Hamma joyni to'ldiring!");
+        
+        const btn = document.getElementById('sendBtn');
+        btn.disabled = true;
+        btn.innerText = "YUBORILMOQDA...";
 
         try {
-            // A) Foydalanuvchining 'users' kolleksiyasidagi balansini oshirish
-            const userRef = doc(db, "users", uID);
-            await updateDoc(userRef, {
-                balance: increment(Number(summa)) // Balansga qo'shadi
+            // Firestorega yozish
+            await addDoc(collection(db, "payment_requests"), {
+                userId: auth.currentUser.uid,
+                fio: profile?.fio || "Noma'lum",
+                studentID: profile?.studentID || "---",
+                amount: Number(sum),
+                status: "pending",
+                timestamp: serverTimestamp()
             });
 
-            // B) So'rov statusini o'zgartirish (bu uni ro'yxatdan yo'qotadi)
-            await updateDoc(doc(db, "payment_requests", docId), {
-                status: "approved"
+            // Telegram botga yuborish
+            const fd = new FormData();
+            fd.append("chat_id", "5769394153");
+            fd.append("photo", photo);
+            fd.append("caption", `💰 TO'LOV: ${sum} so'm\n👤 ${profile?.fio}\n🆔 ${profile?.studentID}`);
+
+            await fetch(`https://api.telegram.org/bot5714791266:AAEpc1YGClxn0e5u9BReEsiWrr66APqSYbk/sendPhoto`, {
+                method: "POST",
+                body: fd
             });
 
-            alert("Muvaffaqiyatli qo'shildi! ✅");
-        } catch (e) {
-            console.error(e);
-            alert("Xatolik: " + e.message + "\n\nEslatma: 'users' kolleksiyasida hujjat ID si foydalanuvchi UID si bilan bir xil bo'lishi kerak.");
+            alert("Yuborildi! ✅");
+            window.location.href = "home.html";
+        } catch (err) {
+            alert("Xato chiqdi: " + err.message);
+            btn.disabled = false;
         }
     };
-
-    window.removeReq = async (id) => {
-        if(confirm("O'chirilsinmi?")) {
-            await deleteDoc(doc(db, "payment_requests", id));
-        }
-    };
-
 </script>
 </body>
 </html>
