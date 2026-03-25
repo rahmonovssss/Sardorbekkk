@@ -2,40 +2,28 @@
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>To'lov - Dr. Rahmonov</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <title>Admin Panel - Dr. Rahmonov</title>
     <style>
-        body { background: #0f2027; color: white; font-family: 'Poppins', sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; }
-        .card { background: rgba(255,255,255,0.1); backdrop-filter: blur(15px); padding: 30px; border-radius: 25px; width: 100%; max-width: 400px; text-align: center; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
-        h3 { color: #00d2ff; margin-bottom: 25px; text-transform: uppercase; }
-        .input-box { width: 100%; padding: 15px; margin: 10px 0; border-radius: 12px; border: none; outline: none; text-align: center; font-size: 18px; background: white; color: #333; box-sizing: border-box; }
-        .btn { width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.3s; margin-top: 15px; }
-        .btn-select { background: #444; color: white; }
-        .btn-send { background: #00d2ff; color: #000; }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        #preview { width: 100%; margin-top: 20px; border-radius: 15px; display: none; border: 2px solid #00d2ff; max-height: 250px; object-fit: contain; }
+        body { background: #0f2027; color: white; font-family: sans-serif; padding: 20px; }
+        .card { 
+            background: #1e2a33; padding: 20px; border-radius: 15px; 
+            margin-bottom: 15px; border: 1px solid #00d2ff;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .btn-ok { background: #4caf50; color: white; }
+        .btn-del { background: #ff4b2b; color: white; margin-left: 10px; }
+        .amount { color: #ffd700; font-size: 20px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h3>To'lovni Tasdiqlash</h3>
-    
-    <input type="number" id="amt" class="input-box" placeholder="Summani kiriting (so'm)">
-    
-    <input type="file" id="file" accept="image/*" style="display:none;">
-    <button class="btn btn-select" id="selectBtn">📸 CHEKNI TANLASH</button>
-    
-    <img id="preview" alt="Chek preview">
-    
-    <button class="btn btn-send" id="sendBtn">TASDIQLASHGA YUBORISH</button>
-</div>
+    <h2>📩 Kelgan so'rovlar</h2>
+    <div id="request-list">Yuklanmoqda...</div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, onSnapshot, doc, updateDoc, deleteDoc, increment, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyA2G8cD0JezEKXRCtKLYiZL0bzDyTp06Vs",
@@ -47,101 +35,69 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
     const db = getFirestore(app);
+    const colRef = collection(db, "payment_requests");
 
-    let userProfile = null;
+    // 1. MA'LUMOTLARNI KO'RSATISH (Faqat 'pending' holatdagilar)
+    // Query ishlatamizki, tasdiqlanganlar ro'yxatdan o'zi yo'qolsin
+    const q = query(colRef, where("status", "==", "pending"));
 
-    // 1. Foydalanuvchi ma'lumotlarini yuklash
-    onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            const snap = await getDoc(doc(db, "users", user.uid));
-            if (snap.exists()) userProfile = snap.data();
-        } else {
-            console.log("Tizimga kirilmagan");
+    onSnapshot(q, (snapshot) => {
+        const listDiv = document.getElementById('request-list');
+        listDiv.innerHTML = ""; // Har safar tozalab yangitdan chiqaradi
+
+        if (snapshot.empty) {
+            listDiv.innerHTML = "Hozircha yangi so'rovlar yo'q.";
+            return;
         }
+
+        snapshot.forEach((res) => {
+            const data = res.data();
+            listDiv.innerHTML += `
+                <div class="card">
+                    <div>
+                        <p><b>👤 Foydalanuvchi:</b> ${data.fio || 'Ismsiz'}</p>
+                        <p><b>🆔 ID:</b> ${data.userId}</p>
+                        <p class="amount">💰 ${data.amount} so'm</p>
+                    </div>
+                    <div>
+                        <button class="btn btn-ok" onclick="approve('${res.id}', '${data.userId}', ${data.amount})">TASDIQLASH</button>
+                        <button class="btn btn-del" onclick="removeReq('${res.id}')">O'CHIRISH</button>
+                    </div>
+                </div>
+            `;
+        });
     });
 
-    // 2. Rasm tanlash va preview
-    const fileInput = document.getElementById('file');
-    const selectBtn = document.getElementById('selectBtn');
-    const preview = document.getElementById('preview');
-
-    selectBtn.onclick = () => fileInput.click();
-
-    fileInput.onchange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                preview.src = ev.target.result;
-                preview.style.display = 'block';
-            };
-            reader.readAsDataURL(file);
-        }
-    };
-
-    // 3. To'lovni yuborish
-    document.getElementById('sendBtn').onclick = async () => {
-        const amountValue = document.getElementById('amt').value; // Inputdan qiymat olish
-        const photo = fileInput.files[0];
-        const btn = document.getElementById('sendBtn');
-
-        // Tekshirishlar
-        if (!amountValue || amountValue <= 0) {
-            alert("Iltimos, to'g'ri summa kiriting!");
-            return;
-        }
-        if (!photo) {
-            alert("Iltimos, chek rasmini yuklang!");
-            return;
-        }
-        if (!auth.currentUser) {
-            alert("Siz tizimga kirmagansiz!");
-            return;
-        }
-
-        btn.disabled = true;
-        btn.innerText = "YUBORILMOQDA...";
+    // 2. TASDIQLASH VA BALANSGA QO'SHISH
+    window.approve = async (docId, uID, summa) => {
+        if (!uID) return alert("Foydalanuvchi ID si yo'q!");
 
         try {
-            const uID = auth.currentUser.uid;
-            const ism = userProfile?.fio || "Ismsiz";
-            const sid = userProfile?.studentID || "---";
-
-            // A) Telegramga yuborish (Xabar berish)
-            const formData = new FormData();
-            formData.append("chat_id", "5769394153");
-            formData.append("photo", photo);
-            formData.append("caption", `💰 YANGI TO'LOV KELDI\n👤 Ism: ${ism}\n🆔 ID: ${sid}\n💵 Summa: ${amountValue} so'm`);
-
-            fetch(`https://api.telegram.org/bot5714791266:AAEpc1YGClxn0e5u9BReEsiWrr66APqSYbk/sendPhoto`, {
-                method: "POST",
-                body: formData
-            }).catch(e => console.log("Telegram error:", e));
-
-            // B) FIRESTORE'GA SAQLASH (Admin ko'rishi uchun)
-            // MUHIM: amountValue bu yerda Number() qilinishi shart!
-            await addDoc(collection(db, "payment_requests"), {
-                userId: uID,
-                fio: ism,
-                studentID: sid,
-                amount: Number(amountValue), // Mana shu joyda summa olinadi!
-                status: "pending",
-                timestamp: serverTimestamp()
+            // A) Foydalanuvchining 'users' kolleksiyasidagi balansini oshirish
+            const userRef = doc(db, "users", uID);
+            await updateDoc(userRef, {
+                balance: increment(Number(summa)) // Balansga qo'shadi
             });
 
-            alert("To'lov tasdiqlashga yuborildi! ✅");
-            window.location.href = 'home.html';
+            // B) So'rov statusini o'zgartirish (bu uni ro'yxatdan yo'qotadi)
+            await updateDoc(doc(db, "payment_requests", docId), {
+                status: "approved"
+            });
 
-        } catch (err) {
-            console.error(err);
-            alert("Xatolik: " + err.message);
-            btn.disabled = false;
-            btn.innerText = "QAYTA URINISH";
+            alert("Muvaffaqiyatli qo'shildi! ✅");
+        } catch (e) {
+            console.error(e);
+            alert("Xatolik: " + e.message + "\n\nEslatma: 'users' kolleksiyasida hujjat ID si foydalanuvchi UID si bilan bir xil bo'lishi kerak.");
         }
     };
-</script>
 
+    window.removeReq = async (id) => {
+        if(confirm("O'chirilsinmi?")) {
+            await deleteDoc(doc(db, "payment_requests", id));
+        }
+    };
+
+</script>
 </body>
 </html>
