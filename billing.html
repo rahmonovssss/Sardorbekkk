@@ -13,7 +13,7 @@
         .btn-select { background: #555; color: white; margin-bottom: 10px; }
         .btn-send { background: #00d2ff; color: #000; }
         .btn:disabled { opacity: 0.6; cursor: not-allowed; }
-        #preview { width: 100%; margin-top: 20px; border-radius: 12px; display: none; border: 2px solid #00d2ff; }
+        #preview { width: 100%; margin-top: 20px; border-radius: 12px; display: none; border: 2px solid #00d2ff; max-height: 200px; object-fit: contain; }
     </style>
 </head>
 <body>
@@ -23,12 +23,12 @@
     
     <input type="number" id="amt" class="input-box" placeholder="To'lov summasi (so'm)">
     
-    <input type="file" id="file" accept="image/*" style="display:none;" onchange="handleFile(this)">
-    <button class="btn btn-select" onclick="document.getElementById('file').click()">📸 CHEKNI TANLASH</button>
+    <input type="file" id="file" accept="image/*" style="display:none;">
+    <button class="btn btn-select" id="selectBtn">📸 CHEKNI TANLASH</button>
     
     <img id="preview">
     
-    <button class="btn btn-send" id="sendBtn" onclick="processPayment()">TASDIQLASHGA YUBORISH</button>
+    <button class="btn btn-send" id="sendBtn">TASDIQLASHGA YUBORISH</button>
 </div>
 
 <script type="module">
@@ -36,7 +36,6 @@
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getFirestore, doc, getDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // Firebase sozlamalari
     const firebaseConfig = {
         apiKey: "AIzaSyA2G8cD0JezEKXRCtKLYiZL0bzDyTp06Vs",
         authDomain: "quiz-app-3692d.firebaseapp.com",
@@ -50,94 +49,100 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    let userProfile = null;
+    let currentUserData = null;
 
-    // Foydalanuvchi ma'lumotlarini olish
+    // 1. Foydalanuvchi holatini tekshirish
     onAuthStateChanged(auth, async (user) => {
         if (user) {
-            const snap = await getDoc(doc(db, "users", user.uid));
-            if (snap.exists()) userProfile = snap.data();
+            try {
+                const snap = await getDoc(doc(db, "users", user.uid));
+                if (snap.exists()) {
+                    currentUserData = snap.data();
+                }
+            } catch (e) { console.error("Profil yuklanmadi:", e); }
         } else {
-            window.location.replace("index.html");
+            // Agar tizimga kirmagan bo'lsa, test uchun bu yerni ochiq qoldiramiz 
+            // yoki index.html ga yo'naltiramiz
+            console.warn("Foydalanuvchi tizimga kirmagan.");
         }
     });
 
-    // Rasm preview funksiyasi
-    window.handleFile = (input) => {
-        if (input.files && input.files[0]) {
+    // 2. Rasm tanlash funksiyasi
+    const fileInput = document.getElementById('file');
+    const selectBtn = document.getElementById('selectBtn');
+    const preview = document.getElementById('preview');
+
+    selectBtn.onclick = () => fileInput.click();
+
+    fileInput.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
             const reader = new FileReader();
-            reader.onload = (e) => {
-                const img = document.getElementById('preview');
-                img.src = e.target.result;
-                img.style.display = 'block';
+            reader.onload = (event) => {
+                preview.src = event.target.result;
+                preview.style.display = 'block';
             };
-            reader.readAsDataURL(input.files[0]);
+            reader.readAsDataURL(file);
         }
     };
 
-    // TO'LOVNI YUBORISH (ASOSIY FUNKSIYA)
+    // 3. Yuborish funksiyasi
     window.processPayment = async () => {
         const amount = document.getElementById('amt').value;
-        const photo = document.getElementById('file').files[0];
+        const photo = fileInput.files[0];
         const btn = document.getElementById('sendBtn');
 
-        if(!amount || !photo) {
-            alert("Iltimos, summa va chek rasmiga e'tibor bering!");
+        if (!amount || !photo) {
+            alert("Iltimos, summa kiriting va chek rasmini tanlang!");
+            return;
+        }
+
+        if (!auth.currentUser) {
+            alert("Siz tizimga kirmagansiz!");
             return;
         }
 
         btn.disabled = true;
         btn.innerText = "YUBORILMOQDA...";
 
-        const uID = auth.currentUser.uid;
-        const ism = userProfile?.fio || 'Noma\'lum';
-        const sid = userProfile?.studentID || '---';
-
         try {
-            // 1. TELEGRAMGA YUBORISH (Xabar berish uchun)
-            const formData = new FormData();
-            formData.append("chat_id", "5769394153"); // Admin Chat ID
-            formData.append("photo", photo);
-            formData.append("caption", `💰 YANGI TO'LOV KELDI\n👤 Ism: ${ism}\n🆔 ID: ${sid}\n💵 Summa: ${amount} so'm`);
-            
-            // Telegram tugmalari (shunchaki ma'lumot uchun)
-            const keyboard = {
-                inline_keyboard: [[
-                    { text: "✅ Admin Paneldan tasdiqlash", url: "https://sizning-admin-link.uz" }
-                ]]
-            };
-            formData.append("reply_markup", JSON.stringify(keyboard));
+            const uID = auth.currentUser.uid;
+            const ism = currentUserData?.fio || "Ismsiz foydalanuvchi";
+            const sid = currentUserData?.studentID || "---";
 
-            const resTelegram = await fetch(`https://api.telegram.org/bot5714791266:AAEpc1YGClxn0e5u9BReEsiWrr66APqSYbk/sendPhoto`, {
+            // A) Telegramga yuborish
+            const formData = new FormData();
+            formData.append("chat_id", "5769394153");
+            formData.append("photo", photo);
+            formData.append("caption", `💰 YANGI TO'LOV\n👤 Ism: ${ism}\n🆔 ID: ${sid}\n💵 Summa: ${amount} so'm`);
+
+            fetch(`https://api.telegram.org/bot5714791266:AAEpc1YGClxn0e5u9BReEsiWrr66APqSYbk/sendPhoto`, {
                 method: "POST",
                 body: formData
-            });
+            }).catch(err => console.error("Telegram xatosi:", err));
 
-            // 2. ADMIN ILOVASI (FIRESTORE) UCHUN SAQLASH
+            // B) Firestorega saqlash
             await addDoc(collection(db, "payment_requests"), {
                 userId: uID,
                 fio: ism,
                 studentID: sid,
-                amount: parseInt(amount),
-                status: "pending", // Admin panelda "Yangi" bo'limida chiqadi
+                amount: Number(amount),
+                status: "pending",
                 timestamp: serverTimestamp()
             });
 
-            if(resTelegram.ok) {
-                alert("Muvaffaqiyatli yuborildi! Admin tasdiqlashini kuting. ✅");
-                window.location.href = 'home.html';
-            } else {
-                alert("Bazaga saqlandi, lekin Telegramga xabar bormadi.");
-                window.location.href = 'home.html';
-            }
+            alert("To'lov yuborildi! ✅");
+            window.location.href = 'home.html';
 
-        } catch (e) {
-            console.error(e);
-            alert("Xatolik yuz berdi! Internetni tekshiring.");
+        } catch (error) {
+            console.error(error);
+            alert("Xatolik yuz berdi: " + error.message);
             btn.disabled = false;
             btn.innerText = "QAYTA URINISH";
         }
     };
+
+    document.getElementById('sendBtn').onclick = window.processPayment;
 </script>
 
 </body>
