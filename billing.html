@@ -7,20 +7,17 @@
     <style>
         body { background: #0f2027; color: white; font-family: sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; }
         .card { background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); padding: 30px; border-radius: 20px; width: 100%; max-width: 380px; text-align: center; border: 1px solid rgba(255,255,255,0.2); }
-        .input-box { width: 100%; padding: 15px; margin: 10px 0; border-radius: 10px; border: none; text-align: center; font-size: 18px; box-sizing: border-box; }
+        .input-box { width: 100%; padding: 15px; margin: 10px 0; border-radius: 10px; border: none; text-align: center; font-size: 18px; box-sizing: border-box; color: #000; }
         .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .btn-send { background: #00d2ff; color: #000; }
-        #preview { width: 100%; margin-top: 15px; border-radius: 10px; display: none; max-height: 200px; object-fit: contain; }
     </style>
 </head>
 <body>
 
 <div class="card">
     <h3 id="user-display">Yuklanmoqda...</h3>
-    <input type="number" id="amt" class="input-box" placeholder="Summa (masalan: 5000)">
-    <input type="file" id="file" accept="image/*" style="display:none;">
-    <button class="btn" style="background:#444; color:white;" onclick="document.getElementById('file').click()">📸 CHEKNI TANLASH</button>
-    <img id="preview">
+    <p>To'lov summasini kiriting:</p>
+    <input type="number" id="amt" class="input-box" placeholder="Masalan: 5000">
     <button class="btn btn-send" id="sendBtn">TASDIQLASHGA YUBORISH</button>
 </div>
 
@@ -59,31 +56,20 @@
         }
     });
 
-    // 2. Rasm ko'rinishi
-    document.getElementById('file').onchange = (e) => {
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-            const img = document.getElementById('preview');
-            img.src = ev.target.result;
-            img.style.display = 'block';
-        };
-        reader.readAsDataURL(e.target.files[0]);
-    };
-
-    // 3. YUBORISH (Xatolar tuzatilgan variant)
+    // 2. MA'LUMOTLARNI YUBORISH (Rasm shart emas qismi)
     document.getElementById('sendBtn').onclick = async () => {
         const sum = document.getElementById('amt').value;
-        const photo = document.getElementById('file').files[0];
         
-        if(!sum || !photo) return alert("Hamma joyni to'ldiring!");
+        // Agar summa bo'sh bo'lsa to'xtatadi
+        if(!sum || sum <= 0) return alert("Iltimos, summani kiriting!");
         
         const btn = document.getElementById('sendBtn');
         btn.disabled = true;
         btn.innerText = "YUBORILMOQDA...";
 
         try {
-            // Firestorega yozish
-            await addDoc(collection(db, "payment_requests"), {
+            // A) FIRESTOREGA YOZISH (Rasmisiz faqat ma'lumotlar)
+            const docRef = await addDoc(collection(db, "payment_requests"), {
                 userId: auth.currentUser.uid,
                 fio: profile?.fio || "Noma'lum",
                 studentID: profile?.studentID || "---",
@@ -92,22 +78,19 @@
                 timestamp: serverTimestamp()
             });
 
-            // Telegram botga yuborish
-            const fd = new FormData();
-            fd.append("chat_id", "5769394153");
-            fd.append("photo", photo);
-            fd.append("caption", `💰 TO'LOV: ${sum} so'm\n👤 ${profile?.fio}\n🆔 ${profile?.studentID}`);
+            // B) TELEGRAMGA YUBORISH (SendMessage - matnli xabar)
+            const text = `💰 TO'LOV SO'ROVI\n👤 Ism: ${profile?.fio}\n🆔 ID: ${auth.currentUser.uid}\n💵 Summa: ${sum} so'm\n📄 Doc: ${docRef.id}`;
+            
+            await fetch(`https://api.telegram.org/bot5714791266:AAEpc1YGClxn0e5u9BReEsiWrr66APqSYbk/sendMessage?chat_id=5769394153&text=${encodeURIComponent(text)}`);
 
-            await fetch(`https://api.telegram.org/bot5714791266:AAEpc1YGClxn0e5u9BReEsiWrr66APqSYbk/sendPhoto`, {
-                method: "POST",
-                body: fd
-            });
-
-            alert("Yuborildi! ✅");
+            alert("So'rov yuborildi! ✅");
             window.location.href = "home.html";
+
         } catch (err) {
-            alert("Xato chiqdi: " + err.message);
+            console.error(err);
+            alert("Firebase bilan bog'lanishda xato: " + err.message);
             btn.disabled = false;
+            btn.innerText = "QAYTA URINISH";
         }
     };
 </script>
