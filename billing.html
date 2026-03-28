@@ -47,16 +47,12 @@
     // 1. Foydalanuvchini aniqlash
     onAuthStateChanged(auth, async (user) => {
         if (user) {
-            try {
-                const snap = await getDoc(doc(db, "users", user.uid));
-                if (snap.exists()) {
-                    profile = snap.data();
-                    document.getElementById('user-display').innerText = profile.fio || "Foydalanuvchi";
-                } else {
-                    document.getElementById('user-display').innerText = "Profil topilmadi";
-                }
-            } catch (e) {
-                console.error("Profil yuklashda xato:", e);
+            const snap = await getDoc(doc(db, "users", user.uid));
+            if (snap.exists()) {
+                profile = snap.data();
+                document.getElementById('user-display').innerText = profile.fio;
+            } else {
+                document.getElementById('user-display').innerText = "Profil topilmadi";
             }
         } else {
             window.location.href = "index.html";
@@ -65,32 +61,28 @@
 
     // 2. Rasm ko'rinishi
     document.getElementById('file').onchange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                const img = document.getElementById('preview');
-                img.src = ev.target.result;
-                img.style.display = 'block';
-            };
-            reader.readAsDataURL(file);
-        }
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            const img = document.getElementById('preview');
+            img.src = ev.target.result;
+            img.style.display = 'block';
+        };
+        reader.readAsDataURL(e.target.files[0]);
     };
 
-    // 3. YUBORISH (Firestore va Telegram bog'langan variant)
+    // 3. YUBORISH (Xatolar tuzatilgan variant)
     document.getElementById('sendBtn').onclick = async () => {
         const sum = document.getElementById('amt').value;
         const photo = document.getElementById('file').files[0];
         
-        if(!sum || !photo) return alert("Summa va chek rasmi shart!");
+        if(!sum || !photo) return alert("Hamma joyni to'ldiring!");
         
         const btn = document.getElementById('sendBtn');
         btn.disabled = true;
         btn.innerText = "YUBORILMOQDA...";
 
         try {
-            // ✅ A. FIRESTORE'GA YOZISH (Rasmisiz, faqat ma'lumotlar)
-            // Sizning Rules kodingizga to'liq mos keladi
+            // Firestorega yozish
             await addDoc(collection(db, "payment_requests"), {
                 userId: auth.currentUser.uid,
                 fio: profile?.fio || "Noma'lum",
@@ -100,25 +92,22 @@
                 timestamp: serverTimestamp()
             });
 
-            // ✅ B. TELEGRAM BOTGA YUBORISH (Rasm bilan birga)
+            // Telegram botga yuborish
             const fd = new FormData();
             fd.append("chat_id", "5769394153");
             fd.append("photo", photo);
-            fd.append("caption", `💰 TO'LOV: ${sum} so'm\n👤 Ism: ${profile?.fio}\n🆔 ID: ${auth.currentUser.uid}`);
+            fd.append("caption", `💰 TO'LOV: ${sum} so'm\n👤 ${profile?.fio}\n🆔 ${profile?.studentID}`);
 
             await fetch(`https://api.telegram.org/bot5714791266:AAEpc1YGClxn0e5u9BReEsiWrr66APqSYbk/sendPhoto`, {
                 method: "POST",
                 body: fd
             });
 
-            alert("To'lov so'rovi yuborildi! ✅");
+            alert("Yuborildi! ✅");
             window.location.href = "home.html";
-
         } catch (err) {
-            console.error(err);
-            alert("Xatolik yuz berdi: " + err.message);
+            alert("Xato chiqdi: " + err.message);
             btn.disabled = false;
-            btn.innerText = "TASDIQLASHGA YUBORISH";
         }
     };
 </script>
