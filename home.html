@@ -125,7 +125,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, updateDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2G8cD0JezEKXRCtKLYiZL0bzDyTp06Vs",
@@ -152,22 +152,25 @@
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 const userRef = doc(db, "users", user.uid);
-                const snap = await getDoc(userRef);
-                let data = snap.exists() ? snap.data() : {};
                 
-                if (!data.studentID) {
-                    data.studentID = generateID();
-                    await setDoc(userRef, { studentID: data.studentID }, { merge: true });
-                }
+                // Real-time rejimda foydalanuvchini kuzatish
+                onSnapshot(userRef, async (snap) => {
+                    let data = snap.exists() ? snap.data() : {};
+                    
+                    if (!data.studentID) {
+                        data.studentID = generateID();
+                        await setDoc(userRef, { studentID: data.studentID }, { merge: true });
+                    }
 
-                userBalance = data.balance || 0;
-                const displayName = data.fio || user.displayName || "Foydalanuvchi";
-                
-                document.getElementById('user-id-display').innerText = "ID: " + data.studentID;
-                document.getElementById('top-name').innerText = displayName;
-                document.getElementById('top-initials').innerText = displayName[0].toUpperCase();
-                document.getElementById('user-balance').innerText = userBalance.toLocaleString() + " so'm";
-                document.getElementById('input-name').value = data.fio || "";
+                    userBalance = data.balance || 0;
+                    const displayName = data.fio || user.displayName || "Foydalanuvchi";
+                    
+                    document.getElementById('user-id-display').innerText = "ID: " + data.studentID;
+                    document.getElementById('top-name').innerText = displayName;
+                    document.getElementById('top-initials').innerText = displayName[0].toUpperCase();
+                    document.getElementById('user-balance').innerText = userBalance.toLocaleString() + " so'm";
+                    document.getElementById('input-name').value = data.fio || "";
+                });
             } else {
                 window.location.replace("index.html");
             }
