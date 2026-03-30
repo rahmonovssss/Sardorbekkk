@@ -7,25 +7,20 @@
     <style>
         body { background: #0f2027; color: white; font-family: sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; }
         .card { background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); padding: 30px; border-radius: 20px; width: 100%; max-width: 380px; text-align: center; border: 1px solid rgba(255,255,255,0.2); }
-        .input-box { width: 100%; padding: 15px; margin: 10px 0; border-radius: 10px; border: none; text-align: center; font-size: 18px; box-sizing: border-box; background: #eee; color: #333; }
-        .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 16px; transition: 0.3s; }
+        .input-box { width: 100%; padding: 15px; margin: 10px 0; border-radius: 10px; border: none; text-align: center; font-size: 18px; box-sizing: border-box; background: #eee; }
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .btn-send { background: #00d2ff; color: #000; }
-        .btn-send:disabled { background: #555; color: #aaa; cursor: not-allowed; }
-        #preview { width: 100%; margin-top: 15px; border-radius: 10px; display: none; max-height: 200px; object-fit: contain; border: 1px dashed #555; }
-        h3 { margin-bottom: 20px; color: #00d2ff; }
+        #preview { width: 100%; margin-top: 15px; border-radius: 10px; display: none; max-height: 200px; object-fit: contain; }
     </style>
 </head>
 <body>
 
 <div class="card">
     <h3 id="user-display">Yuklanmoqda...</h3>
-    <input type="number" id="amt" class="input-box" placeholder="Summani kiriting (so'm)">
-    
+    <input type="number" id="amt" class="input-box" placeholder="Summani kiriting">
     <input type="file" id="file" accept="image/*" style="display:none;">
     <button class="btn" style="background:#444; color:white;" onclick="document.getElementById('file').click()">📸 CHEKNI TANLASH</button>
-    
     <img id="preview">
-    
     <button class="btn btn-send" id="sendBtn">TASDIQLASHGA YUBORISH</button>
 </div>
 
@@ -50,43 +45,32 @@
     let profile = null;
     let userId = "";
 
-    // Foydalanuvchi ma'lumotlarini olish
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             userId = user.uid;
-            try {
-                const snap = await getDoc(doc(db, "users", user.uid));
-                if (snap.exists()) {
-                    profile = snap.data();
-                    document.getElementById('user-display').innerText = profile.fio || "Foydalanuvchi";
-                }
-            } catch (e) { console.error("Xato:", e); }
-        } else {
-            window.location.href = "index.html";
-        }
+            const snap = await getDoc(doc(db, "users", user.uid));
+            if (snap.exists()) {
+                profile = snap.data();
+                document.getElementById('user-display').innerText = profile.fio;
+            }
+        } else { window.location.href = "index.html"; }
     });
 
-    // Rasm tanlanganda ko'rsatish
     document.getElementById('file').onchange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                const img = document.getElementById('preview');
-                img.src = ev.target.result;
-                img.style.display = 'block';
-            };
-            reader.readAsDataURL(file);
-        }
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            const img = document.getElementById('preview');
+            img.src = ev.target.result;
+            img.style.display = 'block';
+        };
+        reader.readAsDataURL(e.target.files[0]);
     };
 
-    // Asosiy yuborish funksiyasi
     document.getElementById('sendBtn').onclick = async () => {
         const sum = document.getElementById('amt').value;
         const photo = document.getElementById('file').files[0];
-        
-        if(!sum || !photo) return alert("Iltimos, summa kiriting va chek rasmini tanlang!");
-        
+        if(!sum || !photo) return alert("Hamma joyni to'ldiring!");
+
         const btn = document.getElementById('sendBtn');
         btn.disabled = true;
         btn.innerText = "YUBORILMOQDA...";
@@ -95,10 +79,10 @@
         const sana = hozir.toLocaleDateString('uz-UZ');
         const vaqt = hozir.toLocaleTimeString('uz-UZ', {hour: '2-digit', minute:'2-digit'});
         const timestamp = hozir.getTime();
+        const paymentId = `${userId}_${timestamp}`;
 
         try {
-            // 1. FIRESTOREGA SAQLASH
-            const paymentId = `${userId}_${timestamp}`;
+            // 1. FIRESTOREGA YOZISH
             await setDoc(doc(db, "payments", paymentId), {
                 uid: userId,
                 fio: profile?.fio || "Noma'lum",
@@ -112,46 +96,22 @@
 
             // 2. TELEGRAMGA YUBORISH
             const fd = new FormData();
-            fd.append("chat_id", "5769394153"); // Admin Chat ID
+            fd.append("chat_id", "5769394153"); 
             fd.append("photo", photo);
-            
-            const caption = `💰 TO'LOV SO'ROVI\n` +
-                            `👤 Foydalanuvchi: ${profile?.fio || 'Noma\'lum'}\n` +
-                            `🆔 ID: ${profile?.studentID || 'Yo\'q'}\n` +
-                            `💵 Summa: ${Number(sum).toLocaleString()} so'm\n` +
-                            `🔑 UID: ${userId}`;
+            fd.append("caption", `💰 TO'LOV: ${Number(sum).toLocaleString()} so'm\n👤 Ism: ${profile?.fio}\n🆔 ID: ${profile?.studentID}\n📅 ${sana} | ${vaqt}`);
 
-            const keyboard = {
-                inline_keyboard: [
-                    [
-                        { text: "✅ Tasdiqlash", callback_data: `approve_${paymentId}_${sum}` },
-                        { text: "❌ Rad etish", callback_data: `reject_${paymentId}` }
-                    ]
-                ]
-            };
-            
-            fd.append("caption", caption);
-            fd.append("reply_markup", JSON.stringify(keyboard));
-
-            const res = await fetch(`https://api.telegram.org/bot5714791266:AAEpc1YGClxn0e5u9BReEsiWrr66APqSYbk/sendPhoto`, {
+            await fetch(`https://api.telegram.org/bot5714791266:AAEpc1YGClxn0e5u9BReEsiWrr66APqSYbk/sendPhoto`, {
                 method: "POST",
                 body: fd
             });
 
-            if(res.ok) {
-                alert("To'lov bazaga saqlandi va Adminga yuborildi! ✅");
-                window.location.href = "home.html";
-            } else {
-                throw new Error("Telegramga yuborishda xato!");
-            }
-
+            alert("To'lov yuborildi! Admin tasdiqlashini kuting.");
+            window.location.href = "home.html";
         } catch (err) {
-            alert("Xato yuz berdi: " + err.message);
+            alert("Xato: " + err.message);
             btn.disabled = false;
-            btn.innerText = "TASDIQLASHGA YUBORISH";
         }
     };
 </script>
-
 </body>
 </html>
