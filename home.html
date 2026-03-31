@@ -54,7 +54,7 @@
         .modal-content { background: #021d33; padding: 30px; border-radius: 35px; width: 90%; max-width: 380px; text-align: center; border: 1px solid rgba(255,255,255,0.1); position: relative; }
         .btn-main { width: 100%; padding: 16px; background: #00d2ff; border: none; border-radius: 15px; color: #fff; font-weight: 800; cursor: pointer; margin-bottom: 10px; }
         
-        #toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: #fff; color: #005c97; padding: 15px 30px; border-radius: 50px; transition: 0.5s; z-index: 3000; font-weight: 700; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        #toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: #fff; color: #005c97; padding: 15px 30px; border-radius: 50px; transition: 0.5s; z-index: 3000; font-weight: 700; box-shadow: 0 10px 30px rgba(0,0,0,0.3); text-align: center; width: max-content; max-width: 90%; }
         #toast.show { bottom: 40px; }
     </style>
 </head>
@@ -65,7 +65,7 @@
     <div class="bubbles" id="bubble-container"></div>
 
     <header class="header">
-        <div class="bell-btn" onclick="location.href='messages.html'">🔔</div>
+        <div class="bell-btn" onclick="navigate('messages.html', 'Xabarnomalar...')">🔔</div>
         <div class="top-profile-container" onclick="toggleModal(true)">
             <span id="top-name" style="font-weight: 600; font-size: 14px;">...</span>
             <div style="width: 32px; height: 32px; background: #00d2ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #fff;" id="top-initials">?</div>
@@ -76,7 +76,7 @@
         <div class="balance-card">
             <h3 style="font-size: 12px; text-transform: uppercase; opacity: 0.7; letter-spacing: 1px;">Balansim</h3>
             <h1 id="user-balance">0 so'm</h1>
-            <a href="billing.html" class="btn-refill">To'ldirish 💳</a>
+            <a href="billing.html" onclick="showToast('Hamyon bo\'limi yuklanmoqda...')" class="btn-refill">To'ldirish 💳</a>
         </div>
 
         <div class="grid-menu">
@@ -84,7 +84,7 @@
             <div class="menu-item premium-box" onclick="startQuiz('premium')"><i>💎</i><span>Premium (1000)</span></div>
             <div class="menu-item" onclick="navigate('statistics.html', 'Statistika...')"><i>📊</i><span>Statistika</span></div>
             <div class="menu-item" onclick="navigate('leaderboard.html', 'Liderlar...')"><i>🏆</i><span>Liderlar</span></div>
-            <div class="menu-item" style="grid-column: span 2; background: rgba(0, 136, 204, 0.2); border-color: #0088cc;" onclick="window.open('https://t.me/dr_rahmonov_admin')">
+            <div class="menu-item" style="grid-column: span 2; background: rgba(0, 136, 204, 0.2); border-color: #0088cc;" onclick="contactSupport()">
                 <i style="color: #00d2ff;">✈️</i><span>Telegram Admin</span>
             </div>
         </div>
@@ -92,12 +92,12 @@
 
     <div id="profileModal" class="modal">
         <div class="modal-content">
-            <div id="user-id-display" style="background: #ffd700; color: #000; padding: 5px 15px; border-radius: 10px; font-weight: 800; display: inline-block; margin-bottom: 20px;">ID: ...</div>
+            <div id="user-id-display" style="background: #ffd700; color: #000; padding: 5px 15px; border-radius: 10px; font-weight: 800; display: inline-block; margin-bottom: 20px;">ID: yuklanmoqda...</div>
             <input type="text" id="input-name" style="width: 100%; padding: 15px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; color: white; margin-bottom: 15px; text-align: center; font-weight: 600;" placeholder="Ismingiz">
             <button class="btn-main" onclick="updateName()">SAQLASH</button>
             <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                <button class="btn-main" style="background: rgba(255,255,255,0.1);" onclick="location.href='results.html'">📜 Tarix</button>
-                <button class="btn-main" style="background: rgba(255,255,255,0.1);" onclick="location.href='payments.html'">💸 To'lovlar</button>
+                <button class="btn-main" style="background: rgba(255,255,255,0.1);" onclick="navigate('results.html', 'Tarix yuklanmoqda...')">📜 Tarix</button>
+                <button class="btn-main" style="background: rgba(255,255,255,0.1);" onclick="navigate('payments.html', 'To\'lovlar yuklanmoqda...')">💸 To'lovlar</button>
             </div>
             <button class="btn-main" style="background: transparent; border: 1px solid #ff4b2b; color: #ff4b2b;" id="logout-btn">Tizimdan chiqish</button>
             <p onclick="toggleModal(false)" style="margin-top:15px; cursor:pointer; font-size:12px; opacity:0.5;">Yopish</p>
@@ -118,7 +118,15 @@
             b.style.animationDelay = Math.random() * 5 + 's';
             container.appendChild(b);
         }
-        window.toggleModal = (s) => document.getElementById('profileModal').style.display = s ? 'flex' : 'none';
+        window.toggleModal = (s) => {
+            document.getElementById('profileModal').style.display = s ? 'flex' : 'none';
+        };
+        window.showToast = (txt) => { 
+            const t = document.getElementById('toast'); 
+            t.innerText = txt; 
+            t.classList.add('show'); 
+            setTimeout(() => t.classList.remove('show'), 2500); 
+        };
     </script>
 
     <script type="module">
@@ -149,21 +157,36 @@
                     document.getElementById('user-balance').innerText = userBalance.toLocaleString() + " so'm";
                     document.getElementById('top-name').innerText = data.fio || "Foydalanuvchi";
                     document.getElementById('top-initials').innerText = (data.fio || "U")[0].toUpperCase();
-                    document.getElementById('user-id-display').innerText = "ID: " + (data.studentID || "...");
+                    
+                    // ID ishlamayotgan edi, mana shu qismda ID ni studentID dan oladi
+                    document.getElementById('user-id-display').innerText = "ID: " + (data.studentID || "Mavjud emas");
                     document.getElementById('input-name').value = data.fio || "";
+                }, (error) => {
+                    showToast("Ma'lumot olishda xatolik! ⚠️");
                 });
-            } else { location.replace("index.html"); }
+            } else { 
+                location.replace("index.html"); 
+            }
         });
 
         window.updateName = async () => {
             const name = document.getElementById('input-name').value;
-            if(!name) return showToast("Ismni kiriting!");
-            await updateDoc(doc(db, "users", auth.currentUser.uid), { fio: name });
-            showToast("Saqlandi! ✅");
-            toggleModal(false);
+            if(!name) return showToast("Ismni kiriting! ✍️");
+            try {
+                await updateDoc(doc(db, "users", auth.currentUser.uid), { fio: name });
+                showToast("Muvaffaqiyatli saqlandi! ✅");
+                toggleModal(false);
+            } catch (e) {
+                showToast("Saqlashda xatolik yuz berdi!");
+            }
         };
 
-        document.getElementById('logout-btn').onclick = () => signOut(auth);
+        document.getElementById('logout-btn').onclick = () => {
+            if(confirm("Tizimdan chiqmoqchimisiz? 🚪")) {
+                showToast("Xayr, sog' bo'ling! 👋");
+                setTimeout(() => signOut(auth), 1000);
+            }
+        };
 
         window.startQuiz = async (type) => {
             if(type === 'premium') {
@@ -171,15 +194,29 @@
                     showToast("Mablag' yetarli emas! 💳");
                     setTimeout(() => location.href = 'billing.html', 1500);
                 } else {
-                    await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-1000) });
-                    showToast("Premium boshlandi! 💎");
-                    setTimeout(() => location.href = 'premium-quiz.html', 1000);
+                    try {
+                        await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-1000) });
+                        showToast("Premium test boshlandi! (-1000 so'm) 💎");
+                        setTimeout(() => location.href = 'premium-quiz.html', 1200);
+                    } catch (e) {
+                        showToast("Xatolik: Balansni kamaytirib bo'lmadi.");
+                    }
                 }
-            } else { location.href = 'quiz.html'; }
+            } else { 
+                showToast("Bepul test yuklanmoqda... 🎁");
+                setTimeout(() => location.href = 'quiz.html', 800); 
+            }
         };
 
-        window.showToast = (txt) => { const t = document.getElementById('toast'); t.innerText = txt; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2500); };
-        window.navigate = (url, msg) => { showToast(msg); setTimeout(() => location.href = url, 800); };
+        window.navigate = (url, msg) => { 
+            showToast(msg); 
+            setTimeout(() => location.href = url, 800); 
+        };
+
+        window.contactSupport = () => {
+            showToast("Telegram admin bilan bog'lanish... ✈️");
+            setTimeout(() => window.open("https://t.me/dr_rahmonov_admin", "_blank"), 500);
+        };
     </script>
 </body>
 </html>
