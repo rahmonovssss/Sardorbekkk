@@ -9,14 +9,14 @@
 
     <style>
         :root {
-            --primary: #00f2fe; /* Yorqin ko'k */
-            --secondary: #4facfe; /* Moviy */
-            --premium: #f6d365; /* Oltin */
-            --premium-end: #fda085; /* Shaftoli */
-            --bg-start: #1a1a2e; /* To'q ko'k */
-            --bg-end: #16213e; /* Binafsha rangga yaqin ko'k */
-            --card-bg: rgba(255, 255, 255, 0.07);
-            --glass-border: rgba(255, 255, 255, 0.12);
+            --primary: #00f2fe;
+            --secondary: #4facfe;
+            --premium: #f6d365;
+            --premium-end: #fda085;
+            --bg-start: #0f172a; 
+            --bg-end: #1e1b4b;
+            --card-bg: rgba(255, 255, 255, 0.06);
+            --glass-border: rgba(255, 255, 255, 0.1);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -24,142 +24,95 @@
         body { 
             color: white; 
             min-height: 100vh;
+            background: radial-gradient(circle at top right, #1e293b, #0f172a);
             overflow-x: hidden;
-            /* Jonli va Jozibakor Gradient Fon */
-            background: linear-gradient(135deg, var(--bg-start) 0%, #1f1f3a 50%, var(--bg-end) 100%);
-            position: relative;
         }
 
-        /* Orqa fondagi harakatlanuvchi nurlar */
+        /* Fon animatsiyasi */
         body::before {
-            content: ""; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-            background: radial-gradient(circle at center, rgba(79, 172, 254, 0.1) 0%, transparent 40%),
-                        radial-gradient(circle at 80% 20%, rgba(123, 31, 162, 0.15) 0%, transparent 35%);
-            animation: bgRotate 20s linear infinite; z-index: -1;
+            content: ""; position: absolute; width: 300px; height: 300px;
+            background: var(--secondary); filter: blur(150px);
+            top: -100px; left: -100px; opacity: 0.2; z-index: -1;
         }
-        @keyframes bgRotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        /* --- HEADER --- */
         .header {
             position: fixed; top: 0; left: 0; width: 100%; 
-            padding: 20px; display: flex; justify-content: space-between; 
-            align-items: center; background: rgba(26, 26, 46, 0.8); 
+            padding: 15px 20px; display: flex; justify-content: space-between; 
+            align-items: center; background: rgba(15, 23, 42, 0.8); 
             backdrop-filter: blur(15px); z-index: 1000; border-bottom: 1px solid var(--glass-border);
         }
 
-        .bell-btn {
-            font-size: 24px; cursor: pointer; transition: 0.3s;
-            filter: drop-shadow(0 0 8px rgba(0,242,254,0.5));
-        }
-        .bell-btn:active { transform: scale(0.8) rotate(15deg); }
-
         .top-profile-container { 
-            display: flex; align-items: center; gap: 12px; 
-            background: var(--card-bg); padding: 7px 18px; 
+            display: flex; align-items: center; gap: 10px; 
+            background: var(--card-bg); padding: 5px 15px; 
             border-radius: 100px; border: 1px solid var(--glass-border);
-            cursor: pointer; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            cursor: pointer;
         }
-        .top-profile-container:active { transform: scale(0.92); background: rgba(255,255,255,0.15); }
 
-        /* --- ANIMATSION AVATAR --- */
         .mini-avatar { 
-            width: 38px; height: 38px; 
+            width: 32px; height: 32px; 
             background: linear-gradient(45deg, var(--primary), var(--secondary)); 
             border-radius: 50%; display: flex; align-items: center; justify-content: center; 
-            font-weight: 800; color: #001a33; font-size: 18px;
-            box-shadow: 0 0 20px rgba(0, 242, 254, 0.6);
-            animation: avatarGlow 3s infinite alternate;
-        }
-        @keyframes avatarGlow {
-            from { box-shadow: 0 0 10px rgba(0, 242, 254, 0.4); }
-            to { box-shadow: 0 0 25px rgba(0, 242, 254, 0.9); }
+            font-weight: 800; color: #0f172a; font-size: 14px;
         }
 
-        /* --- CONTENT --- */
-        .main-content { padding: 120px 20px 40px; max-width: 600px; margin: 0 auto; }
+        .main-content { padding: 110px 20px 40px; max-width: 500px; margin: 0 auto; }
         
         .balance-card { 
-            background: linear-gradient(135deg, var(--secondary) 0%, #4facfe 100%); 
-            padding: 30px; border-radius: 30px; margin-bottom: 30px; 
-            position: relative; overflow: hidden;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(255,255,255,0.2);
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); 
+            padding: 25px; border-radius: 24px; margin-bottom: 25px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            text-align: center;
         }
-        .balance-card::before {
-            content: ""; position: absolute; top: -30%; right: -20%; width: 150px; height: 150px;
-            background: rgba(255,255,255,0.1); border-radius: 50%;
-        }
-        .balance-card h3 { font-size: 14px; opacity: 0.85; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; font-weight: 600; }
-        .balance-card h1 { font-size: 42px; font-weight: 800; letter-spacing: -1.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .balance-card h1 { font-size: 36px; font-weight: 800; margin: 5px 0; }
         
         .btn-refill { 
-            display: inline-block; margin-top: 18px; background: white; 
-            padding: 12px 28px; border-radius: 15px; font-size: 15px; font-weight: 700;
-            text-decoration: none; color: #3a7bd5; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            display: inline-block; margin-top: 15px; background: white; 
+            padding: 10px 20px; border-radius: 12px; font-size: 14px; font-weight: 700;
+            text-decoration: none; color: #2563eb; transition: 0.3s;
         }
-        .btn-refill:active { transform: scale(0.9) translateY(3deg); }
 
         /* --- GRID MENU --- */
-        .grid-menu { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+        .grid-menu { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
         
         .menu-item { 
             background: var(--card-bg); border: 1px solid var(--glass-border); 
-            padding: 20px 15px; border-radius: 30px; cursor: pointer; text-align: center;
-            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            backdrop-filter: blur(10px); position: relative; overflow: hidden;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 20px 10px; border-radius: 24px; cursor: pointer; text-align: center;
+            transition: 0.3s; display: flex; flex-direction: column; align-items: center;
+            backdrop-filter: blur(10px);
         }
-        .menu-item::before {
-            content: ""; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
-            transition: 0.5s;
-        }
-        .menu-item:hover::before { left: 100%; }
+        .menu-item:active { transform: scale(0.95); background: rgba(255,255,255,0.1); }
         
-        .menu-item:active { transform: scale(0.95) translateY(-5px); border-color: var(--primary); box-shadow: 0 10px 30px rgba(0,242,254,0.2); }
-        
-        /* Lottie Animatsiya o'lchami */
-        .menu-item dotlottie-player { width: 70px; height: 70px; margin-bottom: 10px; }
-        .menu-item span { font-size: 15px; font-weight: 700; color: rgba(255,255,255,0.95); }
+        /* Stiker o'lchami */
+        .menu-item dotlottie-player { width: 80px; height: 80px; margin-bottom: 10px; }
+        .menu-item span { font-size: 14px; font-weight: 600; color: #cbd5e1; }
 
-        /* --- YALTIRAYDIGAN PREMIUM TUGMA --- */
+        /* --- PREMIUM YALTIRASH --- */
         .menu-item.premium-item {
-            background: linear-gradient(135deg, rgba(246, 211, 101, 0.1) 0%, rgba(253, 160, 133, 0.1) 100%);
-            border: 2px solid rgba(246, 211, 101, 0.3);
+            border: 1px solid rgba(246, 211, 101, 0.4);
+            background: rgba(246, 211, 101, 0.05);
             position: relative;
+            overflow: hidden;
         }
-        /* Oltin yaltirash effekti */
-        .menu-item.premium-item::after {
-            content: ""; position: absolute; inset: -2px; border-radius: 30px;
-            background: linear-gradient(135deg, var(--premium), var(--premium-end));
-            z-index: -1; opacity: 0.3; filter: blur(15px);
-            animation: premiumGlow 2s infinite alternate;
+        .menu-item.premium-item::before {
+            content: ""; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(246,211,101,0.2) 0%, transparent 70%);
+            animation: rotateGlow 4s linear infinite;
         }
-        @keyframes premiumGlow {
-            from { opacity: 0.2; filter: blur(10px); }
-            to { opacity: 0.6; filter: blur(20px); }
-        }
-        .menu-item.premium-item span { color: var(--premium); text-shadow: 0 0 10px rgba(246,211,101,0.5); }
-        .menu-item.premium-item:active { border-color: var(--premium); box-shadow: 0 10px 30px rgba(246,211,101,0.3); }
+        @keyframes rotateGlow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        
+        .menu-item.premium-item span { color: var(--premium); font-weight: 800; }
 
         /* --- MODAL --- */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(15px); }
-        .modal-content { 
-            background: #111a2e; padding: 35px; border-radius: 40px; 
-            width: 90%; max-width: 390px; border: 1px solid var(--glass-border); 
-            text-align: center; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-        }
-
-        .user-id-badge { background: var(--premium); color: #000; padding: 7px 20px; border-radius: 12px; font-weight: 800; font-size: 14px; margin-bottom: 25px; display: inline-block; letter-spacing: 1px; }
-        .edit-input { width: 100%; padding: 18px; background: rgba(255,255,255,0.04); border: 1px solid var(--glass-border); border-radius: 20px; color: white; margin-bottom: 25px; text-align: center; font-size: 17px; font-weight: 600; outline: none; transition: 0.3s; }
-        .edit-input:focus { border-color: var(--primary); background: rgba(255,255,255,0.08); }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(10px); }
+        .modal-content { background: #1e293b; padding: 30px; border-radius: 30px; width: 90%; max-width: 350px; text-align: center; border: 1px solid var(--glass-border); }
         
-        .btn-main { width: 100%; padding: 18px; background: linear-gradient(45deg, var(--primary), var(--secondary)); border: none; border-radius: 20px; color: #001a33; font-weight: 800; cursor: pointer; margin-bottom: 12px; transition: 0.3s; font-size: 16px; letter-spacing: 0.5px; }
-        .btn-main:active { transform: scale(0.96); opacity: 0.9; }
+        .edit-input { width: 100%; padding: 15px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 15px; color: white; margin: 20px 0; outline: none; text-align: center; }
+        
+        .btn-main { width: 100%; padding: 15px; background: linear-gradient(45deg, var(--primary), var(--secondary)); border: none; border-radius: 15px; color: #0f172a; font-weight: 800; cursor: pointer; margin-bottom: 10px; }
 
-        #toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: var(--premium); color: #000; padding: 16px 35px; border-radius: 100px; transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 3000; font-weight: 700; box-shadow: 0 15px 30px rgba(0,0,0,0.3); font-size: 15px; }
-        #toast.show { bottom: 40px; }
+        #toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: var(--premium); color: #000; padding: 12px 25px; border-radius: 50px; transition: 0.5s; z-index: 3000; font-weight: 700; font-size: 13px; }
+        #toast.show { bottom: 30px; }
     </style>
 </head>
 <body>
@@ -167,26 +120,26 @@
     <header class="header">
         <div class="bell-btn" onclick="location.href='messages.html'">🔔</div>
         <div class="top-profile-container" onclick="toggleModal(true)">
-            <span id="top-name" style="font-weight: 700; letter-spacing: 0.5px;">...</span>
+            <span id="top-name" style="font-weight: 700; font-size: 14px;">...</span>
             <div class="mini-avatar" id="top-initials">?</div>
         </div>
     </header>
 
     <div class="main-content">
         <div class="balance-card">
-            <h3>Asosiy Balans</h3>
+            <p style="font-size: 12px; opacity: 0.8; letter-spacing: 1px;">ASOSIY BALANS</p>
             <h1 id="user-balance">0 so'm</h1>
-            <a href="billing.html" class="btn-refill">Balansni to'ldirish 💳</a>
+            <a href="billing.html" class="btn-refill">To'ldirish 💳</a>
         </div>
 
         <div class="grid-menu">
-            <div class="menu-item" onclick="navigate('quiz.html', 'Bepul test yuklanmoqda...')">
+            <div class="menu-item" onclick="navigate('quiz.html', 'Bepul test...')">
                 <dotlottie-player src="https://lottie.host/7c978a3c-3103-4481-9964-b5a83a48e7e1/N4C4XN148s.json" background="transparent" speed="1" loop autoplay></dotlottie-player>
                 <span>Bepul Test</span>
             </div>
             
             <div class="menu-item premium-item" onclick="startQuiz('premium')">
-                <dotlottie-player src="https://lottie.host/8026111b-7798-4228-a53c-1b702336338e/A9F4uNfD8p.json" background="transparent" speed="1.2" loop autoplay></dotlottie-player>
+                <dotlottie-player src="https://lottie.host/8026111b-7798-4228-a53c-1b702336338e/A9F4uNfD8p.json" background="transparent" speed="1" loop autoplay></dotlottie-player>
                 <span>Premium (1000)</span>
             </div>
             
@@ -200,36 +153,31 @@
                 <span>Liderlar</span>
             </div>
             
-            <div class="menu-item" style="grid-column: span 2; background: rgba(0, 136, 204, 0.12); border-color: rgba(0, 136, 204, 0.3);" onclick="window.open('https://t.me/dr_rahmonov_admin', '_blank')">
-                <dotlottie-player src="https://lottie.host/5b47a61d-6161-4608-8e6b-67e324c47841/T88XGOf6m6.json" background="transparent" speed="1" loop autoplay style="width: 50px; height: 50px;"></dotlottie-player>
-                <span style="color: #4facfe;">Telegram Support</span>
+            <div class="menu-item" style="grid-column: span 2; flex-direction: row; gap: 15px; padding: 15px;" onclick="window.open('https://t.me/dr_rahmonov_admin', '_blank')">
+                <dotlottie-player src="https://lottie.host/5b47a61d-6161-4608-8e6b-67e324c47841/T88XGOf6m6.json" background="transparent" speed="1" loop autoplay style="width: 40px; height: 40px; margin: 0;"></dotlottie-player>
+                <span style="color: var(--secondary);">Telegram Support</span>
             </div>
         </div>
     </div>
 
     <div id="profileModal" class="modal">
         <div class="modal-content">
-            <div style="height: 130px; margin-bottom: 10px;"><dotlottie-player src="https://lottie.host/0a8a6886-c408-4177-bb89-7243b85f0962/8U7uG4H8D5.json" speed="1" loop autoplay></dotlottie-player></div>
-            <div class="user-id-badge" id="user-id-display">ID: ...</div>
-            <input type="text" id="input-name" class="edit-input" placeholder="Ismingizni kiriting">
-            <button class="btn-main" onclick="updateName()">SAQLASH ✅</button>
-            <div style="display: flex; gap: 10px;">
-                <button class="btn-main" style="background: rgba(255,255,255,0.08); color: white;" onclick="location.href='results.html'">📜 Tarix</button>
-                <button class="btn-main" style="background: rgba(255,255,255,0.08); color: white;" onclick="location.href='payments.html'">💸 To'lovlar</button>
-            </div>
-            <button class="btn-main" style="background: transparent; border: 1px solid #ff4b2b; color: #ff4b2b;" onclick="signOut(auth).then(()=>location.reload())">Chiqish 👋</button>
-            <p onclick="toggleModal(false)" style="margin-top:18px; cursor:pointer; opacity:0.6; font-size: 14px;">Yopish</p>
+            <div style="height: 100px;"><dotlottie-player src="https://lottie.host/0a8a6886-c408-4177-bb89-7243b85f0962/8U7uG4H8D5.json" speed="1" loop autoplay></dotlottie-player></div>
+            <div id="user-id-display" style="font-size: 12px; color: var(--premium); font-weight: bold; margin-top: 10px;">ID: ...</div>
+            <input type="text" id="input-name" class="edit-input" placeholder="Ismingiz">
+            <button class="btn-main" onclick="updateName()">SAQLASH</button>
+            <button class="btn-main" style="background: transparent; border: 1px solid #ff4b2b; color: #ff4b2b;" onclick="signOut(auth).then(()=>location.reload())">Chiqish</button>
+            <p onclick="toggleModal(false)" style="margin-top:15px; cursor:pointer; opacity:0.5; font-size: 12px;">Yopish</p>
         </div>
     </div>
 
-    <div id="toast">Xabar!</div>
+    <div id="toast"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, onSnapshot, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // FIREBASE CONFIG (O'zingizniki bilan almashtiring)
         const firebaseConfig = {
             apiKey: "AIzaSyA2G8cD0JezEKXRCtKLYiZL0bzDyTp06Vs",
             authDomain: "quiz-app-3692d.firebaseapp.com",
@@ -245,68 +193,33 @@
 
         let userBalance = 0;
 
-        function generateID() {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            let res = '';
-            for (let i = 0; i < 6; i++) res += chars.charAt(Math.floor(Math.random() * chars.length));
-            return res;
-        }
-
-        onAuthStateChanged(auth, async (user) => {
+        onAuthStateChanged(auth, (user) => {
             if (user) {
-                const userRef = doc(db, "users", user.uid);
-                onSnapshot(userRef, async (snap) => {
-                    let data = snap.exists() ? snap.data() : {};
-                    
-                    if (!data.studentID) {
-                        const newID = generateID();
-                        await setDoc(userRef, { studentID: newID }, { merge: true });
-                        data.studentID = newID;
-                    }
-
+                onSnapshot(doc(db, "users", user.uid), (snap) => {
+                    const data = snap.data() || {};
                     userBalance = data.balance || 0;
-                    const name = data.fio || user.displayName || "Foydalanuvchi";
-                    
-                    document.getElementById('user-id-display').innerText = "ID: " + data.studentID;
+                    const name = data.fio || "Foydalanuvchi";
+                    document.getElementById('user-balance').innerText = userBalance.toLocaleString() + " so'm";
                     document.getElementById('top-name').innerText = name;
                     document.getElementById('top-initials').innerText = name[0].toUpperCase();
-                    document.getElementById('user-balance').innerText = userBalance.toLocaleString() + " so'm";
+                    document.getElementById('user-id-display').innerText = "ID: " + (data.studentID || "...");
                     document.getElementById('input-name').value = data.fio || "";
                 });
-            } else {
-                location.replace("index.html");
-            }
+            } else { location.replace("index.html"); }
         });
 
         window.navigate = (url, msg) => { showToast(msg); setTimeout(() => location.href = url, 800); };
-
-        window.startQuiz = (type) => {
-            if(type === 'premium') {
-                if(userBalance < 1000) {
-                    showToast("Mablag' yetarli emas! (Kamida 1000 so'm) 💳");
-                    setTimeout(() => location.href='billing.html', 1500);
-                } else {
-                    navigate('premium-quiz.html', "Oltin test boshlanmoqda... 💎");
-                }
-            } else {
-                navigate('quiz.html', "Tayyorlaning, test yuklanmoqda...");
-            }
+        window.startQuiz = (t) => {
+            if(t === 'premium' && userBalance < 1000) {
+                showToast("Mablag' yetarli emas!");
+                setTimeout(() => location.href='billing.html', 1200);
+            } else { navigate(t === 'premium' ? 'premium-quiz.html' : 'quiz.html', "Yuklanmoqda..."); }
         };
-
         window.toggleModal = (s) => document.getElementById('profileModal').style.display = s ? 'flex' : 'none';
-        
-        window.showToast = (txt) => {
-            const t = document.getElementById('toast');
-            t.innerText = txt; t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), 2800);
-        };
-
+        window.showToast = (m) => { const t = document.getElementById('toast'); t.innerText = m; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2500); };
         window.updateName = async () => {
-            const name = document.getElementById('input-name').value;
-            if(!name) return showToast("Ism bo'sh bo'lishi mumkin emas!");
-            await updateDoc(doc(db, "users", auth.currentUser.uid), { fio: name });
-            showToast("Ma'lumotlar saqlandi! ✅");
-            setTimeout(() => toggleModal(false), 1000);
+            await updateDoc(doc(db, "users", auth.currentUser.uid), { fio: document.getElementById('input-name').value });
+            showToast("Saqlandi! ✅"); toggleModal(false);
         };
     </script>
 </body>
