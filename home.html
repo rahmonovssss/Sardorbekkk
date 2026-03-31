@@ -3,84 +3,145 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dr. Rahmonov - Premium Kabinet</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <title>Dr. Rahmonov - Premium Cabinet</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@dotlottie/player-component@latest/dist/dotlottie-player.mjs" type="module"></script>
 
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: #0f2027; color: white; overflow-x: hidden; min-height: 100vh; }
+        :root {
+            --primary: #00f2fe;
+            --secondary: #4facfe;
+            --premium: #f6d365;
+            --premium-end: #fda085;
+            --bg-deep: #0f172a;
+            --card-bg: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.12);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            color: white; 
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
 
         /* --- HEADER --- */
         .header {
             position: fixed; top: 0; left: 0; width: 100%; 
             padding: 15px 20px; display: flex; justify-content: space-between; 
-            align-items: center; background: rgba(15, 32, 39, 0.9); 
-            backdrop-filter: blur(15px); z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.05);
+            align-items: center; background: rgba(15, 23, 42, 0.8); 
+            backdrop-filter: blur(20px); z-index: 1000; border-bottom: 1px solid var(--glass-border);
         }
-        .top-profile-container { display: flex; align-items: center; gap: 10px; background: rgba(255, 255, 255, 0.08); padding: 5px 12px; border-radius: 50px; cursor: pointer; transition: 0.3s; border: 1px solid rgba(255,255,255,0.1); }
-        .top-profile-container:active { transform: scale(0.95); }
-        .mini-avatar { width: 34px; height: 34px; background: linear-gradient(45deg, #00d2ff, #3a7bd5); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #000; font-size: 14px; box-shadow: 0 0 10px rgba(0, 210, 255, 0.5); }
+
+        .bell-btn { font-size: 24px; cursor: pointer; transition: 0.3s; filter: drop-shadow(0 0 8px var(--primary)); }
+        .bell-btn:active { transform: scale(0.85); }
+
+        .top-profile-container { 
+            display: flex; align-items: center; gap: 10px; 
+            background: var(--card-bg); padding: 6px 15px; 
+            border-radius: 100px; border: 1px solid var(--glass-border);
+            cursor: pointer; transition: 0.3s;
+        }
+
+        .mini-avatar { 
+            width: 34px; height: 34px; 
+            background: linear-gradient(45deg, var(--primary), var(--secondary)); 
+            border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+            font-weight: 800; color: #000; font-size: 14px;
+            box-shadow: 0 0 15px rgba(0, 242, 254, 0.5);
+        }
 
         /* --- CONTENT --- */
-        .main-content { padding: 100px 20px 30px; max-width: 500px; margin: 0 auto; }
+        .main-content { padding: 110px 20px 40px; max-width: 500px; margin: 0 auto; }
         
         .balance-card { 
-            background: linear-gradient(135deg, #00d2ff, #3a7bd5); 
-            padding: 25px; border-radius: 30px; margin-bottom: 25px; position: relative; overflow: hidden;
-            box-shadow: 0 15px 30px rgba(0, 210, 255, 0.25);
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); 
+            padding: 25px; border-radius: 25px; margin-bottom: 30px; 
+            position: relative; overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.2);
         }
-        .balance-card::after { content: ''; position: absolute; width: 100px; height: 100px; background: rgba(255,255,255,0.1); border-radius: 50%; top: -20px; right: -20px; }
-        .balance-card h3 { font-size: 13px; opacity: 0.8; letter-spacing: 1px; text-transform: uppercase; }
-        .balance-card h1 { font-size: 36px; margin: 5px 0; font-weight: 800; }
+        .balance-card::before {
+            content: ""; position: absolute; top: -20%; right: -10%; width: 120px; height: 120px;
+            background: rgba(255,255,255,0.1); border-radius: 50%;
+        }
+        .balance-card h3 { font-size: 12px; opacity: 0.8; text-transform: uppercase; letter-spacing: 1.5px; }
+        .balance-card h1 { font-size: 38px; font-weight: 800; margin: 5px 0; }
+        
         .btn-refill { 
-            display: inline-block; margin-top: 12px; background: white; 
-            padding: 8px 20px; border-radius: 12px; font-size: 14px; font-weight: 700;
-            text-decoration: none; color: #3a7bd5; transition: 0.3s;
+            display: inline-block; margin-top: 10px; background: white; 
+            padding: 10px 20px; border-radius: 12px; font-size: 14px; font-weight: 700;
+            text-decoration: none; color: #2563eb; transition: 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
 
         /* --- GRID MENU --- */
         .grid-menu { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
-        .menu-item { 
-            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08); 
-            padding: 20px 10px; border-radius: 28px; cursor: pointer; text-align: center;
-            transition: 0.3s; display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
-        .menu-item:active { transform: scale(0.92); background: rgba(255, 255, 255, 0.12); }
         
-        /* Stikerlar o'lchami */
-        .menu-item dotlottie-player { width: 85px; height: 85px; margin-bottom: 5px; }
-        .menu-item span { font-size: 14px; font-weight: 600; color: #e2e8f0; }
+        .menu-item { 
+            background: var(--card-bg); border: 1px solid var(--glass-border); 
+            padding: 20px 15px; border-radius: 25px; cursor: pointer; text-align: center;
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            backdrop-filter: blur(10px);
+        }
+        .menu-item:active { transform: scale(0.92); background: rgba(255,255,255,0.15); }
+        .menu-item dotlottie-player { width: 75px; height: 75px; margin: 0 auto 8px; }
+        .menu-item span { font-size: 14px; font-weight: 700; color: #f8fafc; }
 
-        /* Premium Yaltirash */
-        .premium-box { border: 1.5px solid #ffd700; background: rgba(255, 215, 0, 0.05); position: relative; }
-        .premium-box span { color: #ffd700; }
-        .premium-box::before { content: "PREMIUM"; position: absolute; top: 8px; right: 12px; font-size: 8px; font-weight: 800; color: #ffd700; border: 1px solid #ffd700; padding: 2px 5px; border-radius: 5px; }
+        /* --- PREMIUM SHINE EFFECT --- */
+        .menu-item.premium-btn {
+            background: linear-gradient(135deg, rgba(246, 211, 101, 0.1) 0%, rgba(253, 160, 133, 0.1) 100%);
+            border: 2px solid var(--premium);
+            position: relative; overflow: hidden;
+        }
+        .menu-item.premium-btn::after {
+            content: ""; position: absolute; top: -50%; left: -100%; width: 50%; height: 200%;
+            background: rgba(255,255,255,0.2); transform: rotate(30deg);
+            animation: shine 3s infinite;
+        }
+        @keyframes shine {
+            0% { left: -100%; }
+            20% { left: 150%; }
+            100% { left: 150%; }
+        }
+        .menu-item.premium-btn span { color: var(--premium); text-shadow: 0 0 10px rgba(246,211,101,0.4); }
 
         /* --- MODAL --- */
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(15px); }
-        .modal-content { background: #162a33; padding: 30px; border-radius: 35px; width: 90%; max-width: 360px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
-        
-        .edit-input { width: 100%; padding: 15px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 18px; color: white; margin: 15px 0; outline: none; text-align: center; font-size: 16px; font-weight: 600; }
-        .btn-main { width: 100%; padding: 15px; background: linear-gradient(90deg, #00d2ff, #3a7bd5); border: none; border-radius: 18px; color: #000; font-weight: 800; cursor: pointer; margin-bottom: 10px; transition: 0.3s; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(10px); }
+        .modal-content { 
+            background: #111827; padding: 30px; border-radius: 30px; 
+            width: 90%; max-width: 360px; text-align: center; border: 1px solid var(--glass-border);
+        }
 
-        #toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: #ffd700; color: #000; padding: 12px 30px; border-radius: 50px; transition: 0.5s; z-index: 3000; font-weight: 700; font-size: 14px; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+        .btn-main { width: 100%; padding: 15px; background: linear-gradient(45deg, var(--primary), var(--secondary)); border: none; border-radius: 15px; color: #000; font-weight: 800; cursor: pointer; margin-bottom: 10px; }
+
+        #toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: var(--premium); color: #000; padding: 14px 30px; border-radius: 50px; transition: 0.5s; z-index: 3000; font-weight: 700; }
         #toast.show { bottom: 40px; }
     </style>
 </head>
 <body>
 
     <header class="header">
-        <div onclick="showToast('Xabarlar hozircha bo\'sh 📭')" style="cursor:pointer; font-size: 22px;">🔔</div>
+        <div class="bell-btn" onclick="location.href='messages.html'">🔔</div>
         <div class="top-profile-container" onclick="toggleModal(true)">
-            <span id="top-name" style="font-weight: 600; font-size: 14px;">...</span>
+            <span id="top-name">...</span>
             <div class="mini-avatar" id="top-initials">?</div>
         </div>
     </header>
 
     <div class="main-content">
         <div class="balance-card">
-            <h3>Asosiy Balans</h3>
+            <h3>Mavjud Balans</h3>
             <h1 id="user-balance">0 so'm</h1>
             <a href="billing.html" class="btn-refill">Balansni to'ldirish 💳</a>
         </div>
@@ -91,8 +152,8 @@
                 <span>Bepul Test</span>
             </div>
             
-            <div class="menu-item premium-box" onclick="startQuiz('premium')">
-                <dotlottie-player src="https://lottie.host/8026111b-7798-4228-a53c-1b702336338e/A9F4uNfD8p.json" background="transparent" speed="1" loop autoplay></dotlottie-player>
+            <div class="menu-item premium-btn" onclick="startQuiz('premium')">
+                <dotlottie-player src="https://lottie.host/8026111b-7798-4228-a53c-1b702336338e/A9F4uNfD8p.json" background="transparent" speed="1.2" loop autoplay></dotlottie-player>
                 <span>Premium (1000)</span>
             </div>
             
@@ -105,28 +166,17 @@
                 <dotlottie-player src="https://lottie.host/575a7c2c-8097-422e-b2d9-f53874411624/k65C6b7E4K.json" background="transparent" speed="1" loop autoplay></dotlottie-player>
                 <span>Liderlar</span>
             </div>
-            
-            <div class="menu-item" style="grid-column: span 2; flex-direction: row; gap: 15px; background: rgba(0, 136, 204, 0.12);" onclick="contactSupport()">
-                <dotlottie-player src="https://lottie.host/5b47a61d-6161-4608-8e6b-67e324c47841/T88XGOf6m6.json" background="transparent" speed="1" loop autoplay style="width: 45px; height: 45px; margin:0;"></dotlottie-player>
-                <span style="color: #0088cc; font-weight: 800;">TELEGRAM YORDAM</span>
-            </div>
         </div>
     </div>
 
     <div id="profileModal" class="modal">
         <div class="modal-content">
-            <div style="height: 120px; margin-bottom: 10px;">
-                <dotlottie-player src="https://lottie.host/0a8a6886-c408-4177-bb89-7243b85f0962/8U7uG4H8D5.json" speed="1" loop autoplay></dotlottie-player>
-            </div>
-            <div class="user-id-badge" id="user-id-display">ID: ...</div>
-            <input type="text" id="input-name" class="edit-input" placeholder="Ismingiz">
-            <button class="btn-main" onclick="updateName()">SAQLASH ✅</button>
-            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                <button class="btn-main" style="background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1);" onclick="location.href='results.html'">Tarix</button>
-                <button class="btn-main" style="background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1);" onclick="location.href='payments.html'">To'lovlar</button>
-            </div>
-            <button class="btn-main" style="background: transparent; border: 1px solid #ff4b2b; color: #ff4b2b;" onclick="finalLogout()">Chiqish 👋</button>
-            <p onclick="toggleModal(false)" style="margin-top:15px; cursor:pointer; font-size:12px; opacity:0.5;">Yopish</p>
+            <div style="height: 100px;"><dotlottie-player src="https://lottie.host/5b47a61d-6161-4608-8e6b-67e324c47841/T88XGOf6m6.json" speed="1" loop autoplay></dotlottie-player></div>
+            <div id="user-id-display" style="font-weight: 800; color: var(--premium); margin: 10px 0;">ID: ...</div>
+            <input type="text" id="input-name" style="width:100%; padding:15px; border-radius:15px; border:1px solid var(--glass-border); background:rgba(255,255,255,0.05); color:white; text-align:center; margin-bottom:15px;">
+            <button class="btn-main" onclick="updateName()">SAQLASH</button>
+            <button class="btn-main" style="background:transparent; border:1px solid #ff4b2b; color:#ff4b2b;" onclick="signOut(auth).then(()=>location.reload())">Chiqish</button>
+            <p onclick="toggleModal(false)" style="margin-top:10px; cursor:pointer; opacity:0.5; font-size:12px;">Yopish</p>
         </div>
     </div>
 
@@ -135,7 +185,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2G8cD0JezEKXRCtKLYiZL0bzDyTp06Vs",
@@ -157,33 +207,37 @@
                 onSnapshot(doc(db, "users", user.uid), (snap) => {
                     const data = snap.data() || {};
                     userBalance = data.balance || 0;
-                    const name = data.fio || user.displayName || "Foydalanuvchi";
                     document.getElementById('user-balance').innerText = userBalance.toLocaleString() + " so'm";
-                    document.getElementById('top-name').innerText = name;
-                    document.getElementById('top-initials').innerText = name[0].toUpperCase();
+                    document.getElementById('top-name').innerText = data.fio || "Foydalanuvchi";
+                    document.getElementById('top-initials').innerText = (data.fio || "F")[0].toUpperCase();
                     document.getElementById('user-id-display').innerText = "ID: " + (data.studentID || "...");
-                    document.getElementById('input-name').value = data.fio || "";
                 });
             } else { location.replace("index.html"); }
         });
 
+        window.startQuiz = async (type) => {
+            if (type === 'premium') {
+                if (userBalance < 1000) {
+                    showToast("Balans yetarli emas! 💳");
+                    setTimeout(() => location.href = 'billing.html', 1500);
+                } else {
+                    // Balansdan 1000 so'm yechish
+                    try {
+                        const userRef = doc(db, "users", auth.currentUser.uid);
+                        await updateDoc(userRef, { balance: increment(-1000) });
+                        showToast("1000 so'm yechildi. Premium test boshlanmoqda! 💎");
+                        setTimeout(() => location.href = 'premium-quiz.html', 1200);
+                    } catch (e) { showToast("Xatolik yuz berdi."); }
+                }
+            } else {
+                showToast("Bepul test yuklanmoqda...");
+                setTimeout(() => location.href = 'quiz.html', 1000);
+            }
+        };
+
         window.navigate = (url, msg) => { showToast(msg); setTimeout(() => location.href = url, 800); };
-        window.contactSupport = () => { showToast("Telegramga o'tilmoqda..."); setTimeout(() => window.open("https://t.me/dr_rahmonov_admin", "_blank"), 800); };
-        window.startQuiz = (t) => {
-            if(t === 'premium' && userBalance < 1000) {
-                showToast("Balans yetarli emas!");
-                setTimeout(() => location.href='billing.html', 1500);
-            } else { navigate(t === 'premium' ? 'premium-quiz.html' : 'quiz.html', "Yuklanmoqda..."); }
-        };
         window.toggleModal = (s) => document.getElementById('profileModal').style.display = s ? 'flex' : 'none';
-        window.showToast = (txt) => { const t = document.getElementById('toast'); t.innerText = txt; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2500); };
-        window.updateName = async () => {
-            const name = document.getElementById('input-name').value;
-            if(!name) return showToast("Ismni kiriting!");
-            await updateDoc(doc(db, "users", auth.currentUser.uid), { fio: name });
-            showToast("Saqlandi! ✅"); toggleModal(false);
-        };
-        window.finalLogout = () => signOut(auth).then(() => location.replace("index.html"));
+        window.showToast = (m) => { const t = document.getElementById('toast'); t.innerText = m; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2500); };
     </script>
 </body>
 </html>
