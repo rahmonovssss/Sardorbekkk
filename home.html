@@ -4,109 +4,161 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dr. Rahmonov - Premium Cabinet</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@dotlottie/player-component@latest/dist/dotlottie-player.mjs" type="module"></script>
 
     <style>
         :root {
-            --primary: #00d2ff;
-            --secondary: #3a7bd5;
-            --bg: #050a10;
-            --card-bg: rgba(255, 255, 255, 0.06);
-            --glass-border: rgba(255, 255, 255, 0.1);
+            --primary: #00f2fe; /* Yorqin ko'k */
+            --secondary: #4facfe; /* Moviy */
+            --premium: #f6d365; /* Oltin */
+            --premium-end: #fda085; /* Shaftoli */
+            --bg-start: #1a1a2e; /* To'q ko'k */
+            --bg-end: #16213e; /* Binafsha rangga yaqin ko'k */
+            --card-bg: rgba(255, 255, 255, 0.07);
+            --glass-border: rgba(255, 255, 255, 0.12);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
         
         body { 
-            background: var(--bg); 
             color: white; 
             min-height: 100vh;
             overflow-x: hidden;
-            /* Professional Mesh Gradient Fon */
-            background: radial-gradient(circle at 0% 0%, rgba(0, 210, 255, 0.15) 0%, transparent 35%),
-                        radial-gradient(circle at 100% 100%, rgba(58, 123, 213, 0.15) 0%, transparent 35%),
-                        var(--bg);
+            /* Jonli va Jozibakor Gradient Fon */
+            background: linear-gradient(135deg, var(--bg-start) 0%, #1f1f3a 50%, var(--bg-end) 100%);
+            position: relative;
         }
+
+        /* Orqa fondagi harakatlanuvchi nurlar */
+        body::before {
+            content: ""; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle at center, rgba(79, 172, 254, 0.1) 0%, transparent 40%),
+                        radial-gradient(circle at 80% 20%, rgba(123, 31, 162, 0.15) 0%, transparent 35%);
+            animation: bgRotate 20s linear infinite; z-index: -1;
+        }
+        @keyframes bgRotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
         /* --- HEADER --- */
         .header {
             position: fixed; top: 0; left: 0; width: 100%; 
             padding: 20px; display: flex; justify-content: space-between; 
-            align-items: center; background: rgba(5, 10, 16, 0.8); 
+            align-items: center; background: rgba(26, 26, 46, 0.8); 
             backdrop-filter: blur(15px); z-index: 1000; border-bottom: 1px solid var(--glass-border);
         }
 
         .bell-btn {
-            font-size: 22px; cursor: pointer; transition: 0.3s;
-            filter: drop-shadow(0 0 8px rgba(0,210,255,0.3));
+            font-size: 24px; cursor: pointer; transition: 0.3s;
+            filter: drop-shadow(0 0 8px rgba(0,242,254,0.5));
         }
         .bell-btn:active { transform: scale(0.8) rotate(15deg); }
 
         .top-profile-container { 
             display: flex; align-items: center; gap: 12px; 
-            background: var(--card-bg); padding: 6px 15px; 
+            background: var(--card-bg); padding: 7px 18px; 
             border-radius: 100px; border: 1px solid var(--glass-border);
             cursor: pointer; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
         }
-        .top-profile-container:active { transform: scale(0.92); background: rgba(255,255,255,0.12); }
+        .top-profile-container:active { transform: scale(0.92); background: rgba(255,255,255,0.15); }
 
-        /* --- ANIMATSION AVATAR (Undov o'rniga) --- */
+        /* --- ANIMATSION AVATAR --- */
         .mini-avatar { 
-            width: 36px; height: 36px; 
+            width: 38px; height: 38px; 
             background: linear-gradient(45deg, var(--primary), var(--secondary)); 
             border-radius: 50%; display: flex; align-items: center; justify-content: center; 
-            font-weight: 800; color: #000; font-size: 16px;
-            box-shadow: 0 0 15px rgba(0, 210, 255, 0.5);
+            font-weight: 800; color: #001a33; font-size: 18px;
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.6);
             animation: avatarGlow 3s infinite alternate;
         }
         @keyframes avatarGlow {
-            from { box-shadow: 0 0 5px rgba(0, 210, 255, 0.4); }
-            to { box-shadow: 0 0 20px rgba(0, 210, 255, 0.8); }
+            from { box-shadow: 0 0 10px rgba(0, 242, 254, 0.4); }
+            to { box-shadow: 0 0 25px rgba(0, 242, 254, 0.9); }
         }
 
         /* --- CONTENT --- */
-        .main-content { padding: 110px 20px 40px; max-width: 600px; margin: 0 auto; }
+        .main-content { padding: 120px 20px 40px; max-width: 600px; margin: 0 auto; }
         
         .balance-card { 
-            background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%); 
+            background: linear-gradient(135deg, var(--secondary) 0%, #4facfe 100%); 
             padding: 30px; border-radius: 30px; margin-bottom: 30px; 
             position: relative; overflow: hidden;
-            box-shadow: 0 20px 40px rgba(0, 210, 255, 0.25);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255,255,255,0.2);
         }
-        .balance-card h3 { font-size: 14px; opacity: 0.8; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px; }
-        .balance-card h1 { font-size: 38px; font-weight: 800; letter-spacing: -1px; }
+        .balance-card::before {
+            content: ""; position: absolute; top: -30%; right: -20%; width: 150px; height: 150px;
+            background: rgba(255,255,255,0.1); border-radius: 50%;
+        }
+        .balance-card h3 { font-size: 14px; opacity: 0.85; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; font-weight: 600; }
+        .balance-card h1 { font-size: 42px; font-weight: 800; letter-spacing: -1.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         
         .btn-refill { 
-            display: inline-block; margin-top: 15px; background: white; 
-            padding: 12px 24px; border-radius: 15px; font-size: 14px; font-weight: 700;
-            text-decoration: none; color: #3a7bd5; transition: 0.3s;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: inline-block; margin-top: 18px; background: white; 
+            padding: 12px 28px; border-radius: 15px; font-size: 15px; font-weight: 700;
+            text-decoration: none; color: #3a7bd5; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
         }
-        .btn-refill:active { transform: scale(0.95); }
+        .btn-refill:active { transform: scale(0.9) translateY(3deg); }
 
         /* --- GRID MENU --- */
-        .grid-menu { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+        .grid-menu { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+        
         .menu-item { 
             background: var(--card-bg); border: 1px solid var(--glass-border); 
-            padding: 25px 15px; border-radius: 28px; cursor: pointer; text-align: center;
-            transition: 0.4s; backdrop-filter: blur(5px);
+            padding: 20px 15px; border-radius: 30px; cursor: pointer; text-align: center;
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            backdrop-filter: blur(10px); position: relative; overflow: hidden;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
-        .menu-item:active { transform: translateY(-8px); background: rgba(255,255,255,0.1); border-color: var(--primary); }
-        .menu-item i { font-size: 36px; display: block; margin-bottom: 12px; font-style: normal; }
-        .menu-item span { font-size: 15px; font-weight: 600; }
+        .menu-item::before {
+            content: ""; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+            transition: 0.5s;
+        }
+        .menu-item:hover::before { left: 100%; }
+        
+        .menu-item:active { transform: scale(0.95) translateY(-5px); border-color: var(--primary); box-shadow: 0 10px 30px rgba(0,242,254,0.2); }
+        
+        /* Lottie Animatsiya o'lchami */
+        .menu-item dotlottie-player { width: 70px; height: 70px; margin-bottom: 10px; }
+        .menu-item span { font-size: 15px; font-weight: 700; color: rgba(255,255,255,0.95); }
+
+        /* --- YALTIRAYDIGAN PREMIUM TUGMA --- */
+        .menu-item.premium-item {
+            background: linear-gradient(135deg, rgba(246, 211, 101, 0.1) 0%, rgba(253, 160, 133, 0.1) 100%);
+            border: 2px solid rgba(246, 211, 101, 0.3);
+            position: relative;
+        }
+        /* Oltin yaltirash effekti */
+        .menu-item.premium-item::after {
+            content: ""; position: absolute; inset: -2px; border-radius: 30px;
+            background: linear-gradient(135deg, var(--premium), var(--premium-end));
+            z-index: -1; opacity: 0.3; filter: blur(15px);
+            animation: premiumGlow 2s infinite alternate;
+        }
+        @keyframes premiumGlow {
+            from { opacity: 0.2; filter: blur(10px); }
+            to { opacity: 0.6; filter: blur(20px); }
+        }
+        .menu-item.premium-item span { color: var(--premium); text-shadow: 0 0 10px rgba(246,211,101,0.5); }
+        .menu-item.premium-item:active { border-color: var(--premium); box-shadow: 0 10px 30px rgba(246,211,101,0.3); }
 
         /* --- MODAL --- */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(12px); }
-        .modal-content { background: #0f172a; padding: 30px; border-radius: 35px; width: 90%; max-width: 380px; border: 1px solid var(--glass-border); text-align: center; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(15px); }
+        .modal-content { 
+            background: #111a2e; padding: 35px; border-radius: 40px; 
+            width: 90%; max-width: 390px; border: 1px solid var(--glass-border); 
+            text-align: center; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
 
-        .user-id-badge { background: #ffd700; color: #000; padding: 6px 18px; border-radius: 12px; font-weight: 800; font-size: 14px; margin-bottom: 20px; display: inline-block; }
-        .edit-input { width: 100%; padding: 16px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 18px; color: white; margin-bottom: 20px; text-align: center; font-size: 16px; font-weight: 600; outline: none; }
+        .user-id-badge { background: var(--premium); color: #000; padding: 7px 20px; border-radius: 12px; font-weight: 800; font-size: 14px; margin-bottom: 25px; display: inline-block; letter-spacing: 1px; }
+        .edit-input { width: 100%; padding: 18px; background: rgba(255,255,255,0.04); border: 1px solid var(--glass-border); border-radius: 20px; color: white; margin-bottom: 25px; text-align: center; font-size: 17px; font-weight: 600; outline: none; transition: 0.3s; }
+        .edit-input:focus { border-color: var(--primary); background: rgba(255,255,255,0.08); }
         
-        .btn-main { width: 100%; padding: 16px; background: var(--primary); border: none; border-radius: 18px; color: #000; font-weight: 800; cursor: pointer; margin-bottom: 12px; transition: 0.3s; }
-        .btn-main:active { transform: scale(0.96); }
+        .btn-main { width: 100%; padding: 18px; background: linear-gradient(45deg, var(--primary), var(--secondary)); border: none; border-radius: 20px; color: #001a33; font-weight: 800; cursor: pointer; margin-bottom: 12px; transition: 0.3s; font-size: 16px; letter-spacing: 0.5px; }
+        .btn-main:active { transform: scale(0.96); opacity: 0.9; }
 
-        #toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: #ffd700; color: #000; padding: 15px 30px; border-radius: 100px; transition: 0.5s; z-index: 3000; font-weight: 700; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+        #toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: var(--premium); color: #000; padding: 16px 35px; border-radius: 100px; transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 3000; font-weight: 700; box-shadow: 0 15px 30px rgba(0,0,0,0.3); font-size: 15px; }
         #toast.show { bottom: 40px; }
     </style>
 </head>
@@ -115,7 +167,7 @@
     <header class="header">
         <div class="bell-btn" onclick="location.href='messages.html'">🔔</div>
         <div class="top-profile-container" onclick="toggleModal(true)">
-            <span id="top-name" style="font-weight: 600;">...</span>
+            <span id="top-name" style="font-weight: 700; letter-spacing: 0.5px;">...</span>
             <div class="mini-avatar" id="top-initials">?</div>
         </div>
     </header>
@@ -124,30 +176,49 @@
         <div class="balance-card">
             <h3>Asosiy Balans</h3>
             <h1 id="user-balance">0 so'm</h1>
-            <a href="billing.html" class="btn-refill">Hozir to'ldirish 💳</a>
+            <a href="billing.html" class="btn-refill">Balansni to'ldirish 💳</a>
         </div>
 
         <div class="grid-menu">
-            <div class="menu-item" onclick="navigate('quiz.html', 'Bepul test yuklanmoqda...')"><i>🎁</i><span>Bepul Test</span></div>
-            <div class="menu-item" style="border-color: rgba(255, 215, 0, 0.3);" onclick="startQuiz('premium')"><i>💎</i><span style="color: #ffd700;">Premium (1000)</span></div>
-            <div class="menu-item" onclick="navigate('statistics.html', 'Statistika...')"><i>📊</i><span>Statistika</span></div>
-            <div class="menu-item" onclick="navigate('leaderboard.html', 'Liderlar...')"><i>🏆</i><span>Liderlar</span></div>
-            <div class="menu-item" style="grid-column: span 2; background: rgba(0, 136, 204, 0.1);" onclick="window.open('https://t.me/dr_rahmonov_admin', '_blank')"><i>✈️</i><span style="color: #0088cc;">Telegram Support</span></div>
+            <div class="menu-item" onclick="navigate('quiz.html', 'Bepul test yuklanmoqda...')">
+                <dotlottie-player src="https://lottie.host/7c978a3c-3103-4481-9964-b5a83a48e7e1/N4C4XN148s.json" background="transparent" speed="1" loop autoplay></dotlottie-player>
+                <span>Bepul Test</span>
+            </div>
+            
+            <div class="menu-item premium-item" onclick="startQuiz('premium')">
+                <dotlottie-player src="https://lottie.host/8026111b-7798-4228-a53c-1b702336338e/A9F4uNfD8p.json" background="transparent" speed="1.2" loop autoplay></dotlottie-player>
+                <span>Premium (1000)</span>
+            </div>
+            
+            <div class="menu-item" onclick="navigate('statistics.html', 'Statistika...')">
+                <dotlottie-player src="https://lottie.host/8b7d4133-c598-4444-938b-d7b693e43075/j28r6XhH3A.json" background="transparent" speed="1" loop autoplay></dotlottie-player>
+                <span>Statistika</span>
+            </div>
+            
+            <div class="menu-item" onclick="navigate('leaderboard.html', 'Liderlar...')">
+                <dotlottie-player src="https://lottie.host/575a7c2c-8097-422e-b2d9-f53874411624/k65C6b7E4K.json" background="transparent" speed="1" loop autoplay></dotlottie-player>
+                <span>Liderlar</span>
+            </div>
+            
+            <div class="menu-item" style="grid-column: span 2; background: rgba(0, 136, 204, 0.12); border-color: rgba(0, 136, 204, 0.3);" onclick="window.open('https://t.me/dr_rahmonov_admin', '_blank')">
+                <dotlottie-player src="https://lottie.host/5b47a61d-6161-4608-8e6b-67e324c47841/T88XGOf6m6.json" background="transparent" speed="1" loop autoplay style="width: 50px; height: 50px;"></dotlottie-player>
+                <span style="color: #4facfe;">Telegram Support</span>
+            </div>
         </div>
     </div>
 
     <div id="profileModal" class="modal">
         <div class="modal-content">
-            <div style="height: 120px; margin-bottom: 10px;"><dotlottie-player src="https://lottie.host/5b47a61d-6161-4608-8e6b-67e324c47841/T88XGOf6m6.json" speed="1" loop autoplay></dotlottie-player></div>
+            <div style="height: 130px; margin-bottom: 10px;"><dotlottie-player src="https://lottie.host/0a8a6886-c408-4177-bb89-7243b85f0962/8U7uG4H8D5.json" speed="1" loop autoplay></dotlottie-player></div>
             <div class="user-id-badge" id="user-id-display">ID: ...</div>
             <input type="text" id="input-name" class="edit-input" placeholder="Ismingizni kiriting">
-            <button class="btn-main" onclick="updateName()">SAQLASH</button>
+            <button class="btn-main" onclick="updateName()">SAQLASH ✅</button>
             <div style="display: flex; gap: 10px;">
                 <button class="btn-main" style="background: rgba(255,255,255,0.08); color: white;" onclick="location.href='results.html'">📜 Tarix</button>
                 <button class="btn-main" style="background: rgba(255,255,255,0.08); color: white;" onclick="location.href='payments.html'">💸 To'lovlar</button>
             </div>
-            <button class="btn-main" style="background: transparent; border: 1px solid #ff4b2b; color: #ff4b2b;" onclick="signOut(auth).then(()=>location.reload())">Chiqish</button>
-            <p onclick="toggleModal(false)" style="margin-top:15px; cursor:pointer; opacity:0.5; font-size: 13px;">Yopish</p>
+            <button class="btn-main" style="background: transparent; border: 1px solid #ff4b2b; color: #ff4b2b;" onclick="signOut(auth).then(()=>location.reload())">Chiqish 👋</button>
+            <p onclick="toggleModal(false)" style="margin-top:18px; cursor:pointer; opacity:0.6; font-size: 14px;">Yopish</p>
         </div>
     </div>
 
@@ -158,6 +229,7 @@
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, onSnapshot, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+        // FIREBASE CONFIG (O'zingizniki bilan almashtiring)
         const firebaseConfig = {
             apiKey: "AIzaSyA2G8cD0JezEKXRCtKLYiZL0bzDyTp06Vs",
             authDomain: "quiz-app-3692d.firebaseapp.com",
@@ -211,10 +283,10 @@
         window.startQuiz = (type) => {
             if(type === 'premium') {
                 if(userBalance < 1000) {
-                    showToast("Mablag' yetarli emas! 💳");
-                    setTimeout(() => location.href='billing.html', 1200);
+                    showToast("Mablag' yetarli emas! (Kamida 1000 so'm) 💳");
+                    setTimeout(() => location.href='billing.html', 1500);
                 } else {
-                    navigate('premium-quiz.html', "Premium test boshlanmoqda... 💎");
+                    navigate('premium-quiz.html', "Oltin test boshlanmoqda... 💎");
                 }
             } else {
                 navigate('quiz.html', "Tayyorlaning, test yuklanmoqda...");
@@ -226,14 +298,14 @@
         window.showToast = (txt) => {
             const t = document.getElementById('toast');
             t.innerText = txt; t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), 2500);
+            setTimeout(() => t.classList.remove('show'), 2800);
         };
 
         window.updateName = async () => {
             const name = document.getElementById('input-name').value;
-            if(!name) return showToast("Ism bo'sh!");
+            if(!name) return showToast("Ism bo'sh bo'lishi mumkin emas!");
             await updateDoc(doc(db, "users", auth.currentUser.uid), { fio: name });
-            showToast("Saqlandi! ✅");
+            showToast("Ma'lumotlar saqlandi! ✅");
             setTimeout(() => toggleModal(false), 1000);
         };
     </script>
