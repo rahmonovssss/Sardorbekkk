@@ -23,7 +23,7 @@
             color: white; 
             min-height: 100vh;
             overflow-x: hidden;
-            /* Chiroyli orqa fon animatsiyasi */
+            /* Professional Mesh Gradient Fon */
             background: radial-gradient(circle at 0% 0%, rgba(0, 210, 255, 0.15) 0%, transparent 35%),
                         radial-gradient(circle at 100% 100%, rgba(58, 123, 213, 0.15) 0%, transparent 35%),
                         var(--bg);
@@ -51,7 +51,7 @@
         }
         .top-profile-container:active { transform: scale(0.92); background: rgba(255,255,255,0.12); }
 
-        /* --- ANIMATSION AVATAR --- */
+        /* --- ANIMATSION AVATAR (Undov o'rniga) --- */
         .mini-avatar { 
             width: 36px; height: 36px; 
             background: linear-gradient(45deg, var(--primary), var(--secondary)); 
@@ -74,19 +74,16 @@
             position: relative; overflow: hidden;
             box-shadow: 0 20px 40px rgba(0, 210, 255, 0.25);
         }
-        .balance-card::after {
-            content: ""; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-        }
         .balance-card h3 { font-size: 14px; opacity: 0.8; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px; }
         .balance-card h1 { font-size: 38px; font-weight: 800; letter-spacing: -1px; }
         
         .btn-refill { 
             display: inline-block; margin-top: 15px; background: white; 
-            padding: 10px 20px; border-radius: 12px; font-size: 14px; font-weight: 700;
+            padding: 12px 24px; border-radius: 15px; font-size: 14px; font-weight: 700;
             text-decoration: none; color: #3a7bd5; transition: 0.3s;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
+        .btn-refill:active { transform: scale(0.95); }
 
         /* --- GRID MENU --- */
         .grid-menu { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
@@ -95,8 +92,8 @@
             padding: 25px 15px; border-radius: 28px; cursor: pointer; text-align: center;
             transition: 0.4s; backdrop-filter: blur(5px);
         }
-        .menu-item:active { transform: translateY(-5px); background: rgba(255,255,255,0.1); border-color: var(--primary); }
-        .menu-item i { font-size: 36px; display: block; margin-bottom: 12px; }
+        .menu-item:active { transform: translateY(-8px); background: rgba(255,255,255,0.1); border-color: var(--primary); }
+        .menu-item i { font-size: 36px; display: block; margin-bottom: 12px; font-style: normal; }
         .menu-item span { font-size: 15px; font-weight: 600; }
 
         /* --- MODAL --- */
@@ -104,11 +101,12 @@
         .modal-content { background: #0f172a; padding: 30px; border-radius: 35px; width: 90%; max-width: 380px; border: 1px solid var(--glass-border); text-align: center; }
 
         .user-id-badge { background: #ffd700; color: #000; padding: 6px 18px; border-radius: 12px; font-weight: 800; font-size: 14px; margin-bottom: 20px; display: inline-block; }
-        .edit-input { width: 100%; padding: 16px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 18px; color: white; margin-bottom: 20px; text-align: center; font-size: 16px; font-weight: 600; }
+        .edit-input { width: 100%; padding: 16px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 18px; color: white; margin-bottom: 20px; text-align: center; font-size: 16px; font-weight: 600; outline: none; }
         
-        .btn-main { width: 100%; padding: 16px; background: var(--primary); border: none; border-radius: 18px; color: #000; font-weight: 800; cursor: pointer; margin-bottom: 12px; }
+        .btn-main { width: 100%; padding: 16px; background: var(--primary); border: none; border-radius: 18px; color: #000; font-weight: 800; cursor: pointer; margin-bottom: 12px; transition: 0.3s; }
+        .btn-main:active { transform: scale(0.96); }
 
-        #toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: #ffd700; color: #000; padding: 15px 30px; border-radius: 100px; transition: 0.5s; z-index: 3000; font-weight: 700; }
+        #toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: #ffd700; color: #000; padding: 15px 30px; border-radius: 100px; transition: 0.5s; z-index: 3000; font-weight: 700; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
         #toast.show { bottom: 40px; }
     </style>
 </head>
@@ -134,7 +132,7 @@
             <div class="menu-item" style="border-color: rgba(255, 215, 0, 0.3);" onclick="startQuiz('premium')"><i>💎</i><span style="color: #ffd700;">Premium (1000)</span></div>
             <div class="menu-item" onclick="navigate('statistics.html', 'Statistika...')"><i>📊</i><span>Statistika</span></div>
             <div class="menu-item" onclick="navigate('leaderboard.html', 'Liderlar...')"><i>🏆</i><span>Liderlar</span></div>
-            <div class="menu-item" style="grid-column: span 2; background: rgba(0, 136, 204, 0.1);" onclick="window.open('https://t.me/dr_rahmonov_admin')"><i>✈️</i><span style="color: #0088cc;">Telegram Support</span></div>
+            <div class="menu-item" style="grid-column: span 2; background: rgba(0, 136, 204, 0.1);" onclick="window.open('https://t.me/dr_rahmonov_admin', '_blank')"><i>✈️</i><span style="color: #0088cc;">Telegram Support</span></div>
         </div>
     </div>
 
@@ -145,8 +143,8 @@
             <input type="text" id="input-name" class="edit-input" placeholder="Ismingizni kiriting">
             <button class="btn-main" onclick="updateName()">SAQLASH</button>
             <div style="display: flex; gap: 10px;">
-                <button class="btn-main" style="background: rgba(255,255,255,0.08); color: white;" onclick="location.href='results.html'">Tarix</button>
-                <button class="btn-main" style="background: rgba(255,255,255,0.08); color: white;" onclick="location.href='payments.html'">To'lovlar</button>
+                <button class="btn-main" style="background: rgba(255,255,255,0.08); color: white;" onclick="location.href='results.html'">📜 Tarix</button>
+                <button class="btn-main" style="background: rgba(255,255,255,0.08); color: white;" onclick="location.href='payments.html'">💸 To'lovlar</button>
             </div>
             <button class="btn-main" style="background: transparent; border: 1px solid #ff4b2b; color: #ff4b2b;" onclick="signOut(auth).then(()=>location.reload())">Chiqish</button>
             <p onclick="toggleModal(false)" style="margin-top:15px; cursor:pointer; opacity:0.5; font-size: 13px;">Yopish</p>
@@ -175,15 +173,29 @@
 
         let userBalance = 0;
 
+        function generateID() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let res = '';
+            for (let i = 0; i < 6; i++) res += chars.charAt(Math.floor(Math.random() * chars.length));
+            return res;
+        }
+
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 const userRef = doc(db, "users", user.uid);
-                onSnapshot(userRef, (snap) => {
-                    const data = snap.data() || {};
-                    userBalance = data.balance || 0;
-                    const name = data.fio || "Foydalanuvchi";
+                onSnapshot(userRef, async (snap) => {
+                    let data = snap.exists() ? snap.data() : {};
                     
-                    document.getElementById('user-id-display').innerText = "ID: " + (data.studentID || "...");
+                    if (!data.studentID) {
+                        const newID = generateID();
+                        await setDoc(userRef, { studentID: newID }, { merge: true });
+                        data.studentID = newID;
+                    }
+
+                    userBalance = data.balance || 0;
+                    const name = data.fio || user.displayName || "Foydalanuvchi";
+                    
+                    document.getElementById('user-id-display').innerText = "ID: " + data.studentID;
                     document.getElementById('top-name').innerText = name;
                     document.getElementById('top-initials').innerText = name[0].toUpperCase();
                     document.getElementById('user-balance').innerText = userBalance.toLocaleString() + " so'm";
@@ -197,12 +209,15 @@
         window.navigate = (url, msg) => { showToast(msg); setTimeout(() => location.href = url, 800); };
 
         window.startQuiz = (type) => {
-            if(type === 'premium' && userBalance < 1000) {
-                showToast("Mablag' yetarli emas! 💳");
-                setTimeout(() => location.href='billing.html', 1200);
+            if(type === 'premium') {
+                if(userBalance < 1000) {
+                    showToast("Mablag' yetarli emas! 💳");
+                    setTimeout(() => location.href='billing.html', 1200);
+                } else {
+                    navigate('premium-quiz.html', "Premium test boshlanmoqda... 💎");
+                }
             } else {
-                const url = type === 'premium' ? 'premium-quiz.html' : 'quiz.html';
-                navigate(url, "Tayyorlaning, test boshlanmoqda...");
+                navigate('quiz.html', "Tayyorlaning, test yuklanmoqda...");
             }
         };
 
