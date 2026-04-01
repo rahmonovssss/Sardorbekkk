@@ -104,16 +104,15 @@
         </div>
     </div>
     
-    <div id="exitOverlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 10000; align-items: center; justify-content: center;">
-    <div style="background: #021d33; padding: 30px; border-radius: 25px; width: 85%; max-width: 320px; text-align: center; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 15px 35px rgba(0,0,0,0.5);">
-        <div style="font-size: 40px; margin-bottom: 15px;">🚪</div>
-        <h3 style="color: white; margin-bottom: 20px; font-weight: 600;">Tizimdan chiqasizmi?</h3>
-        <div style="display: flex; gap: 10px;">
-            <button onclick="document.getElementById('exitOverlay').style.display='none'" style="flex: 1; padding: 12px; border-radius: 12px; border: none; background: rgba(255,255,255,0.1); color: white; font-weight: 600; cursor: pointer;">YO'Q</button>
-            <button id="confirmExitBtn" style="flex: 1; padding: 12px; border-radius: 12px; border: none; background: #ff4b2b; color: white; font-weight: 600; cursor: pointer;">HA, CHIQISH</button>
+    <div id="logoutModal" class="modal">
+        <div class="modal-content" style="max-width: 320px;">
+            <h3 style="margin-bottom: 20px;">Tizimdan chiqasizmi?</h3>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-main" style="background: rgba(255,255,255,0.1); color: white;" onclick="closeLogoutConfirm()">Yo'q</button>
+                <button class="btn-main" style="background: #ff4b2b; color: white;" onclick="finalLogout()">Ha, chiqish</button>
+            </div>
         </div>
     </div>
-</div>
 
     <div id="toast"></div>
 
@@ -158,9 +157,8 @@
 
         let userBalance = 0;
 
-        // ID GENERATOR (Mavjud bo'lmasa)
         function generateID() {
-            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
             let res = '';
             for (let i = 0; i < 6; i++) res += chars.charAt(Math.floor(Math.random() * chars.length));
             return res;
@@ -180,7 +178,7 @@
                     }
 
                     userBalance = data.balance || 0;
-                    const fio = data.fio || "Foydalanuvchi";
+                    const displayName = data.fio || user.displayName || "Foydalanuvchi";
                     
                     document.getElementById('user-balance').innerText = userBalance.toLocaleString() + " so'm";
                     document.getElementById('top-name').innerText = fio;
@@ -201,12 +199,10 @@
             toggleModal(false);
         };
 
-        document.getElementById('logout-btn').onclick = () => {
-            if(confirm("Tizimdan chiqmoqchimisiz? 🚪")) {
-                showToast("Xayr, sog' bo'ling! 👋");
-                setTimeout(() => signOut(auth), 1000);
-            }
-        };
+        window.toggleModal = (s) => document.getElementById('profileModal').style.display = s ? 'flex' : 'none';
+        window.openLogoutConfirm = () => { document.getElementById('logoutModal').style.display = 'flex'; toggleModal(false); };
+        window.closeLogoutConfirm = () => document.getElementById('logoutModal').style.display = 'none';
+        window.finalLogout = () => signOut(auth).then(() => window.location.replace("index.html"));
 
         window.startQuiz = async (type) => {
             if(type === 'premium') {
