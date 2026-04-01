@@ -86,7 +86,7 @@
     <div class="bubbles" id="bubble-container"></div>
 
     <header class="header">
-        <div class="bell-container" onclick="navigate('messages.html', 'Xabarnomalar...')">
+        <div class="bell-container" id="bell-trigger">
             <div class="bell-btn">🔔</div>
             <div id="notif-badge" class="notif-badge">0</div>
         </div>
@@ -216,6 +216,15 @@
                         badge.style.display = 'none';
                     }
                 });
+
+                // Qo'ng'iroqchani bosganda sonni o'chirish
+                document.getElementById('bell-trigger').onclick = async () => {
+                    showToast("Xabarnomalar yuklanmoqda...");
+                    // Firebase'da o'qilmaganlar sonini 0 qilish
+                    await updateDoc(userRef, { unreadNotifications: 0 });
+                    setTimeout(() => location.href = 'messages.html', 800);
+                };
+
             } else { 
                 location.replace("index.html"); 
             }
@@ -229,11 +238,14 @@
             toggleModal(false);
         };
 
+        // Chiqishni so'rash mantiqi
         document.getElementById('logout-btn').onclick = () => {
-            showToast("Chiqish amalga oshirilmoqda... 🚪");
-            setTimeout(() => {
-                signOut(auth).then(() => location.replace("index.html"));
-            }, 1500);
+            if(confirm("Haqiqatan ham tizimdan chiqmoqchimisiz? 🚪")) {
+                showToast("Chiqish amalga oshirilmoqda... 👋");
+                setTimeout(() => {
+                    signOut(auth).then(() => location.replace("index.html"));
+                }, 1500);
+            }
         };
 
         window.startQuiz = async (type) => {
