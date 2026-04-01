@@ -103,6 +103,17 @@
             <p onclick="toggleModal(false)" style="margin-top:15px; cursor:pointer; font-size:12px; opacity:0.5;">Yopish</p>
         </div>
     </div>
+    
+    <div id="exitOverlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 10000; align-items: center; justify-content: center;">
+    <div style="background: #021d33; padding: 30px; border-radius: 25px; width: 85%; max-width: 320px; text-align: center; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 15px 35px rgba(0,0,0,0.5);">
+        <div style="font-size: 40px; margin-bottom: 15px;">🚪</div>
+        <h3 style="color: white; margin-bottom: 20px; font-weight: 600;">Tizimdan chiqasizmi?</h3>
+        <div style="display: flex; gap: 10px;">
+            <button onclick="document.getElementById('exitOverlay').style.display='none'" style="flex: 1; padding: 12px; border-radius: 12px; border: none; background: rgba(255,255,255,0.1); color: white; font-weight: 600; cursor: pointer;">YO'Q</button>
+            <button id="confirmExitBtn" style="flex: 1; padding: 12px; border-radius: 12px; border: none; background: #ff4b2b; color: white; font-weight: 600; cursor: pointer;">HA, CHIQISH</button>
+        </div>
+    </div>
+</div>
 
     <div id="toast"></div>
 
@@ -190,18 +201,12 @@
             toggleModal(false);
         };
 
-        <div id="customLogoutModal" class="modal">
-    <div class="modal-content" style="max-width: 320px; border: 1px solid rgba(255, 75, 43, 0.3);">
-        <div style="font-size: 50px; margin-bottom: 15px;">🚪</div>
-        <h3 style="margin-bottom: 10px;">Chiqish</h3>
-        <p style="font-size: 14px; opacity: 0.8; margin-bottom: 25px;">Haqiqatan ham tizimdan chiqmoqchimisiz?</p>
-        
-        <div style="display: flex; gap: 10px;">
-            <button class="btn-main" style="background: rgba(255,255,255,0.1); color: white;" onclick="closeLogoutModal()">YO'Q</button>
-            <button class="btn-main" style="background: #ff4b2b; color: white; box-shadow: 0 5px 15px rgba(255, 75, 43, 0.3);" id="confirmExitBtn">HA, CHIQISH</button>
-        </div>
-    </div>
-</div>
+        document.getElementById('logout-btn').onclick = () => {
+            if(confirm("Tizimdan chiqmoqchimisiz? 🚪")) {
+                showToast("Xayr, sog' bo'ling! 👋");
+                setTimeout(() => signOut(auth), 1000);
+            }
+        };
 
         window.startQuiz = async (type) => {
             if(type === 'premium') {
