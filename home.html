@@ -58,7 +58,7 @@
         .premium-box::after { content: ''; position: absolute; top: -50%; left: -150%; width: 200%; height: 200%; background: linear-gradient(45deg, transparent, rgba(255,255,255,0.4), transparent); transform: rotate(45deg); animation: shine 3s infinite; }
         @keyframes shine { 0% { left: -150%; } 100% { left: 150%; } }
 
-        /* --- MODAL (PROFIL) --- */
+        /* --- MODALLAR --- */
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(15px); }
         .modal-content { 
             background: linear-gradient(135deg, #021d33 0%, #014371 100%); 
@@ -77,6 +77,10 @@
         
         #toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: #fff; color: #005c97; padding: 15px 30px; border-radius: 50px; transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 3000; font-weight: 700; box-shadow: 0 10px 30px rgba(0,0,0,0.3); text-align: center; width: max-content; max-width: 90%; }
         #toast.show { bottom: 40px; }
+
+        /* EXIT MODAL STYLE */
+        .btn-exit-no { background: rgba(255,255,255,0.1); color: white; }
+        .btn-exit-yes { background: #ff4b2b; color: white; }
     </style>
 </head>
 <body>
@@ -128,16 +132,27 @@
                 <button class="btn-main" style="background: rgba(255,255,255,0.1);" onclick="navigate('payments.html', 'To\'lovlar yuklanmoqda...')">💸 To'lovlar</button>
             </div>
             
-            <button class="btn-main" style="background: transparent; border: 1px solid #ff4b2b; color: #ff4b2b;" id="logout-btn">CHIQISH 🚪</button>
+            <button class="btn-main" style="background: transparent; border: 1px solid #ff4b2b; color: #ff4b2b;" onclick="toggleExitModal(true)">CHIQISH 🚪</button>
             
             <p onclick="toggleModal(false)" style="margin-top:15px; cursor:pointer; font-size:12px; opacity:0.5; text-transform: uppercase; letter-spacing: 1px;">Yopish</p>
+        </div>
+    </div>
+
+    <div id="exitModal" class="modal" style="z-index: 3000;">
+        <div class="modal-content">
+            <i style="font-size: 50px; display: block; margin-bottom: 15px;">🚪</i>
+            <h2 style="margin-bottom: 10px;">Chiqish</h2>
+            <p style="opacity: 0.8; margin-bottom: 25px; font-size: 14px;">Haqiqatan ham tizimdan chiqmoqchimisiz?</p>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-main btn-exit-no" onclick="toggleExitModal(false)">YO'Q</button>
+                <button class="btn-main btn-exit-yes" id="confirm-logout-btn">HA, CHIQISH</button>
+            </div>
         </div>
     </div>
 
     <div id="toast"></div>
 
     <script>
-        // BUBBLE GENERATOR
         const container = document.getElementById('bubble-container');
         for (let i = 0; i < 15; i++) {
             const b = document.createElement('div');
@@ -150,6 +165,7 @@
             container.appendChild(b);
         }
         window.toggleModal = (s) => document.getElementById('profileModal').style.display = s ? 'flex' : 'none';
+        window.toggleExitModal = (s) => document.getElementById('exitModal').style.display = s ? 'flex' : 'none';
         window.showToast = (txt) => { 
             const t = document.getElementById('toast'); 
             t.innerText = txt; t.classList.add('show'); 
@@ -206,7 +222,6 @@
                     document.getElementById('user-id-display').innerText = "ID: " + data.studentID;
                     document.getElementById('input-name').value = data.fio || "";
 
-                    // Notification Badge Logic
                     const unreadCount = data.unreadNotifications || 0;
                     const badge = document.getElementById('notif-badge');
                     if(unreadCount > 0) {
@@ -217,12 +232,19 @@
                     }
                 });
 
-                // Qo'ng'iroqchani bosganda sonni o'chirish
                 document.getElementById('bell-trigger').onclick = async () => {
                     showToast("Xabarnomalar yuklanmoqda...");
-                    // Firebase'da o'qilmaganlar sonini 0 qilish
                     await updateDoc(userRef, { unreadNotifications: 0 });
                     setTimeout(() => location.href = 'messages.html', 800);
+                };
+
+                // Haqiqiy chiqish funksiyasi
+                document.getElementById('confirm-logout-btn').onclick = () => {
+                    toggleExitModal(false);
+                    showToast("Chiqish amalga oshirilmoqda... 👋");
+                    setTimeout(() => {
+                        signOut(auth).then(() => location.replace("index.html"));
+                    }, 1500);
                 };
 
             } else { 
@@ -236,16 +258,6 @@
             await updateDoc(doc(db, "users", auth.currentUser.uid), { fio: name });
             showToast("Muvaffaqiyatli saqlandi! ✅");
             toggleModal(false);
-        };
-
-        // Chiqishni so'rash mantiqi
-        document.getElementById('logout-btn').onclick = () => {
-            if(confirm("Haqiqatan ham tizimdan chiqmoqchimisiz? 🚪")) {
-                showToast("Chiqish amalga oshirilmoqda... 👋");
-                setTimeout(() => {
-                    signOut(auth).then(() => location.replace("index.html"));
-                }, 1500);
-            }
         };
 
         window.startQuiz = async (type) => {
