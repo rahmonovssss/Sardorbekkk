@@ -104,6 +104,16 @@
         </div>
     </div>
 
+    <div id="logoutModal" class="modal">
+        <div class="modal-content" style="max-width: 320px;">
+            <h3 style="margin-bottom: 20px;">Tizimdan chiqasizmi?</h3>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-main" style="background: rgba(255,255,255,0.1); color: white;" onclick="closeLogoutConfirm()">Yo'q</button>
+                <button class="btn-main" style="background: #ff4b2b; color: white;" onclick="finalLogout()">Ha, chiqish</button>
+            </div>
+        </div>
+    </div>
+
     <div id="toast"></div>
 
     <script>
@@ -149,7 +159,7 @@
 
         // ID GENERATOR (Mavjud bo'lmasa)
         function generateID() {
-            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
             let res = '';
             for (let i = 0; i < 6; i++) res += chars.charAt(Math.floor(Math.random() * chars.length));
             return res;
