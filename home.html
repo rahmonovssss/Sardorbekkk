@@ -59,65 +59,78 @@
     </style>
 </head>
 <body>
-    
+
+    <div class="light-rays"></div>
+    <div class="water-overlay"></div>
+    <div class="bubbles" id="bubble-container"></div>
+
     <header class="header">
-        <div onclick="showToast('Xabarlar hozircha bo\'sh 📭')" style="cursor:pointer; font-size: 20px;">🔔</div>
+        <div class="bell-btn" onclick="navigate('messages.html', 'Xabarnomalar...')">🔔</div>
         <div class="top-profile-container" onclick="toggleModal(true)">
-            <span id="top-name">...</span>
-            <div class="mini-avatar" id="top-initials">?</div>
+            <span id="top-name" style="font-weight: 600; font-size: 14px;">...</span>
+            <div style="width: 32px; height: 32px; background: #00d2ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #fff;" id="top-initials">?</div>
         </div>
     </header>
 
     <div class="main-content">
         <div class="balance-card">
-            <h3>Balansim</h3>
+            <h3 style="font-size: 12px; text-transform: uppercase; opacity: 0.7; letter-spacing: 1px;">Balansim</h3>
             <h1 id="user-balance">0 so'm</h1>
-            <a href="billing.html" class="btn-refill">💳 To'ldirish</a>
+            <a href="billing.html" onclick="showToast('Hamyon bo\'limi yuklanmoqda...')" class="btn-refill">To'ldirish 💳</a>
         </div>
 
         <div class="grid-menu">
             <div class="menu-item" onclick="startQuiz('free')"><i>🎁</i><span>Bepul Test</span></div>
-            <div class="menu-item" style="border-color: #ffd700;" onclick="startQuiz('premium')"><i style="color: #ffd700;">💎</i><span style="color: #ffd700; font-weight: 600;">Premium (1000)</span></div>
-            <div class="menu-item" onclick="navigate('statistics.html', 'Statistika yuklanmoqda...')"><i>📊</i><span>Statistika</span></div>
-            <div class="menu-item" onclick="navigate('leaderboard.html', 'Liderlar jadvali...')"><i>🏆</i><span>Liderlar</span></div>
-            <div class="menu-item" style="grid-column: span 2; background: rgba(0, 136, 204, 0.1); border-color: rgba(0, 136, 204, 0.3);" onclick="contactSupport()">
-                <i style="color: #0088cc; font-size: 24px;">✈️</i>
-                <span style="color: #0088cc; font-weight: 600;">Telegram orqali yordam</span>
+            <div class="menu-item premium-box" onclick="startQuiz('premium')"><i>💎</i><span>Premium (1000)</span></div>
+            <div class="menu-item" onclick="navigate('statistics.html', 'Statistika...')"><i>📊</i><span>Statistika</span></div>
+            <div class="menu-item" onclick="navigate('leaderboard.html', 'Liderlar...')"><i>🏆</i><span>Liderlar</span></div>
+            <div class="menu-item" style="grid-column: span 2; background: rgba(0, 136, 204, 0.2); border-color: #0088cc;" onclick="contactSupport()">
+                <i style="color: #00d2ff;">✈️</i><span>Telegram Admin</span>
             </div>
         </div>
     </div>
 
     <div id="profileModal" class="modal">
         <div class="modal-content">
-            <div class="sticker-box"><dotlottie-player src="https://lottie.host/5b47a61d-6161-4608-8e6b-67e324c47841/T88XGOf6m6.json" background="transparent" speed="1" loop autoplay></dotlottie-player></div>
-            <div class="user-id-badge" id="user-id-display">ID: ...</div>
-            <input type="text" id="input-name" class="edit-input" placeholder="Ismingiz">
+            <div id="user-id-display" style="background: #ffd700; color: #000; padding: 5px 15px; border-radius: 10px; font-weight: 800; display: inline-block; margin-bottom: 20px;">ID: yuklanmoqda...</div>
+            <input type="text" id="input-name" style="width: 100%; padding: 15px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; color: white; margin-bottom: 15px; text-align: center; font-weight: 600;" placeholder="Ismingiz">
             <button class="btn-main" onclick="updateName()">SAQLASH</button>
-            <div class="btn-action-row" style="display: flex; gap: 10px; margin-bottom: 10px;">
-                <button class="btn-main" style="background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1);" onclick="location.href='results.html'">📜 Tarix</button>
-                <button class="btn-main" style="background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1);" onclick="location.href='payments.html'">💸 To'lovlar</button>
+            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                <button class="btn-main" style="background: rgba(255,255,255,0.1);" onclick="navigate('results.html', 'Tarix yuklanmoqda...')">📜 Tarix</button>
+                <button class="btn-main" style="background: rgba(255,255,255,0.1);" onclick="navigate('payments.html', 'To\'lovlar yuklanmoqda...')">💸 To'lovlar</button>
             </div>
-            <button class="btn-main" style="background: transparent; border: 1px solid #ff4b2b; color: #ff4b2b;" onclick="openLogoutConfirm()">Chiqish</button>
-            <p onclick="toggleModal(false)" style="margin-top:10px; cursor:pointer; font-size:12px; opacity:0.5;">Yopish</p>
+            <button class="btn-main" style="background: transparent; border: 1px solid #ff4b2b; color: #ff4b2b;" id="logout-btn">Tizimdan chiqish</button>
+            <p onclick="toggleModal(false)" style="margin-top:15px; cursor:pointer; font-size:12px; opacity:0.5;">Yopish</p>
         </div>
     </div>
 
-    <div id="logoutModal" class="modal">
-        <div class="modal-content" style="max-width: 320px;">
-            <h3 style="margin-bottom: 20px;">Tizimdan chiqasizmi?</h3>
-            <div style="display: flex; gap: 10px;">
-                <button class="btn-main" style="background: rgba(255,255,255,0.1); color: white;" onclick="closeLogoutConfirm()">Yo'q</button>
-                <button class="btn-main" style="background: #ff4b2b; color: white;" onclick="finalLogout()">Ha, chiqish</button>
-            </div>
-        </div>
-    </div>
+    <div id="toast"></div>
 
-    <div id="toast">Xabar!</div>
+    <script>
+        // BUBBLE GENERATOR
+        const container = document.getElementById('bubble-container');
+        for (let i = 0; i < 15; i++) {
+            const b = document.createElement('div');
+            b.className = 'bubble';
+            const size = Math.random() * 20 + 5 + 'px';
+            b.style.width = size; b.style.height = size;
+            b.style.left = Math.random() * 100 + '%';
+            b.style.setProperty('--d', Math.random() * 5 + 3 + 's');
+            b.style.animationDelay = Math.random() * 5 + 's';
+            container.appendChild(b);
+        }
+        window.toggleModal = (s) => document.getElementById('profileModal').style.display = s ? 'flex' : 'none';
+        window.showToast = (txt) => { 
+            const t = document.getElementById('toast'); 
+            t.innerText = txt; t.classList.add('show'); 
+            setTimeout(() => t.classList.remove('show'), 2500); 
+        };
+    </script>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, updateDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, updateDoc, setDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2G8cD0JezEKXRCtKLYiZL0bzDyTp06Vs",
@@ -134,8 +147,9 @@
 
         let userBalance = 0;
 
+        // ID GENERATOR (Mavjud bo'lmasa)
         function generateID() {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
             let res = '';
             for (let i = 0; i < 6; i++) res += chars.charAt(Math.floor(Math.random() * chars.length));
             return res;
@@ -145,75 +159,67 @@
             if (user) {
                 const userRef = doc(db, "users", user.uid);
                 
-                // Real-time rejimda foydalanuvchini kuzatish
                 onSnapshot(userRef, async (snap) => {
                     let data = snap.exists() ? snap.data() : {};
                     
+                    // Agar ID yo'q bo'lsa, yangi yaratamiz
                     if (!data.studentID) {
                         data.studentID = generateID();
                         await setDoc(userRef, { studentID: data.studentID }, { merge: true });
                     }
 
                     userBalance = data.balance || 0;
-                    const displayName = data.fio || user.displayName || "Foydalanuvchi";
+                    const fio = data.fio || "Foydalanuvchi";
                     
-                    document.getElementById('user-id-display').innerText = "ID: " + data.studentID;
-                    document.getElementById('top-name').innerText = displayName;
-                    document.getElementById('top-initials').innerText = displayName[0].toUpperCase();
                     document.getElementById('user-balance').innerText = userBalance.toLocaleString() + " so'm";
+                    document.getElementById('top-name').innerText = fio;
+                    document.getElementById('top-initials').innerText = fio[0].toUpperCase();
+                    document.getElementById('user-id-display').innerText = "ID: " + data.studentID;
                     document.getElementById('input-name').value = data.fio || "";
                 });
-            } else {
-                window.location.replace("index.html");
+            } else { 
+                location.replace("index.html"); 
             }
         });
 
-        // NAVIGATSIYA FUNKSIYASI
-        window.navigate = (url, msg) => {
-            showToast(msg);
-            setTimeout(() => location.href = url, 800);
-        }
+        window.updateName = async () => {
+            const name = document.getElementById('input-name').value;
+            if(!name) return showToast("Ismni kiriting! ✍️");
+            await updateDoc(doc(db, "users", auth.currentUser.uid), { fio: name });
+            showToast("Muvaffaqiyatli saqlandi! ✅");
+            toggleModal(false);
+        };
 
-        // TELEGRAM YORDAM
-        window.contactSupport = () => {
-            showToast("Telegramga o'tilmoqda...");
-            setTimeout(() => window.open("https://t.me/dr_rahmonov_admin", "_blank"), 800);
-        }
+        <div id="customLogoutModal" class="modal">
+    <div class="modal-content" style="max-width: 320px; border: 1px solid rgba(255, 75, 43, 0.3);">
+        <div style="font-size: 50px; margin-bottom: 15px;">🚪</div>
+        <h3 style="margin-bottom: 10px;">Chiqish</h3>
+        <p style="font-size: 14px; opacity: 0.8; margin-bottom: 25px;">Haqiqatan ham tizimdan chiqmoqchimisiz?</p>
+        
+        <div style="display: flex; gap: 10px;">
+            <button class="btn-main" style="background: rgba(255,255,255,0.1); color: white;" onclick="closeLogoutModal()">YO'Q</button>
+            <button class="btn-main" style="background: #ff4b2b; color: white; box-shadow: 0 5px 15px rgba(255, 75, 43, 0.3);" id="confirmExitBtn">HA, CHIQISH</button>
+        </div>
+    </div>
+</div>
 
-        // PREMIUM TEST MANTIQI
-        window.startQuiz = (type) => {
+        window.startQuiz = async (type) => {
             if(type === 'premium') {
                 if(userBalance < 1000) {
-                    showToast("Balans yetarli emas! (Kamida 1000 so'm)");
+                    showToast("Mablag' yetarli emas! 💳");
                     setTimeout(() => location.href = 'billing.html', 1500);
                 } else {
                     showToast("Premium test boshlanmoqda... 💎");
                     setTimeout(() => location.href = 'premium-quiz.html', 1000);
                 }
-            } else {
-                showToast("Bepul test yuklanmoqda...");
-                setTimeout(() => location.href = 'quiz.html', 1000);
+            } else { 
+                showToast("Bepul test yuklanmoqda... 🎁");
+                setTimeout(() => location.href = 'quiz.html', 800); 
             }
         };
 
-        window.toggleModal = (s) => document.getElementById('profileModal').style.display = s ? 'flex' : 'none';
-        window.openLogoutConfirm = () => { document.getElementById('logoutModal').style.display = 'flex'; toggleModal(false); };
-        window.closeLogoutConfirm = () => document.getElementById('logoutModal').style.display = 'none';
-        window.finalLogout = () => signOut(auth).then(() => window.location.replace("index.html"));
-
-        window.showToast = (txt) => {
-            const t = document.getElementById('toast');
-            t.innerText = txt; t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), 2500);
-        };
-
-        window.updateName = async () => {
-            const name = document.getElementById('input-name').value;
-            if(!name) return showToast("Ismni kiriting!");
-            await updateDoc(doc(db, "users", auth.currentUser.uid), { fio: name });
-            showToast("Muvaffaqiyatli saqlandi! ✅");
-            setTimeout(() => location.reload(), 1000);
-        };
+        window.navigate = (url, msg) => { showToast(msg); setTimeout(() => location.href = url, 800); };
+        window.contactSupport = () => { showToast("Telegramga o'tilmoqda..."); setTimeout(() => window.open("https://t.me/dr_rahmonov_admin", "_blank"), 500); };
     </script>
 </body>
-    </html>
+</html>
