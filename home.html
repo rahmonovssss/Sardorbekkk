@@ -31,7 +31,8 @@
         .bell-btn { font-size: 22px; cursor: pointer; animation: pulse-glow 2s infinite; }
         @keyframes pulse-glow { 0%, 100% { filter: drop-shadow(0 0 2px #ffd700); } 50% { filter: drop-shadow(0 0 10px #ffd700); } }
 
-        .top-profile-container { display: flex; align-items: center; gap: 10px; background: rgba(255, 255, 255, 0.15); padding: 5px 12px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; }
+        .top-profile-container { display: flex; align-items: center; gap: 10px; background: rgba(255, 255, 255, 0.15); padding: 5px 12px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; transition: 0.3s; }
+        .top-profile-container:active { transform: scale(0.95); background: rgba(255, 255, 255, 0.25); }
 
         /* --- MAIN CONTENT --- */
         .main-content { position: relative; z-index: 10; padding: 100px 20px 30px; max-width: 600px; margin: 0 auto; text-align: center; }
@@ -49,10 +50,37 @@
         .premium-box::after { content: ''; position: absolute; top: -50%; left: -150%; width: 200%; height: 200%; background: linear-gradient(45deg, transparent, rgba(255,255,255,0.4), transparent); transform: rotate(45deg); animation: shine 3s infinite; }
         @keyframes shine { 0% { left: -150%; } 100% { left: 150%; } }
 
-        /* --- MODAL (PROFIL) --- */
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(10px); }
-        .modal-content { background: #021d33; padding: 30px; border-radius: 35px; width: 90%; max-width: 380px; text-align: center; border: 1px solid rgba(255,255,255,0.1); position: relative; }
-        .btn-main { width: 100%; padding: 16px; background: #00d2ff; border: none; border-radius: 15px; color: #fff; font-weight: 800; cursor: pointer; margin-bottom: 10px; }
+        /* --- MODAL (PROFIL VA CHIQUISH) --- */
+        .modal-overlay { 
+            display: none; 
+            position: fixed; 
+            inset: 0; 
+            background: rgba(0,0,0,0.7); 
+            backdrop-filter: blur(15px); 
+            align-items: center; 
+            justify-content: center; 
+            z-index: 2000; 
+            opacity: 0; 
+            transition: opacity 0.3s ease;
+        }
+        .modal-overlay.active { display: flex; opacity: 1; }
+
+        .modal-content { 
+            background: linear-gradient(145deg, #021d33, #032a4a); 
+            padding: 30px; 
+            border-radius: 35px; 
+            width: 90%; 
+            max-width: 380px; 
+            text-align: center; 
+            border: 1px solid rgba(255,255,255,0.15); 
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            transform: translateY(30px);
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .modal-overlay.active .modal-content { transform: translateY(0); }
+
+        .btn-main { width: 100%; padding: 16px; background: #00d2ff; border: none; border-radius: 15px; color: #fff; font-weight: 800; cursor: pointer; margin-bottom: 10px; transition: 0.3s; }
+        .btn-main:active { transform: scale(0.96); opacity: 0.8; }
         
         #toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: #fff; color: #005c97; padding: 15px 30px; border-radius: 50px; transition: 0.5s; z-index: 3000; font-weight: 700; box-shadow: 0 10px 30px rgba(0,0,0,0.3); text-align: center; width: max-content; max-width: 90%; }
         #toast.show { bottom: 40px; }
@@ -90,7 +118,7 @@
         </div>
     </div>
 
-    <div id="profileModal" class="modal">
+    <div id="profileModal" class="modal-overlay">
         <div class="modal-content">
             <div id="user-id-display" style="background: #ffd700; color: #000; padding: 5px 15px; border-radius: 10px; font-weight: 800; display: inline-block; margin-bottom: 20px;">ID: yuklanmoqda...</div>
             <input type="text" id="input-name" style="width: 100%; padding: 15px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; color: white; margin-bottom: 15px; text-align: center; font-weight: 600;" placeholder="Ismingiz">
@@ -101,6 +129,18 @@
             </div>
             <button class="btn-main" style="background: transparent; border: 1px solid #ff4b2b; color: #ff4b2b;" id="logout-btn">Tizimdan chiqish</button>
             <p onclick="toggleModal(false)" style="margin-top:15px; cursor:pointer; font-size:12px; opacity:0.5;">Yopish</p>
+        </div>
+    </div>
+
+    <div id="exitOverlay" class="modal-overlay" style="z-index: 10001;">
+        <div class="modal-content" style="max-width: 320px; border-color: rgba(255, 75, 43, 0.3);">
+            <div style="font-size: 50px; margin-bottom: 10px;">🚪</div>
+            <h3 style="margin-bottom: 10px;">Chiqasizmi?</h3>
+            <p style="font-size: 14px; opacity: 0.7; margin-bottom: 25px;">Haqiqatan ham profilni tark etmoqchimisiz?</p>
+            <div style="display: flex; gap: 12px;">
+                <button onclick="closeExitModal()" style="flex: 1; padding: 14px; border-radius: 15px; border: none; background: rgba(255,255,255,0.1); color: white; font-weight: 600; cursor: pointer;">YO'Q</button>
+                <button id="finalLogoutBtn" style="flex: 1; padding: 14px; border-radius: 15px; border: none; background: #ff4b2b; color: white; font-weight: 600; cursor: pointer; box-shadow: 0 5px 15px rgba(255, 75, 43, 0.3);">HA</button>
+            </div>
         </div>
     </div>
 
@@ -119,7 +159,14 @@
             b.style.animationDelay = Math.random() * 5 + 's';
             container.appendChild(b);
         }
-        window.toggleModal = (s) => document.getElementById('profileModal').style.display = s ? 'flex' : 'none';
+
+        // CHIROLI MODAL FUNKSIYALARI
+        window.toggleModal = (s) => {
+            const m = document.getElementById('profileModal');
+            s ? m.classList.add('active') : m.classList.remove('active');
+        };
+        window.closeExitModal = () => document.getElementById('exitOverlay').classList.remove('active');
+
         window.showToast = (txt) => { 
             const t = document.getElementById('toast'); 
             t.innerText = txt; t.classList.add('show'); 
@@ -130,7 +177,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot, updateDoc, setDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2G8cD0JezEKXRCtKLYiZL0bzDyTp06Vs",
@@ -147,40 +194,33 @@
 
         let userBalance = 0;
 
-        // ID GENERATOR (Mavjud bo'lmasa)
-        function generateID() {
-            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-            let res = '';
-            for (let i = 0; i < 6; i++) res += chars.charAt(Math.floor(Math.random() * chars.length));
-            return res;
-        }
-
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 const userRef = doc(db, "users", user.uid);
-                
-                onSnapshot(userRef, async (snap) => {
+                onSnapshot(userRef, (snap) => {
                     let data = snap.exists() ? snap.data() : {};
-                    
-                    // Agar ID yo'q bo'lsa, yangi yaratamiz
-                    if (!data.studentID) {
-                        data.studentID = generateID();
-                        await setDoc(userRef, { studentID: data.studentID }, { merge: true });
-                    }
-
                     userBalance = data.balance || 0;
                     const fio = data.fio || "Foydalanuvchi";
-                    
                     document.getElementById('user-balance').innerText = userBalance.toLocaleString() + " so'm";
                     document.getElementById('top-name').innerText = fio;
                     document.getElementById('top-initials').innerText = fio[0].toUpperCase();
-                    document.getElementById('user-id-display').innerText = "ID: " + data.studentID;
-                    document.getElementById('input-name').value = data.fio || "";
+                    document.getElementById('user-id-display').innerText = "ID: " + (data.studentID || "---");
+                    document.getElementById('input-name').value = fio;
                 });
-            } else { 
-                location.replace("index.html"); 
-            }
+            } else { location.replace("index.html"); }
         });
+
+        // CHIQUISH TIZIMI (Sayt manzilisiz)
+        document.getElementById('logout-btn').onclick = () => {
+            toggleModal(false);
+            document.getElementById('exitOverlay').classList.add('active');
+        };
+
+        document.getElementById('finalLogoutBtn').onclick = async () => {
+            closeExitModal();
+            showToast("Xayr, sog' bo'ling! 👋");
+            setTimeout(async () => { await signOut(auth); }, 1000);
+        };
 
         window.updateName = async () => {
             const name = document.getElementById('input-name').value;
@@ -190,25 +230,13 @@
             toggleModal(false);
         };
 
-        document.getElementById('logout-btn').onclick = () => {
-            if(confirm("Tizimdan chiqmoqchimisiz? 🚪")) {
-                showToast("Xayr, sog' bo'ling! 👋");
-                setTimeout(() => signOut(auth), 1000);
-            }
-        };
-
-        window.startQuiz = async (type) => {
-            if(type === 'premium') {
-                if(userBalance < 1000) {
-                    showToast("Mablag' yetarli emas! 💳");
-                    setTimeout(() => location.href = 'billing.html', 1500);
-                } else {
-                    showToast("Premium test boshlanmoqda... 💎");
-                    setTimeout(() => location.href = 'premium-quiz.html', 1000);
-                }
-            } else { 
-                showToast("Bepul test yuklanmoqda... 🎁");
-                setTimeout(() => location.href = 'quiz.html', 800); 
+        window.startQuiz = (type) => {
+            if(type === 'premium' && userBalance < 1000) {
+                showToast("Mablag' yetarli emas! 💳");
+                setTimeout(() => location.href = 'billing.html', 1500);
+            } else {
+                showToast(type === 'premium' ? "Premium boshlanmoqda... 💎" : "Bepul test yuklanmoqda... 🎁");
+                setTimeout(() => location.href = (type === 'premium' ? 'premium-quiz.html' : 'quiz.html'), 1000);
             }
         };
 
