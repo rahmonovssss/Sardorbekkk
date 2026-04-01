@@ -103,16 +103,6 @@
             <p onclick="toggleModal(false)" style="margin-top:15px; cursor:pointer; font-size:12px; opacity:0.5;">Yopish</p>
         </div>
     </div>
-    
-    <div id="logoutModal" class="modal">
-        <div class="modal-content" style="max-width: 320px;">
-            <h3 style="margin-bottom: 20px;">Tizimdan chiqasizmi?</h3>
-            <div style="display: flex; gap: 10px;">
-                <button class="btn-main" style="background: rgba(255,255,255,0.1); color: white;" onclick="closeLogoutConfirm()">Yo'q</button>
-                <button class="btn-main" style="background: #ff4b2b; color: white;" onclick="finalLogout()">Ha, chiqish</button>
-            </div>
-        </div>
-    </div>
 
     <div id="toast"></div>
 
@@ -157,8 +147,9 @@
 
         let userBalance = 0;
 
+        // ID GENERATOR (Mavjud bo'lmasa)
         function generateID() {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
             let res = '';
             for (let i = 0; i < 6; i++) res += chars.charAt(Math.floor(Math.random() * chars.length));
             return res;
@@ -178,7 +169,7 @@
                     }
 
                     userBalance = data.balance || 0;
-                    const displayName = data.fio || user.displayName || "Foydalanuvchi";
+                    const fio = data.fio || "Foydalanuvchi";
                     
                     document.getElementById('user-balance').innerText = userBalance.toLocaleString() + " so'm";
                     document.getElementById('top-name').innerText = fio;
@@ -199,10 +190,12 @@
             toggleModal(false);
         };
 
-        window.toggleModal = (s) => document.getElementById('profileModal').style.display = s ? 'flex' : 'none';
-        window.openLogoutConfirm = () => { document.getElementById('logoutModal').style.display = 'flex'; toggleModal(false); };
-        window.closeLogoutConfirm = () => document.getElementById('logoutModal').style.display = 'none';
-        window.finalLogout = () => signOut(auth).then(() => window.location.replace("index.html"));
+        document.getElementById('logout-btn').onclick = () => {
+            if(confirm("Tizimdan chiqmoqchimisiz? 🚪")) {
+                showToast("Xayr, sog' bo'ling! 👋");
+                setTimeout(() => signOut(auth), 1000);
+            }
+        };
 
         window.startQuiz = async (type) => {
             if(type === 'premium') {
