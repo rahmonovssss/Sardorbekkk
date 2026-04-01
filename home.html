@@ -28,19 +28,22 @@
 
         /* --- HEADER --- */
         .header { position: fixed; top: 0; left: 0; width: 100%; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .bell-btn { font-size: 22px; cursor: pointer; animation: pulse-glow 2s infinite; }
+        
+        .bell-container { position: relative; display: inline-block; cursor: pointer; }
+        .bell-btn { font-size: 22px; animation: pulse-glow 2s infinite; }
         @keyframes pulse-glow { 0%, 100% { filter: drop-shadow(0 0 2px #ffd700); } 50% { filter: drop-shadow(0 0 10px #ffd700); } }
 
-        /* Bildirishnoma belgisi stili */
-        .bell-container { position: relative; display: inline-block; cursor: pointer; }
-        .badge { 
-            position: absolute; top: -2px; right: -2px; 
+        /* Qizil raqam belgisi */
+        .notif-badge { 
+            position: absolute; top: -5px; right: -5px; 
             background: #ff4b2b; color: white; 
             font-size: 10px; font-weight: 800; 
             padding: 2px 6px; border-radius: 50%; 
-            border: 2px solid #004b7a; 
-            display: none; 
+            border: 2px solid #005c97; 
+            display: none; /* Faqat xabar kelsa chiqadi */
+            animation: bounce 0.5s ease;
         }
+        @keyframes bounce { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
 
         .top-profile-container { display: flex; align-items: center; gap: 10px; background: rgba(255, 255, 255, 0.15); padding: 5px 12px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; transition: 0.3s; }
         .top-profile-container:active { transform: scale(0.95); background: rgba(255, 255, 255, 0.25); }
@@ -104,9 +107,9 @@
     <div class="bubbles" id="bubble-container"></div>
 
     <header class="header">
-        <div class="bell-container" onclick="navigate('messages.html', 'Xabarnomalar...')">
+        <div class="bell-container" id="bell-notif" onclick="openMessages()">
             <div class="bell-btn">🔔</div>
-            <div id="notif-badge" class="badge">0</div>
+            <div id="unread-count" class="notif-badge">0</div>
         </div>
         <div class="top-profile-container" onclick="toggleModal(true)">
             <span id="top-name" style="font-weight: 600; font-size: 14px;">...</span>
@@ -216,11 +219,11 @@
                     userBalance = data.balance || 0;
                     const fio = data.fio || "Foydalanuvchi";
                     
-                    // Bildirishnoma belgisi mantiqi
-                    const unreadCount = data.unreadNotifications || 0;
-                    const badge = document.getElementById('notif-badge');
-                    if (unreadCount > 0) {
-                        badge.innerText = unreadCount;
+                    // Bildirishnoma mantiqi
+                    const unread = data.unreadNotifications || 0;
+                    const badge = document.getElementById('unread-count');
+                    if(unread > 0) {
+                        badge.innerText = unread;
                         badge.style.display = 'block';
                     } else {
                         badge.style.display = 'none';
@@ -235,7 +238,15 @@
             } else { location.replace("index.html"); }
         });
 
-        // CHIQUISH TIZIMI (Sayt manzilisiz)
+        // Xabarlarga o'tish va belgini o'chirish
+        window.openMessages = async () => {
+            if (auth.currentUser) {
+                await updateDoc(doc(db, "users", auth.currentUser.uid), { unreadNotifications: 0 });
+            }
+            navigate('messages.html', 'Xabarnomalar...');
+        };
+
+        // CHIQUISH TIZIMI
         document.getElementById('logout-btn').onclick = () => {
             toggleModal(false);
             document.getElementById('exitOverlay').classList.add('active');
