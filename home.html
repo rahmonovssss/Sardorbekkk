@@ -135,6 +135,8 @@
         const db = getFirestore(app);
 
         let userBalance = 0;
+
+        // --- SIZ BERGAN ID GENERATOR FUNKSIYASI ---
         function generateID() {
             const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
             let res = '';
@@ -149,13 +151,12 @@
                     if (snap.exists()) {
                         let data = snap.data();
                         
-                        // ID generator (agar yo'q bo'lsa)
+                        // ID generator (agar yo'q bo'lsa yangi funksiyadan foydalanadi)
                         if(!data.studentID) {
-                            const newID = Math.random().toString(36).substr(2, 6).toUpperCase();
+                            const newID = generateID(); // SIZNING FUNKSIYANGIZ SHU YERDA
                             await setDoc(userRef, { studentID: newID }, { merge: true });
                         }
 
-                        // Ma'lumotlarni chiqarish
                         userBalance = data.balance || 0;
                         const fio = data.fio || "Foydalanuvchi";
                         document.getElementById('user-balance').innerText = userBalance.toLocaleString() + " so'm";
@@ -164,7 +165,6 @@
                         document.getElementById('user-id-display').innerText = "ID: " + (data.studentID || "...");
                         document.getElementById('input-name').value = fio;
 
-                        // QO'NG'IROQCHA AVTOMATIKASI
                         const unread = data.unreadNotifications || 0;
                         const badge = document.getElementById('notif-badge');
                         if (unread > 0) {
@@ -208,7 +208,6 @@
         window.showToast = (txt) => { const t = document.getElementById('toast'); t.innerText = txt; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2500); };
         window.contactSupport = () => window.open("https://t.me/dr_rahmonov_admin", "_blank");
 
-        // Pufakchalar generatori
         const container = document.getElementById('bubble-container');
         for (let i = 0; i < 15; i++) {
             const b = document.createElement('div');
