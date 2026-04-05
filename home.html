@@ -176,8 +176,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        // CRITICAL: addDoc, collection va serverTimestamp funksiyalari to'liq qo'shildi
-        import { getFirestore, doc, onSnapshot, updateDoc, setDoc, addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2G8cD0JezEKXRCtKLYiZL0bzDyTp06Vs",
@@ -239,6 +238,7 @@
                     setTimeout(() => location.href = 'messages.html', 800);
                 };
 
+                // Haqiqiy chiqish funksiyasi
                 document.getElementById('confirm-logout-btn').onclick = () => {
                     toggleExitModal(false);
                     showToast("Chiqish amalga oshirilmoqda... 👋");
@@ -266,30 +266,8 @@
                     showToast("Mablag' yetarli emas! 💳");
                     setTimeout(() => location.href = 'billing.html', 1500);
                 } else {
-                    try {
-                        showToast("Mablag' yechilmoqda... 💎");
-                        const userRef = doc(db, "users", auth.currentUser.uid);
-                        
-                        // 1. Balansni bazada 1000 so'mga kamaytirish
-                        await updateDoc(userRef, {
-                            balance: userBalance - 1000
-                        });
-
-                        // 2. To'lovlar tarixiga (payments collection) yozish
-                        await addDoc(collection(db, "payments"), {
-                            userId: auth.currentUser.uid,
-                            title: "Premium Blok Test",
-                            amount: 1000,
-                            type: "out", // Chiqim turi
-                            timestamp: serverTimestamp()
-                        });
-
-                        showToast("To'lov muvaffaqiyatli! Test boshlanmoqda...");
-                        setTimeout(() => location.href = 'premium-quiz.html', 1000);
-                    } catch (error) {
-                        console.error("To'lovda xatolik:", error);
-                        showToast("Xatolik yuz berdi, qaytadan urinib ko'ring! ❌");
-                    }
+                    showToast("Premium test boshlanmoqda... 💎");
+                    setTimeout(() => location.href = 'premium-quiz.html', 1000);
                 }
             } else { 
                 showToast("Bepul test yuklanmoqda... 🎁");
@@ -301,4 +279,4 @@
         window.contactSupport = () => { showToast("Telegramga o'tilmoqda..."); setTimeout(() => window.open("https://t.me/dr_rahmonov_admin", "_blank"), 500); };
     </script>
 </body>
-</html>
+    </html>
