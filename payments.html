@@ -2,30 +2,133 @@
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>To'lovlar - Dr. Rahmonov</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        body { background: #0f2027; color: white; padding: 20px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: #0f2027; color: white; padding: 20px; min-height: 100vh; }
+        
         .header { display: flex; align-items: center; gap: 15px; margin-bottom: 30px; }
+        .back-btn { text-decoration: none; font-size: 24px; color: white; background: rgba(255,255,255,0.1); width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 12px; }
+        
+        .summary-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 25px; }
+        .s-card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
+        .s-card span { font-size: 11px; opacity: 0.6; text-transform: uppercase; }
+        .s-card h3 { font-size: 16px; margin-top: 5px; }
+
         .pay-item { 
             background: rgba(255, 255, 255, 0.03); border-left: 4px solid #00d2ff;
             padding: 15px; border-radius: 12px; margin-bottom: 12px;
             display: flex; justify-content: space-between; align-items: center;
+            animation: fadeIn 0.5s ease;
         }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
         .pay-item.out { border-left-color: #ff4b2b; }
-        .amount { font-weight: 700; color: #00d2ff; }
+        .amount { font-weight: 700; color: #00ff88; }
         .amount.minus { color: #ff4b2b; }
+        
+        .date-label { font-size: 10px; opacity: 0.5; display: block; margin-top: 4px; }
+        #loader { text-align: center; margin-top: 50px; opacity: 0.5; }
     </style>
 </head>
 <body>
-    <div class="header"><a href="home.html" style="text-decoration:none;">⬅️</a> <h2>To'lovlar Tarixi</h2></div>
-    <div id="pay-list">
-        <div class="pay-item">
-            <div><strong>Hisob to'ldirildi</strong><br><small>Hozircha bo'sh</small></div>
-            <div class="amount">+0 so'm</div>
+
+    <div class="header">
+        <a href="home.html" class="back-btn">⬅️</a> 
+        <h2>To'lovlar Tarixi</h2>
+    </div>
+
+    <div class="summary-cards">
+        <div class="s-card">
+            <span>Haftalik Kirim</span>
+            <h3 id="total-in" style="color: #00ff88;">0 so'm</h3>
+        </div>
+        <div class="s-card">
+            <span>Haftalik Chiqim</span>
+            <h3 id="total-out" style="color: #ff4b2b;">0 so'm</h3>
         </div>
     </div>
+
+    <div id="pay-list">
+        <div id="loader">Yuklanmoqda...</div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, query, where, orderBy, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyA2G8cD0JezEKXRCtKLYiZL0bzDyTp06Vs",
+            authDomain: "quiz-app-3692d.firebaseapp.com",
+            projectId: "quiz-app-3692d",
+            storageBucket: "quiz-app-3692d.firebasestorage.app",
+            messagingSenderId: "526836020845",
+            appId: "1:526836020845:android:3ea991380c104c75e8b164"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                const payRef = collection(db, "payments");
+                // Faqat shu foydalanuvchining to'lovlarini vaqt bo'yicha saralab olish
+                const q = query(payRef, where("userId", "==", user.uid), orderBy("timestamp", "desc"));
+
+                onSnapshot(q, (snapshot) => {
+                    const listContainer = document.getElementById('pay-list');
+                    listContainer.innerHTML = "";
+                    
+                    let totalIn = 0;
+                    let totalOut = 0;
+                    const oneWeekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000); // 7 kun millisekundda
+
+                    if (snapshot.empty) {
+                        listContainer.innerHTML = "<p style='text-align:center; opacity:0.5;'>Hozircha tarix mavjud emas.</p>";
+                    }
+
+                    snapshot.forEach(async (documentSnap) => {
+                        const data = documentSnap.data();
+                        const time = data.timestamp?.toMillis() || Date.now();
+
+                        // --- AVTOMATIK O'CHIRISH ---
+                        if (time < oneWeekAgo) {
+                            // Agar 7 kundan o'tib ketgan bo'lsa, bazadan o'chirib tashlaymiz
+                            await deleteDoc(doc(db, "payments", documentSnap.id));
+                            return; // Keyingi elementga o'tamiz, buni ro'yxatga qo'shmaymiz
+                        }
+
+                        // Kirim yoki chiqimni hisoblash
+                        if (data.type === 'in') totalIn += data.amount;
+                        else totalOut += data.amount;
+
+                        const dateStr = new Date(time).toLocaleString('uz-UZ', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+                        const item = document.createElement('div');
+                        item.className = `pay-item ${data.type === 'out' ? 'out' : ''}`;
+                        item.innerHTML = `
+                            <div>
+                                <strong>${data.title}</strong>
+                                <span class="date-label">${dateStr}</span>
+                            </div>
+                            <div class="amount ${data.type === 'out' ? 'minus' : ''}">
+                                ${data.type === 'out' ? '-' : '+'}${data.amount.toLocaleString()} so'm
+                            </div>
+                        `;
+                        listContainer.appendChild(item);
+                    });
+
+                    document.getElementById('total-in').innerText = totalIn.toLocaleString() + " so'm";
+                    document.getElementById('total-out').innerText = totalOut.toLocaleString() + " so'm";
+                });
+            } else {
+                window.location.replace("index.html");
+            }
+        });
+    </script>
 </body>
 </html>
