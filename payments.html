@@ -58,7 +58,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, query, where, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, query, where, orderBy, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2G8cD0JezEKXRCtKLYiZL0bzDyTp06Vs",
@@ -76,9 +76,8 @@
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 const payRef = collection(db, "payments");
-                
-                // Faqat userId bo'yicha qidiriladi (orderBy olib tashlandi -> Indeks shart emas!)
-                const q = query(payRef, where("userId", "==", user.uid));
+                // So'rovni xavfsiz tartiblash
+                const q = query(payRef, where("userId", "==", user.uid), orderBy("timestamp", "desc"));
 
                 onSnapshot(q, (snapshot) => {
                     const listContainer = document.getElementById('pay-list');
@@ -95,29 +94,17 @@
                         return;
                     }
 
-                    // Ma'lumotlarni tartiblash uchun massivga yig'amiz
-                    let docsArray = [];
-                    snapshot.forEach(d => docsArray.push(d));
-                    
-                    // Kelgan ma'lumotlarni vaqt bo'yicha (eng yangisi yuqorida) JavaScript-da saralaymiz
-                    docsArray.sort((a, b) => {
-                        const timeA = a.data().timestamp?.toMillis() || 0;
-                        const timeB = b.data().timestamp?.toMillis() || 0;
-                        return timeB - timeA;
-                    });
-
-                    // Saralangan massivni ekranga chiqaramiz
-                    docsArray.forEach((documentSnap) => {
+                    snapshot.forEach((documentSnap) => {
                         const data = documentSnap.data();
                         const time = data.timestamp?.toMillis() || Date.now();
 
-                        // Haftalik avtomatik tozalash (7 kundan eskilarini fonda o'chirish)
+                        // --- ESKI MA'LUMOTLARNI FONDA O'CHIRISH (Siklni buzmagan holda) ---
                         if (time < oneWeekAgo) {
-                            deleteDoc(doc(db, "payments", documentSnap.id)).catch(err => console.log("Eski ma'lumotni o'chirishda xatolik:", err));
+                            deleteDoc(doc(db, "payments", documentSnap.id)).catch(err => console.log("O'chirishda xato:", err));
                             return; 
                         }
 
-                        // Kirim va chiqimlarni jamlash
+                        // Kirim yoki chiqimni hisoblash
                         const amount = Number(data.amount || 0);
                         if (data.type === 'in') {
                             totalIn += amount;
@@ -125,7 +112,6 @@
                             totalOut += amount;
                         }
 
-                        // Sanani chiroyli formatlash
                         const dateStr = new Date(time).toLocaleString('uz-UZ', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 
                         const item = document.createElement('div');
@@ -142,12 +128,12 @@
                         listContainer.appendChild(item);
                     });
 
-                    // Kartalarga yakuniy hisob-kitobni yozish
                     document.getElementById('total-in').innerText = totalIn.toLocaleString() + " so'm";
                     document.getElementById('total-out').innerText = totalOut.toLocaleString() + " so'm";
                 }, (error) => {
                     console.error("Firebase xatoligi:", error);
-                    document.getElementById('pay-list').innerHTML = "<p style='text-align:center; color:#ff4b2b;'>Ma'lumotlarni yuklashda xatolik yuz berdi.</p>";
+                    // AGAR INDEKS YO'Q BO'LSA LOGDA LINK CHIQADI
+                    document.getElementById('pay-list').innerHTML = "<p style='text-align:center; color:#ff4b2b;'>Yuklashda xatolik yuz berdi. Console panelini tekshiring.</p>";
                 });
             } else {
                 window.location.replace("index.html");
