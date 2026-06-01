@@ -17,11 +17,14 @@
         .stats-table th, .stats-table td { padding: 15px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; }
         .stats-table th { color: #ffd700; background: rgba(255,215,0,0.05); text-transform: uppercase; letter-spacing: 1px; }
 
-        .btn-home { display: block; width: 100%; padding: 16px; margin-top: 30px; background: #ffd700; color: #000; text-decoration: none; border-radius: 15px; font-weight: bold; transition: 0.3s; }
+        .btn-home { display: block; width: 100%; padding: 16px; margin-top: 30px; background: #ffd700; color: #000; text-decoration: none; border-radius: 15px; font-weight: bold; transition: 0.3s; text-align: center; }
         .btn-home:active { transform: scale(0.98); }
         
         .correct-val { color: #00ff00; font-weight: 600; }
         .ball-val { color: #fff; font-weight: 600; }
+
+        /* Natija yuklanish holati matni */
+        .sync-status { font-size: 11px; opacity: 0.5; margin-top: 12px; display: block; letter-spacing: 0.5px; }
     </style>
 </head>
 <body>
@@ -39,22 +42,44 @@
                     <th>Ball</th>
                 </tr>
             </thead>
-            <tbody id="stats-body">
-                </tbody>
+            <tbody id="stats-body"></tbody>
         </table>
 
         <a href="home.html" class="btn-home">ASOSIY MENYUGA QAYTISH</a>
+        <span id="sync-label" class="sync-status"></span>
     </div>
 
-    <script>
+    <!-- Firebase va Asosiy Mantiq -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyA2G8cD0JezEKXRCtKLYiZL0bzDyTp06Vs",
+            authDomain: "quiz-app-3692d.firebaseapp.com",
+            projectId: "quiz-app-3692d",
+            storageBucket: "quiz-app-3692d.firebasestorage.app",
+            messagingSenderId: "526836020845",
+            appId: "1:526836020845:android:3ea991380c104c75e8b164"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
         document.addEventListener("DOMContentLoaded", () => {
-            // LocalStorage dan ma'lumotni olish
+            // LocalStorage ma'lumotlari
             const results = JSON.parse(localStorage.getItem('premiumResult') || "[]");
+            const testType = localStorage.getItem('currentTestType') || "oddiy"; // Test turi: premium yoki oddiy
+
             const statsBody = document.getElementById('stats-body');
             const totalScoreElem = document.getElementById('total-score');
+            const syncLabel = document.getElementById('sync-label');
 
             if (results.length === 0) {
                 statsBody.innerHTML = "<tr><td colspan='3' style='text-align:center'>Natijalar topilmadi</td></tr>";
+                syncLabel.innerText = "";
                 return;
             }
 
@@ -68,13 +93,12 @@
                 }
                 if (res.isCorrect) {
                     summary[res.subject].correct += 1;
-                    // res.ball qiymati asosiy sahifadan 1.1, 2.1 yoki 3.1 bo'lib keladi
                     summary[res.subject].score += res.ball;
                     totalBall += res.ball;
                 }
             });
 
-            // Jadvalni chiroyli ko'rinishda to'ldirish
+            // Jadvalni render qilish
             Object.keys(summary).forEach(subject => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
@@ -85,8 +109,56 @@
                 statsBody.appendChild(row);
             });
 
-            // Yakuniy ballni chiqarish (Maksimal 189.0 bo'lishi tekshirildi)
+            // Yakuniy ballni ekranga chiqarish
             totalScoreElem.innerText = totalBall.toFixed(1);
+
+            // 🔥 ASOSIY FILTER: FAQAT PREMIUM NATIJANI BAZAGA YUBORISH
+            if (testType === 'premium') {
+                syncLabel.innerText = "Premium natija serverga yuklanmoqda...";
+                
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        try {
+                            // Sahifa qayta yangilanganda (refresh) takroran yuborilmaslik himoyasi
+                            if (localStorage.getItem('isResultSynced') === 'true') {
+                                syncLabel.innerText = "✓ Natija adminga yuborilgan";
+                                syncLabel.style.color = "#00ff00";
+                                return;
+                            }
+
+                            const resultPayload = {
+                                studentID: user.uid,
+                                studentName: user.displayName || "Talaba",
+                                studentEmail: user.email || "",
+                                totalScore: Number(totalBall.toFixed(1)),
+                                testType: "Premium Test",
+                                subjects: summary,
+                                timestamp: serverTimestamp()
+                            };
+
+                            // Faqat premium natijalar tushadigan alohida kolleksiya
+                            await addDoc(collection(db, "premium_results"), resultPayload);
+                            
+                            // Yuborildi deb belgi qo'yamiz
+                            localStorage.setItem('isResultSynced', 'true');
+                            syncLabel.innerText = "✓ Premium natija adminga yuborildi!";
+                            syncLabel.style.color = "#00ff00";
+
+                        } catch (error) {
+                            console.error("Xatolik:", error);
+                            syncLabel.innerText = "⚠️ Tarmoq xatosi: Adminga saqlanmadi.";
+                            syncLabel.style.color = "#ff4b2b";
+                        }
+                    } else {
+                        syncLabel.innerText = "⚠️ Avtorizatsiya xatosi: Foydalanuvchi aniqlanmadi.";
+                        syncLabel.style.color = "#ff4b2b";
+                    }
+                });
+            } else {
+                // Agar bepul (oddiy) test tugatilgan bo'lsa
+                syncLabel.innerText = "Oddiy test natijasi (Serverga saqlanmadi)";
+                syncLabel.style.color = "#888888";
+            }
         });
     </script>
 </body>
