@@ -12,22 +12,24 @@
         .header { display: flex; align-items: center; gap: 15px; margin-bottom: 30px; }
         .back-btn { text-decoration: none; font-size: 24px; color: white; background: rgba(255,255,255,0.1); width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 12px; }
         
-        .summary-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 25px; }
+        .summary-cards { display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 25px; }
         .s-card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
         .s-card span { font-size: 11px; opacity: 0.6; text-transform: uppercase; }
-        .s-card h3 { font-size: 16px; margin-top: 5px; }
+        .s-card h3 { font-size: 18px; margin-top: 5px; }
 
         .pay-item { 
-            background: rgba(255, 255, 255, 0.03); border-left: 4px solid #00d2ff;
+            background: rgba(255, 255, 255, 0.03); border-left: 4px solid #ff4b2b;
             padding: 15px; border-radius: 12px; margin-bottom: 12px;
             display: flex; justify-content: space-between; align-items: center;
             animation: fadeIn 0.5s ease;
         }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .pay-item.out { border-left-color: #ff4b2b; }
-        .amount { font-weight: 700; color: #00ff88; }
-        .amount.minus { color: #ff4b2b; }
+        .amount { font-weight: 700; color: #ff4b2b; }
+        .status-badge { font-size: 10px; padding: 3px 8px; border-radius: 6px; font-weight: 600; margin-top: 5px; display: inline-block; }
+        .status-kutilmoqda { background: #ffaa00; color: #000; }
+        .status-tasdiqlandi { background: #00ff88; color: #000; }
+        .status-rad-etildi { background: #ff4b2b; color: #fff; }
         
         .date-label { font-size: 10px; opacity: 0.5; display: block; margin-top: 4px; }
         #loader { text-align: center; margin-top: 50px; opacity: 0.5; }
@@ -37,16 +39,12 @@
 
     <div class="header">
         <a href="home.html" class="back-btn">⬅️</a> 
-        <h2>To'lovlar Tarixi</h2>
+        <h2>Yechilgan Pullar Tarixi</h2>
     </div>
 
     <div class="summary-cards">
         <div class="s-card">
-            <span>Haftalik Kirim</span>
-            <h3 id="total-in" style="color: #00ff88;">0 so'm</h3>
-        </div>
-        <div class="s-card">
-            <span>Haftalik Chiqim</span>
+            <span>Umumiy Chiqim (So'rovlar)</span>
             <h3 id="total-out" style="color: #ff4b2b;">0 so'm</h3>
         </div>
     </div>
@@ -58,7 +56,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, query, where, orderBy, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, query, where, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2G8cD0JezEKXRCtKLYiZL0bzDyTp06Vs",
@@ -75,68 +73,79 @@
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                const payRef = collection(db, "payments");
-                // So'rovni xavfsiz tartiblash
-                const q = query(payRef, where("userId", "==", user.uid), orderBy("timestamp", "desc"));
+                // Kolleksiya nomini haqiqiy bazangizdagi "withdraw_requests" ga almashtirdik!
+                const payRef = collection(db, "withdraw_requests");
+                
+                // Faqat shu foydalanuvchining uid si bo'yicha qidiramiz (Indeks shart emas)
+                const q = query(payRef, where("uid", "==", user.uid));
 
                 onSnapshot(q, (snapshot) => {
                     const listContainer = document.getElementById('pay-list');
                     listContainer.innerHTML = "";
                     
-                    let totalIn = 0;
                     let totalOut = 0;
-                    const oneWeekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000); // 7 kun millisekundda
+                    const oneWeekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000); // 7 kunlik limit
 
                     if (snapshot.empty) {
-                        listContainer.innerHTML = "<p style='text-align:center; opacity:0.5;'>Hozircha tarix mavjud emas.</p>";
-                        document.getElementById('total-in').innerText = "0 so'm";
+                        listContainer.innerHTML = "<p style='text-align:center; opacity:0.5;'>Hozircha pul yechish tarixi mavjud emas.</p>";
                         document.getElementById('total-out').innerText = "0 so'm";
                         return;
                     }
 
-                    snapshot.forEach((documentSnap) => {
-                        const data = documentSnap.data();
-                        const time = data.timestamp?.toMillis() || Date.now();
+                    // Vaqt bo'yicha saralash uchun massivga olamiz
+                    let docsArray = [];
+                    snapshot.forEach(d => docsArray.push(d));
+                    
+                    // JavaScript orqali yangisidan eskisiga qarab saralash
+                    docsArray.sort((a, b) => {
+                        const timeA = a.data().createdAt?.toMillis() || 0;
+                        const timeB = b.data().createdAt?.toMillis() || 0;
+                        return timeB - timeA;
+                    });
 
-                        // --- ESKI MA'LUMOTLARNI FONDA O'CHIRISH (Siklni buzmagan holda) ---
+                    docsArray.forEach((documentSnap) => {
+                        const data = documentSnap.data();
+                        const time = data.createdAt?.toMillis() || Date.now();
+
+                        // 7 kundan o'tgan eski so'rovlarni o'chirish (fonda)
                         if (time < oneWeekAgo) {
-                            deleteDoc(doc(db, "payments", documentSnap.id)).catch(err => console.log("O'chirishda xato:", err));
+                            deleteDoc(doc(db, "withdraw_requests", documentSnap.id)).catch(err => console.log(err));
                             return; 
                         }
 
-                        // Kirim yoki chiqimni hisoblash
                         const amount = Number(data.amount || 0);
-                        if (data.type === 'in') {
-                            totalIn += amount;
-                        } else if (data.type === 'out') {
-                            totalOut += amount;
-                        }
+                        totalOut += amount;
 
                         const dateStr = new Date(time).toLocaleString('uz-UZ', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                        
+                        // Status ranglarini moslash
+                        let statusClass = "status-kutilmoqda";
+                        let statusText = data.status || "Kutilmoqda";
+                        if (statusText === "Tasdiqlandi") statusClass = "status-tasdiqlandi";
+                        if (statusText === "Rad etildi") statusClass = "status-rad-etildi";
 
                         const item = document.createElement('div');
-                        item.className = `pay-item ${data.type === 'out' ? 'out' : ''}`;
+                        item.className = 'pay-item';
                         item.innerHTML = `
                             <div>
-                                <strong>${data.title || 'To\'lov'}</strong>
+                                <strong>${data.cardType || 'Karta'} ga yechish</strong>
                                 <span class="date-label">${dateStr}</span>
+                                <span class="status-badge ${statusClass}">${statusText}</span>
                             </div>
-                            <div class="amount ${data.type === 'out' ? 'minus' : ''}">
-                                ${data.type === 'out' ? '-' : '+'}${amount.toLocaleString()} so'm
+                            <div class="amount minus">
+                                -${amount.toLocaleString()} so'm
                             </div>
                         `;
                         listContainer.appendChild(item);
                     });
 
-                    document.getElementById('total-in').innerText = totalIn.toLocaleString() + " so'm";
                     document.getElementById('total-out').innerText = totalOut.toLocaleString() + " so'm";
                 }, (error) => {
-                    console.error("Firebase xatoligi:", error);
-                    // AGAR INDEKS YO'Q BO'LSA LOGDA LINK CHIQADI
-                    document.getElementById('pay-list').innerHTML = "<p style='text-align:center; color:#ff4b2b;'>Yuklashda xatolik yuz berdi. Console panelini tekshiring.</p>";
+                    console.error("Xatolik:", error);
+                    document.getElementById('pay-list').innerHTML = "<p style='text-align:center; color:#ff4b2b;'>Yuklashda xatolik yuz berdi.</p>";
                 });
             } else {
-                window.location.replace("index.html");
+                window.location.replace("home.html");
             }
         });
     </script>
