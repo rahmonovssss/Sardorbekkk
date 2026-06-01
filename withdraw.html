@@ -43,7 +43,7 @@
         .btn-submit { width: 100%; padding: 16px; background: linear-gradient(135deg, #ff4b2b 0%, #ff416c 100%); border: none; border-radius: 16px; color: #fff; font-weight: 800; cursor: pointer; font-size: 15px; letter-spacing: 0.5px; box-shadow: 0 5px 20px rgba(255,75,43,0.4); transition: 0.3s; }
         .btn-submit:active { transform: scale(0.97); filter: brightness(0.9); }
 
-        .channel-card { background: linear-gradient(135deg, rgba(0,136,204,0.15) 0%, rgba(0,210,255,0.05) 100%); border: 1px solid rgba(0,136,204,0.3); padding: 20px; border-radius: 25px; text-align: center; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 12px; }
+        .channel-card { background: linear-gradient(135deg, rgba(0,136,204,0.15) 0%, rgba(0,210,255,0.05) 100%); border: 1px solid rgba(0,136,204,0.3); padding: 20px; border-radius: 25px; text-align: center; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 10px; }
         .channel-card:active { transform: scale(0.97); background: rgba(0,136,204,0.25); }
         .channel-card i { font-size: 26px; font-style: normal; }
         .channel-card span { font-weight: 700; font-size: 14px; letter-spacing: 0.5px; }
@@ -95,7 +95,7 @@
             <button class="btn-submit" id="btn-withdraw-submit">SO'ROV YUBORISH 💸</button>
         </div>
 
-        <!-- TELEGRAM TO'LOVLAR KANALI TUGMASI -->
+        <!-- TELEGRAM TO'LOVLAR KANALI TUGMASI (DEEP LINK PROTOKOLI) -->
         <div class="channel-card" onclick="openPaymentChannel()">
             <i>📢</i>
             <span>TO'LOVLAR KANALI (ISBOTLAR)</span>
@@ -115,47 +115,50 @@
             } else if (cardSelect.value === 'Humo') {
                 cardInput.value = '9860 ';
             }
+            formatCardNumber(cardInput);
             cardInput.focus();
         }
 
         // Dastlabki yuklanganda Uzcard prefiksini o'rnatish
         window.addEventListener('DOMContentLoaded', () => {
             cardInput.value = '8600 ';
+            formatCardNumber(cardInput);
         });
 
-        // Karta raqamini har 4 ta sondan keyin chiroyli formatlash
-        cardInput.addEventListener('input', (e) => {
-            let target = e.target;
-            let position = target.selectionEnd;
-            let length = target.value.length;
-            
-            let value = target.value.replace(/[^0-9]/g, '');
+        // Karta formatlashni alohida xavfsiz funksiyaga oldik (Sikl buzilib qolmasligi uchun)
+        function formatCardNumber(input) {
+            let value = input.value.replace(/[^0-9]/g, '');
             let formatted = '';
-            
             for (let i = 0; i < value.length; i++) {
                 if (i > 0 && i % 4 === 0) {
                     formatted += ' ';
                 }
                 formatted += value[i];
             }
+            input.value = formatted;
+        }
+
+        cardInput.addEventListener('input', (e) => {
+            let position = e.target.selectionEnd;
+            let length = e.target.value.length;
             
-            target.value = formatted;
+            formatCardNumber(e.target);
             
-            // Kursorni joyini to'g'irlash
             if (position !== length) {
-                target.setSelectionRange(position, position);
+                e.target.setSelectionRange(position, position);
             }
         });
 
-        // Telegram kanalga o'tish funksiyasi
+        // TO'G'RIDAN-TO'G'RI TELEGRAM ILOVASINI OCHADIGAN XAVFSIZ FUNKSIYA
         function openPaymentChannel() {
             const t = document.getElementById('toast'); 
-            t.innerText = "To'lovlar kanaliga o'tilmoqda..."; 
+            t.innerText = "Telegram ilovasi ochilmoqda..."; 
             t.classList.add('show'); 
             setTimeout(() => {
                 t.classList.remove('show');
-                window.location.href = "https://t.me/dr_rahmonov_payments";
-            }, 600);
+                // Tizimda "Internet yo'q" xatoligini bermasligi uchun universal tg:// protokoli
+                window.location.href = "tg://resolve?domain=dr_rahmonov_payments";
+            }, 500);
         }
     </script>
 
@@ -205,7 +208,6 @@
 
                 document.getElementById('btn-withdraw-submit').onclick = async () => {
                     const cardType = document.getElementById('card-type').value;
-                    // Joy tashlangan chiziqlarni tozalab faqat raqamni tekshiramiz
                     const rawCardNumber = cardInput.value.replace(/\s/g, '');
                     const cardHolder = document.getElementById('card-holder').value.trim();
                     const amountInput = document.getElementById('withdraw-amount').value;
@@ -236,7 +238,7 @@
                             studentID: studentID,
                             userFio: userFio,
                             cardType: cardType,
-                            cardNumber: cardInput.value, // Formatlangan holda saqlaydi
+                            cardNumber: cardInput.value,
                             cardHolder: cardHolder,
                             amount: amount,
                             status: "Kutilmoqda",
@@ -247,10 +249,10 @@
                         
                         document.getElementById('card-holder').value = "";
                         document.getElementById('withdraw-amount').value = "";
-                        handleCardTypeChange(); // Prefiksni joyiga qaytaradi
+                        handleCardTypeChange();
 
                         setTimeout(() => {
-                            window.location.href = 'main.html'; // Yoki sizning asosiy sahifa nomingiz
+                            window.location.href = 'main.html';
                         }, 2000);
 
                     } catch (error) {
