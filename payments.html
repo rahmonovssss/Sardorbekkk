@@ -76,7 +76,7 @@
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 const payRef = collection(db, "payments");
-                // Faqat shu foydalanuvchining to'lovlarini vaqt bo'yicha saralab olish
+                // So'rovni xavfsiz tartiblash
                 const q = query(payRef, where("userId", "==", user.uid), orderBy("timestamp", "desc"));
 
                 onSnapshot(q, (snapshot) => {
@@ -89,22 +89,28 @@
 
                     if (snapshot.empty) {
                         listContainer.innerHTML = "<p style='text-align:center; opacity:0.5;'>Hozircha tarix mavjud emas.</p>";
+                        document.getElementById('total-in').innerText = "0 so'm";
+                        document.getElementById('total-out').innerText = "0 so'm";
+                        return;
                     }
 
-                    snapshot.forEach(async (documentSnap) => {
+                    snapshot.forEach((documentSnap) => {
                         const data = documentSnap.data();
                         const time = data.timestamp?.toMillis() || Date.now();
 
-                        // --- AVTOMATIK O'CHIRISH ---
+                        // --- ESKI MA'LUMOTLARNI FONDA O'CHIRISH (Siklni buzmagan holda) ---
                         if (time < oneWeekAgo) {
-                            // Agar 7 kundan o'tib ketgan bo'lsa, bazadan o'chirib tashlaymiz
-                            await deleteDoc(doc(db, "payments", documentSnap.id));
-                            return; // Keyingi elementga o'tamiz, buni ro'yxatga qo'shmaymiz
+                            deleteDoc(doc(db, "payments", documentSnap.id)).catch(err => console.log("O'chirishda xato:", err));
+                            return; 
                         }
 
                         // Kirim yoki chiqimni hisoblash
-                        if (data.type === 'in') totalIn += data.amount;
-                        else totalOut += data.amount;
+                        const amount = Number(data.amount || 0);
+                        if (data.type === 'in') {
+                            totalIn += amount;
+                        } else if (data.type === 'out') {
+                            totalOut += amount;
+                        }
 
                         const dateStr = new Date(time).toLocaleString('uz-UZ', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 
@@ -112,11 +118,11 @@
                         item.className = `pay-item ${data.type === 'out' ? 'out' : ''}`;
                         item.innerHTML = `
                             <div>
-                                <strong>${data.title}</strong>
+                                <strong>${data.title || 'To\'lov'}</strong>
                                 <span class="date-label">${dateStr}</span>
                             </div>
                             <div class="amount ${data.type === 'out' ? 'minus' : ''}">
-                                ${data.type === 'out' ? '-' : '+'}${data.amount.toLocaleString()} so'm
+                                ${data.type === 'out' ? '-' : '+'}${amount.toLocaleString()} so'm
                             </div>
                         `;
                         listContainer.appendChild(item);
@@ -124,6 +130,10 @@
 
                     document.getElementById('total-in').innerText = totalIn.toLocaleString() + " so'm";
                     document.getElementById('total-out').innerText = totalOut.toLocaleString() + " so'm";
+                }, (error) => {
+                    console.error("Firebase xatoligi:", error);
+                    // AGAR INDEKS YO'Q BO'LSA LOGDA LINK CHIQADI
+                    document.getElementById('pay-list').innerHTML = "<p style='text-align:center; color:#ff4b2b;'>Yuklashda xatolik yuz berdi. Console panelini tekshiring.</p>";
                 });
             } else {
                 window.location.replace("index.html");
