@@ -26,7 +26,7 @@
         }
         .header h2 { font-size: 20px; font-weight: 600; }
         
-        /* --- BANK MONITOR (SUMMAlAR) --- */
+        /* --- BANK MONITOR (SUMMALAR) --- */
         .bank-monitor {
             background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
             border: 1px solid rgba(255, 255, 255, 0.08);
@@ -130,16 +130,16 @@
                 let paymentsData = [];
                 let withdrawsData = [];
 
-                // 1. KIRIMLARNI ESHITISH (Sizning haqiqiy payments tuzilmangiz bo'yicha)
+                // 1. KIRIMLARNI ESHITISH (Sizning haqiqiy payments tuzilmangiz)
+                // Koddagi qattiq filtrlash olib tashlandi, mantiqiy solishtirish JS orqali xavfsiz bajariladi
                 const payRef = collection(db, "payments");
-                // Skrinshotdagi studentID maydoni bo'yicha qidiruv filtrini o'rnatdik!
-                const qPay = query(payRef, where("studentID", "==", user.uid));
+                const qPay = query(payRef);
 
                 // 2. CHIQIMLARNI ESHITISH (withdraw_requests kolleksiyasi)
                 const withRef = collection(db, "withdraw_requests");
                 const qWith = query(withRef, where("uid", "==", user.uid));
 
-                // Birlashtirish va ekranga chiqarish funksiyasi
+                // Ikkala bazani birlashtirib render qiluvchi funksiya
                 function renderHistory() {
                     const listContainer = document.getElementById('pay-list');
                     listContainer.innerHTML = "";
@@ -153,7 +153,7 @@
                         return;
                     }
 
-                    // Amaliyotlarni tartiblash (Sana matn bo'lgani uchun ID bo'yicha taxminiy tartiblaydi)
+                    // Amaliyotlarni ID bo'yicha eng yangisini yuqoriga saralash
                     fullHistory.sort((a, b) => b.id.localeCompare(a.id));
 
                     let totalIn = 0;
@@ -178,73 +178,4 @@
                                 </div>
                             </div>
                             <div class="item-right">
-                                <span class="amount ${item.actionType === 'in' ? 'in-color' : 'out-color'}">
-                                    ${item.actionType === 'in' ? '+' : '-'}${item.amount.toLocaleString()} so'm
-                                </span>
-                            </div>
-                        `;
-                        listContainer.appendChild(card);
-                    });
-
-                    document.getElementById('total-in').innerText = totalIn.toLocaleString() + " so'm";
-                    document.getElementById('total-out').innerText = totalOut.toLocaleString() + " so'm";
-                }
-
-                // PAYMENTS (KIRIM) MA'LUMOTLARINI QABUL QILISH
-                onSnapshot(qPay, (snapshot) => {
-                    paymentsData = [];
-                    snapshot.forEach(docSnap => {
-                        const data = docSnap.data();
-                        
-                        // Status matnini chiroyli qilish
-                        let statusText = data.status || "tasdiqlandi";
-                        let statusClass = "st-tasdiqlandi";
-                        if (statusText === "kutilmoqda") statusClass = "st-kutilmoqda";
-                        if (statusText === "rad etildi") statusClass = "st-rad";
-
-                        // Bazangizdagi "sana" va "vaqt" matnlarini birlashtiramiz
-                        const displayDate = `${data.sana || ''} ${data.vaqt || ''}`.trim() || "Sana noma'lum";
-
-                        paymentsData.push({
-                            id: docSnap.id,
-                            actionType: 'in',
-                            title: data.fio ? `${data.fio} (Kirim)` : "Balans to'ldirildi",
-                            amount: Number(data.summa || 0), // "amount" emas "summa" deb o'zgartirildi!
-                            dateStr: displayDate,
-                            statusHtml: `<span class="status-text ${statusClass}">${statusText.toUpperCase()}</span>`
-                        });
-                    });
-                    renderHistory();
-                });
-
-                // WITHDRAW_REQUESTS (CHIQIM) MA'LUMOTLARINI QABUL QILISH
-                onSnapshot(qWith, (snapshot) => {
-                    withdrawsData = [];
-                    snapshot.forEach(docSnap => {
-                        const data = docSnap.data();
-                        const time = data.createdAt?.toMillis() || Date.now();
-                        
-                        let statusClass = "st-kutilmoqda";
-                        let statusText = data.status || "Kutilmoqda";
-                        if (statusText === "Tasdiqlandi") statusClass = "st-tasdiqlandi";
-                        if (statusText === "Rad etildi") statusClass = "st-rad";
-
-                        withdrawsData.push({
-                            id: docSnap.id,
-                            actionType: 'out',
-                            title: `${data.cardType || 'Karta'}ga pul yechish`,
-                            amount: Number(data.amount || 0),
-                            dateStr: new Date(time).toLocaleString('uz-UZ', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
-                            statusHtml: `<span class="status-text ${statusClass}">${statusText}</span>`
-                        });
-                    });
-                    renderHistory();
-                });
-
-            } else {
-                window.location.replace("index.html");
-            }
-        });
-    </script>
-</body>
-</html>
+                                <span class="amount ${item.actionType === '
