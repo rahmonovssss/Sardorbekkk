@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dr. Rahmonov - Pul Yechish</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            background: linear-gradient(180deg, #005c97 0%, #363795 100%); 
+            color: white; 
+            overflow-x: hidden; 
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* --- SUV EFFEKTLARI --- */
+        .water-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: url('https://www.transparenttextures.com/patterns/cubes.png'); opacity: 0.1; pointer-events: none; z-index: 1; }
+        .light-rays { position: fixed; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 50% 0%, rgba(255,255,255,0.15) 0%, transparent 50%); z-index: 0; pointer-events: none; }
+
+        /* --- HEADER --- */
+        .header { position: fixed; top: 0; left: 0; width: 100%; padding: 15px 20px; display: flex; align-items: center; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .btn-back { background: rgba(255,255,255,0.15); border: none; padding: 8px 15px; border-radius: 12px; color: white; font-weight: 600; cursor: pointer; text-decoration: none; font-size: 14px; }
+
+        /* --- MAIN CONTENT --- */
+        .main-content { position: relative; z-index: 10; padding: 100px 20px 30px; max-width: 600px; margin: 0 auto; text-align: center; }
+        .withdraw-card { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); padding: 30px 25px; border-radius: 30px; margin-bottom: 25px; text-align: left; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        
+        .balance-display { font-size: 24px; font-weight: 800; color: #00d2ff; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
+        
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; font-size: 12px; text-transform: uppercase; opacity: 0.8; margin-bottom: 5px; font-weight: 600; letter-spacing: 0.5px; }
+        .input-group input, .input-group select { width: 100%; padding: 15px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; color: white; font-weight: 600; outline: none; font-size: 16px; }
+        .input-group input::placeholder { color: rgba(255,255,255,0.4); }
+        .input-group select option { background: #021d33; color: white; }
+
+        .btn-submit { width: 100%; padding: 16px; background: #00d2ff; border: none; border-radius: 15px; color: #fff; font-weight: 800; cursor: pointer; font-size: 16px; box-shadow: 0 5px 15px rgba(0,210,255,0.3); transition: 0.3s; }
+        .btn-submit:active { transform: scale(0.98); }
+
+        #toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: #fff; color: #005c97; padding: 15px 30px; border-radius: 50px; transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 3000; font-weight: 700; box-shadow: 0 10px 30px rgba(0,0,0,0.3); text-align: center; width: max-content; max-width: 90%; }
+        #toast.show { bottom: 40px; }
+    </style>
+</head>
+<body>
+
+    <div class="light-rays"></div>
+    <div class="water-overlay"></div>
+
+    <header class="header">
+        <a href="javascript:history.back()" class="btn-back">⬅️ Orqaga</a>
+        <h2 style="font-size: 16px; margin-left: 15px; font-weight: 600;">Pul yechish</h2>
+    </header>
+
+    <div class="main-content">
+        <div class="withdraw-card">
+            <div class="balance-display">
+                <span style="font-size: 14px; font-weight: 400; color: white; display: block;">Sizning balansingiz:</span>
+                <span id="current-balance">yuklanmoqda...</span>
+            </div>
+
+            <div class="input-group">
+                <label>Karta turi</label>
+                <select id="card-type">
+                    <option value="Uzcard">Uzcard</option>
+                    <option value="Humo">Humo</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label>Karta raqami (16 xonali)</label>
+                <input type="text" id="card-number" placeholder="8600 ...." maxlength="16" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+            </div>
+
+            <div class="input-group">
+                <label>Karta egasining ismi</label>
+                <input type="text" id="card-holder" placeholder="F.I.O">
+            </div>
+
+            <div class="input-group">
+                <label>Yechish summasi (so'm)</label>
+                <input type="number" id="withdraw-amount" placeholder="Minimal 10,000" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+            </div>
+
+            <button class="btn-submit" id="btn-withdraw-submit">SO'ROV YUBORISH 💸</button>
+        </div>
+    </div>
+
+    <div id="toast"></div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, onSnapshot, updateDoc, addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Asosiy sahifangizdagi bir xil Firebase konfiguratsiyasi
+        const firebaseConfig = {
+            apiKey: "AIzaSyA2G8cD0JezEKXRCtKLYiZL0bzDyTp06Vs",
+            authDomain: "quiz-app-3692d.firebaseapp.com",
+            projectId: "quiz-app-3692d",
+            storageBucket: "quiz-app-3692d.firebasestorage.app",
+            messagingSenderId: "526836020845",
+            appId: "1:526836020845:android:3ea991380c104c75e8b164"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentBalance = 0;
+        let userFio = "";
+        let studentID = "";
+
+        const toastElement = document.getElementById('toast');
+        function showToast(txt) { 
+            toastElement.innerText = txt; 
+            toastElement.classList.add('show'); 
+            setTimeout(() => toastElement.classList.remove('show'), 2500); 
+        }
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                const userRef = doc(db, "users", user.uid);
+                
+                // Balansni bazadan real vaqtda olish
+                onSnapshot(userRef, (snap) => {
+                    if (snap.exists()) {
+                        const data = snap.data();
+                        currentBalance = data.balance || 0;
+                        userFio = data.fio || "Foydalanuvchi";
+                        studentID = data.studentID || "Yo'q";
+                        
+                        document.getElementById('current-balance').innerText = currentBalance.toLocaleString() + " so'm";
+                    }
+                });
+
+                // Tugma bosilganda ishlaydigan funksiya
+                document.getElementById('btn-withdraw-submit').onclick = async () => {
+                    const cardType = document.getElementById('card-type').value;
+                    const cardNumber = document.getElementById('card-number').value.trim();
+                    const cardHolder = document.getElementById('card-holder').value.trim();
+                    const amountInput = document.getElementById('withdraw-amount').value;
+                    const amount = parseInt(amountInput);
+
+                    // 1. Kiritish tekshiruvlari (Validatsiya)
+                    if (!cardNumber || cardNumber.length !== 16) {
+                        return showToast("Karta raqamini to'liq kiriting (16 ta raqam)! 💳");
+                    }
+                    if (!cardHolder) {
+                        return showToast("Karta egasining ismini kiriting! ✍️");
+                    }
+                    if (!amount || amount < 10000) {
+                        return showToast("Minimal yechish summasi 10,000 so'm! 💰");
+                    }
+                    if (amount > currentBalance) {
+                        return showToast("Balansingizda mablag' yetarli emas! ❌");
+                    }
+
+                    try {
+                        // Tugmani vaqtincha o'chirish (Double-click oldini olish)
+                        document.getElementById('btn-withdraw-submit').disabled = true;
+                        document.getElementById('btn-withdraw-submit').innerText = "YUBORILMOQDA...";
+
+                        // 2. Foydalanuvchining balansidan pulni ayirish
+                        const newBalance = currentBalance - amount;
+                        await updateDoc(userRef, { balance: newBalance });
+
+                        // 3. Admin ko'rishi uchun 'withdraw_requests' degan yangi bazaga so'rov yozish
+                        await addDoc(collection(db, "withdraw_requests"), {
+                            uid: user.uid,
+                            studentID: studentID,
+                            userFio: userFio,
+                            cardType: cardType,
+                            cardNumber: cardNumber,
+                            cardHolder: cardHolder,
+                            amount: amount,
+                            status: "Kutilmoqda", // Admin tasdiqlashi uchun status
+                            createdAt: serverTimestamp()
+                        });
+
+                        showToast("So'rov muvaffaqiyatli yuborildi! Admin tez orada tasdiqlaydi. ✅");
+                        
+                        // Formani tozalash
+                        document.getElementById('card-number').value = "";
+                        document.getElementById('card-holder').value = "";
+                        document.getElementById('withdraw-amount').value = "";
+
+                        // 1.5 soniyadan keyin ortga qaytarish
+                        setTimeout(() => {
+                            window.location.href = 'index.html';
+                        }, 2000);
+
+                    } catch (error) {
+                        console.error("Xatolik yuz berdi:", error);
+                        showToast("Tizimda xatolik yuz berdi. Qayta urinib ko'ring! ⚠️");
+                    } finally {
+                        document.getElementById('btn-withdraw-submit').disabled = false;
+                        document.getElementById('btn-withdraw-submit').innerText = "SO'ROV YUBORISH 💸";
+                    }
+                };
+
+            } else {
+                window.location.replace("index.html");
+            }
+        });
+    </script>
+</body>
+</html>
