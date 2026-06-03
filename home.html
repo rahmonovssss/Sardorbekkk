@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dr. Rahmonov - Crystal Water</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght=300;400;600;800&display=swap" rel="stylesheet">
     
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -55,10 +55,32 @@
         .menu-item:active { transform: scale(0.95); }
         .menu-item i { font-size: 32px; display: block; margin-bottom: 10px; font-style: normal; }
 
+        /* PREMIUM TUGMA DINAMIK STRILLARI */
         .premium-box { background: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728) !important; border: none !important; position: relative; overflow: hidden; box-shadow: 0 5px 20px rgba(184, 134, 11, 0.4) !important; }
         .premium-box span, .premium-box i { color: #5d4037 !important; font-weight: 800 !important; }
         .premium-box::after { content: ''; position: absolute; top: -50%; left: -150%; width: 200%; height: 200%; background: linear-gradient(45deg, transparent, rgba(255,255,255,0.4), transparent); transform: rotate(45deg); animation: shine 3s infinite; }
         @keyframes shine { 0% { left: -150%; } 100% { left: 150%; } }
+
+        /* TEST KETAYOTGANDA (BLOKLANGAN HOLAT STILI) */
+        .premium-box.quiz-running {
+            background: linear-gradient(135deg, #a80000, #e81123, #a80000) !important;
+            box-shadow: 0 5px 20px rgba(232, 17, 35, 0.4) !important;
+            pointer-events: none; /* Bosishni butkul taqiqlash */
+        }
+        .premium-box.quiz-running span, .premium-box.quiz-running i {
+            color: #ffffff !important;
+        }
+
+        /* HALI BOSHLANMAGAN REJIM */
+        .premium-box.quiz-waiting {
+            background: linear-gradient(135deg, #484644, #797775, #484644) !important;
+            box-shadow: none !important;
+            opacity: 0.85;
+        }
+        .premium-box.quiz-waiting span, .premium-box.quiz-waiting i {
+            color: #ffffff !important;
+        }
+        .premium-box.quiz-waiting::after { display: none; }
 
         /* --- MODALLAR --- */
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(15px); }
@@ -80,7 +102,6 @@
         #toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: #fff; color: #005c97; padding: 15px 30px; border-radius: 50px; transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 3000; font-weight: 700; box-shadow: 0 10px 30px rgba(0,0,0,0.3); text-align: center; width: max-content; max-width: 90%; }
         #toast.show { bottom: 40px; }
 
-        /* EXIT MODAL STYLE */
         .btn-exit-no { background: rgba(255,255,255,0.1); color: white; }
         .btn-exit-yes { background: #ff4b2b; color: white; }
     </style>
@@ -112,7 +133,12 @@
 
         <div class="grid-menu">
             <div class="menu-item" onclick="startQuiz('free')"><i>🎁</i><span>Bepul Test</span></div>
-            <div class="menu-item premium-box" onclick="startQuiz('premium')"><i>💎</i><span>Premium (1000)</span></div>
+            
+            <div class="menu-item premium-box quiz-waiting" id="premium-quiz-btn" onclick="startQuiz('premium')">
+                <i id="premium-icon">⏰</i>
+                <span id="premium-text">Yuklanmoqda...</span>
+            </div>
+
             <div class="menu-item" onclick="navigate('statistics.html', 'Statistika...')"><i>📊</i><span>Statistika</span></div>
             <div class="menu-item" onclick="navigate('leaderboard.html', 'Liderlar...')"><i>🏆</i><span>Liderlar</span></div>
             <div class="menu-item" style="grid-column: span 2; background: rgba(0, 136, 204, 0.2); border-color: #0088cc;" onclick="contactSupport()">
@@ -125,18 +151,13 @@
         <div class="modal-content">
             <div class="profile-avatar-big" id="modal-initials">?</div>
             <div id="user-id-display" style="background: rgba(255, 215, 0, 0.2); color: #ffd700; padding: 5px 15px; border-radius: 10px; font-weight: 800; display: inline-block; margin-bottom: 20px; border: 1px solid #ffd700;">ID: yuklanmoqda...</div>
-            
             <input type="text" id="input-name" style="width: 100%; padding: 15px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; color: white; margin-bottom: 20px; text-align: center; font-weight: 600; outline: none;" placeholder="Ismingiz">
-            
             <button class="btn-main" onclick="updateName()">SAQLASH 📂</button>
-            
             <div style="display: flex; gap: 10px; margin-bottom: 10px;">
                 <button class="btn-main" style="background: rgba(255,255,255,0.1);" onclick="navigate('results.html', 'Tarix yuklanmoqda...')">📜 Tarix</button>
                 <button class="btn-main" style="background: rgba(255,255,255,0.1);" onclick="navigate('payments.html', 'To\'lovlar yuklanmoqda...')">💸 To'lovlar</button>
             </div>
-            
             <button class="btn-main" style="background: transparent; border: 1px solid #ff4b2b; color: #ff4b2b;" onclick="toggleExitModal(true)">CHIQISH 🚪</button>
-            
             <p onclick="toggleModal(false)" style="margin-top:15px; cursor:pointer; font-size:12px; opacity:0.5; text-transform: uppercase; letter-spacing: 1px;">Yopish</p>
         </div>
     </div>
@@ -156,6 +177,7 @@
     <div id="toast"></div>
 
     <script>
+        // Animatsion pufakchalar generatori
         const container = document.getElementById('bubble-container');
         for (let i = 0; i < 15; i++) {
             const b = document.createElement('div');
@@ -195,6 +217,8 @@
         const db = getFirestore(app);
 
         let userBalance = 0;
+        let currentQuizState = "waiting"; // waiting, open, running, ended
+        let intervalId = null;
 
         function generateID() {
             const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -203,13 +227,13 @@
             return res;
         }
 
+        // 1. Foydalanuvchi ma'lumotlarini kuzatish
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 const userRef = doc(db, "users", user.uid);
                 
                 onSnapshot(userRef, async (snap) => {
                     let data = snap.exists() ? snap.data() : {};
-                    
                     if (!data.studentID) {
                         data.studentID = generateID();
                         await setDoc(userRef, { studentID: data.studentID }, { merge: true });
@@ -235,13 +259,32 @@
                     }
                 });
 
+                // 2. Tizim vaqtlarini (Premium Quiz) kuzatish bo'limi
+                const quizRef = doc(db, "system_settings", "premium_quiz");
+                onSnapshot(quizRef, (docSnap) => {
+                    if (docSnap.exists()) {
+                        const quizData = docSnap.data();
+                        
+                        // Har soniyada vaqtni server rejimida tekshirib turish
+                        if (intervalId) clearInterval(intervalId);
+                        
+                        intervalId = setInterval(() => {
+                            updatePremiumButtonLogic(quizData);
+                        }, 1000);
+                        
+                        updatePremiumButtonLogic(quizData); // Birinchi marta darhol ishga tushirish
+                    } else {
+                        // Agar bazada test sozlamasi topilmasa
+                        setButtonState("waiting", "Premium Test", "💎");
+                    }
+                });
+
                 document.getElementById('bell-trigger').onclick = async () => {
                     showToast("Xabarnomalar yuklanmoqda...");
                     await updateDoc(userRef, { unreadNotifications: 0 });
                     setTimeout(() => location.href = 'messages.html', 800);
                 };
 
-                // Haqiqiy chiqish funksiyasi
                 document.getElementById('confirm-logout-btn').onclick = () => {
                     toggleExitModal(false);
                     showToast("Chiqish amalga oshirilmoqda... 👋");
@@ -255,16 +298,76 @@
             }
         });
 
-        window.updateName = async () => {
-            const name = document.getElementById('input-name').value;
-            if(!name) return showToast("Ismni kiriting! ✍️");
-            await updateDoc(doc(db, "users", auth.currentUser.uid), { fio: name });
-            showToast("Muvaffaqiyatli saqlandi! ✅");
-            toggleModal(false);
-        };
+        // 3. Vaqt zanjiriga mos tugma holatlarini yangilovchi asosiy funksiya
+        function updatePremiumButtonLogic(quizData) {
+            const now = new Date().getTime(); // Hozirgi joriy vaqt
+            
+            const start = quizData.startTime;
+            const entryEnd = quizData.entryEndTime;
+            const quizEnd = quizData.quizEndTime;
 
+            if (now < start) {
+                // Holat 1: Hali boshlanmagan, vaqt kutilmoqda
+                const startDate = new Date(start);
+                const clockStr = startDate.getHours().toString().padStart(2, '0') + ":" + startDate.getMinutes().toString().padStart(2, '0');
+                currentQuizState = "waiting";
+                setButtonState("waiting", clockStr + " da boshlanadi", "⏰");
+            } 
+            else if (now >= start && now <= entryEnd) {
+                // Holat 2: Kirish vaqti ochiq (Masalan shu 5 minut ichida)
+                currentQuizState = "open";
+                setButtonState("open", "Premium (1000)", "💎");
+            } 
+            else if (now > entryEnd && now <= quizEnd) {
+                // Holat 3: Kirish yopildi va test davom etmoqda (Masalan 80 minut ichida)
+                currentQuizState = "running";
+                setButtonState("running", "Test oʻtkazilyapti...", "🚫");
+            } 
+            else {
+                // Holat 4: Test butkul yakunlandi
+                currentQuizState = "ended";
+                setButtonState("waiting", "Test yakunlandi", "⌛");
+            }
+        }
+
+        // Tugmani vizual ko'rinishini boshqarish
+        function setButtonState(state, text, icon) {
+            const btn = document.getElementById('premium-quiz-btn');
+            const txtSpan = document.getElementById('premium-text');
+            const iconI = document.getElementById('premium-icon');
+
+            txtSpan.innerText = text;
+            iconI.innerText = icon;
+
+            // Klasslarni tozalash
+            btn.classList.remove('quiz-waiting', 'quiz-running', 'premium-box');
+
+            if (state === "waiting") {
+                btn.classList.add('quiz-waiting');
+            } else if (state === "running") {
+                btn.classList.add('quiz-running');
+            } else if (state === "open") {
+                btn.classList.add('premium-box');
+            }
+        }
+
+        // 4. Testni boshlash tugmasi bosilganda
         window.startQuiz = async (type) => {
             if(type === 'premium') {
+                if (currentQuizState === "waiting") {
+                    showToast("Test hali boshlanmadi! ⏰");
+                    return;
+                }
+                if (currentQuizState === "running") {
+                    showToast("Kech qoldingiz! Test allaqachon oʻtkazilyapti... 🚫");
+                    return;
+                }
+                if (currentQuizState === "ended") {
+                    showToast("Ushbu premium test yakunlangan! ⌛");
+                    return;
+                }
+
+                // Agar kirish ochiq bo'lsa (open rejimda)
                 if(userBalance < 1000) {
                     showToast("Mablag' yetarli emas! 💳");
                     setTimeout(() => location.href = 'billing.html', 1500);
@@ -276,6 +379,14 @@
                 showToast("Bepul test yuklanmoqda... 🎁");
                 setTimeout(() => location.href = 'quiz.html', 800); 
             }
+        };
+
+        window.updateName = async () => {
+            const name = document.getElementById('input-name').value;
+            if(!name) return showToast("Ismni kiriting! ✍️");
+            await updateDoc(doc(db, "users", auth.currentUser.uid), { fio: name });
+            showToast("Muvaffaqiyatli saqlandi! ✅");
+            toggleModal(false);
         };
 
         window.navigate = (url, msg) => { showToast(msg); setTimeout(() => location.href = url, 800); };
