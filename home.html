@@ -345,16 +345,21 @@
             }
 
             // 1-HODISA: Admin vaqt qo'ygan va ayni paytda kirish ochiq bo'lsa
-            if (currentQuizState === "entry") {
-                showToast("Premium imtihon boshlanmoqda... 💎");
-                setTimeout(() => location.href = 'premium-main.html', 1000);
-            } 
-            // 2-HODISA: Hech qanday vaqt o'rnatilmagan doimiy holatda
-            else {
-                showToast("Premium test yuklanmoqda... 💎");
-                setTimeout(() => location.href = '​premium-quiz.html', 1000); 
-            }
-        };
+if (currentQuizState === "entry") {
+    showToast("Premium imtihon boshlanmoqda... 💎");
+    setTimeout(() => {
+        window.location.href = 'premium-main.html';
+    }, 1000);
+} 
+// 2-HODISA: Hech qanday vaqt o'rnatilmagan doimiy holatda
+else {
+    showToast("Premium test yuklanmoqda... 💎");
+    setTimeout(() => {
+        // Bu yerdagi yashirin xunuk belgi olib tashlandi
+        window.location.href = 'premium-quiz.html'; 
+    }, 1000); 
+}
+
 
         window.updateName = async () => {
             const name = document.getElementById('input-name').value;
