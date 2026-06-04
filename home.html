@@ -248,7 +248,7 @@
 
                 // --- 0 DAN VAQTLI TEST REAL-TIME MONITURINGI ---
                 // 'premium_timed_config' nomli kolleksiyadan ma'lumotlarni sekundma-sekund tekshiramiz
-                const timedConfigRef = doc(db, "premium_timed_config", "current");
+                const timedConfigRef = doc(db, "premium_admin", "settings");
                 onSnapshot(timedConfigRef, (configSnap) => {
                     if (timerId) clearInterval(timerId);
 
