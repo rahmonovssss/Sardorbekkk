@@ -1,94 +1,285 @@
-<!DOCTYPE html><html lang="uz"><head>    <meta charset="UTF-8">    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">    <title>Dr. Rahmonov - Crystal Water</title>    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">        <style>        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; -webkit-tap-highlight-color: transparent; }                body {             background: linear-gradient(180deg, #005c97 0%, #363795 100%);             color: white;             overflow-x: hidden;             min-height: 100vh;            position: relative;        }        /* --- SUV EFFEKTLARI --- */        .water-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: url('https://www.transparenttextures.com/patterns/cubes.png'); opacity: 0.1; pointer-events: none; z-index: 1; }        .light-rays { position: fixed; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 50% 0%, rgba(255,255,255,0.15) 0%, transparent 50%); animation: rays 10s ease-in-out infinite alternate; z-index: 0; pointer-events: none; }        @keyframes rays { from { transform: rotate(-5deg); } to { transform: rotate(5deg); } }        .bubbles { position: fixed; bottom: -20px; width: 100%; height: 100%; z-index: 0; pointer-events: none; }        .bubble { position: absolute; bottom: -50px; background: rgba(255, 255, 255, 0.2); border-radius: 50%; animation: rise var(--d) infinite ease-in; box-shadow: inset 0 0 5px rgba(255,255,255,0.3); }        @keyframes rise { 0% { transform: translateY(0) scale(1); opacity: 0; } 50% { opacity: 0.5; } 100% { transform: translateY(-110vh) scale(1.5); opacity: 0; } }        /* --- HEADER --- */        .header { position: fixed; top: 0; left: 0; width: 100%; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1); }                .bell-container { position: relative; cursor: pointer; }        .bell-btn { font-size: 24px; animation: pulse-glow 2s infinite; }        .notif-badge {             position: absolute; top: -5px; right: -5px; background: #ff4b2b;             color: white; font-size: 10px; font-weight: 800; min-width: 18px;             height: 18px; border-radius: 50%; display: none; align-items: center;             justify-content: center; border: 2px solid #014371;        }        @keyframes pulse-glow { 0%, 100% { filter: drop-shadow(0 0 2px #ffd700); } 50% { filter: drop-shadow(0 0 10px #ffd700); } }        .top-profile-container { display: flex; align-items: center; gap: 10px; background: rgba(255, 255, 255, 0.15); padding: 5px 12px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; }        /* --- MAIN CONTENT --- */        .main-content { position: relative; z-index: 10; padding: 100px 20px 30px; max-width: 600px; margin: 0 auto; text-align: center; }        .balance-card { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); padding: 30px 25px; border-radius: 30px; margin-bottom: 25px; text-align: left; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 10px 30px rgba(0,0,0,0.2); }        .btn-refill { display: inline-block; margin-top: 10px; background: #00d2ff; padding: 8px 18px; border-radius: 12px; font-size: 13px; font-weight: 700; text-decoration: none; color: #fff; }        .btn-withdraw { display: inline-block; margin-top: 10px; background: #f59e0b; padding: 8px 18px; border-radius: 12px; font-size: 13px; font-weight: 700; text-decoration: none; color: #fff; border: 1px solid rgba(255, 255, 255, 0.2); transition: 0.2s; }        .btn-withdraw:active { background: rgba(255, 255, 255, 0.3); }        /* --- MENU --- */        .grid-menu { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }        .menu-item { background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.1); padding: 25px 15px; border-radius: 25px; cursor: pointer; transition: 0.3s; backdrop-filter: blur(5px); }        .menu-item:active { transform: scale(0.95); }        .menu-item i { font-size: 32px; display: block; margin-bottom: 10px; font-style: normal; }        .premium-box { background: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728) !important; border: none !important; position: relative; overflow: hidden; box-shadow: 0 5px 20px rgba(184, 134, 11, 0.4) !important; }        .premium-box span, .premium-box i { color: #5d4037 !important; font-weight: 800 !important; }        .premium-box::after { content: ''; position: absolute; top: -50%; left: -150%; width: 200%; height: 200%; background: linear-gradient(45deg, transparent, rgba(255,255,255,0.4), transparent); transform: rotate(45deg); animation: shine 3s infinite; }        @keyframes shine { 0% { left: -150%; } 100% { left: 150%; } }        /* --- MODALLAR --- */        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(15px); }        .modal-content {             background: linear-gradient(135deg, #021d33 0%, #014371 100%);             padding: 30px; border-radius: 40px; width: 90%; max-width: 380px;             text-align: center; border: 1px solid rgba(255,255,255,0.2);             position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.5);        }        .profile-avatar-big {             width: 80px; height: 80px; background: #00d2ff; border-radius: 50%;             margin: -70px auto 15px; display: flex; align-items: center;             justify-content: center; font-size: 32px; font-weight: 800;             border: 5px solid #021d33; box-shadow: 0 5px 15px rgba(0,210,255,0.3);        }        .btn-main { width: 100%; padding: 16px; background: #00d2ff; border: none; border-radius: 15px; color: #fff; font-weight: 800; cursor: pointer; margin-bottom: 10px; transition: 0.3s; }        .btn-main:active { transform: scale(0.98); }                #toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: #fff; color: #005c97; padding: 15px 30px; border-radius: 50px; transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 3000; font-weight: 700; box-shadow: 0 10px 30px rgba(0,0,0,0.3); text-align: center; width: max-content; max-width: 90%; }        #toast.show { bottom: 40px; }        /* EXIT MODAL STYLE */        .btn-exit-no { background: rgba(255,255,255,0.1); color: white; }        .btn-exit-yes { background: #ff4b2b; color: white; }    </style></head><body>    <div class="light-rays"></div>    <div class="water-overlay"></div>    <div class="bubbles" id="bubble-container"></div>    <header class="header">        <div class="bell-container" id="bell-trigger">            <div class="bell-btn">🔔</div>            <div id="notif-badge" class="notif-badge">0</div>        </div>        <div class="top-profile-container" onclick="toggleModal(true)">            <span id="top-name" style="font-weight: 600; font-size: 14px;">Yuklanmoqda...</span>            <div style="width: 32px; height: 32px; background: #00d2ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #fff;" id="top-initials">⏳️</div>        </div>    </header>    <div class="main-content">        <div class="balance-card">            <h3 style="font-size: 12px; text-transform: uppercase; opacity: 0.7; letter-spacing: 1px;">Balansim</h3>            <h1 id="user-balance">0 so'm</h1>            <a href="billing.html" onclick="showToast('Hamyon bo\'limi yuklanmoqda...')" class="btn-refill">To'ldirish 💳</a>            <a href="withdraw.html" onclick="showToast('Pul yechib olish bo\'limi...')" class="btn-withdraw">Chiqarish 💸</a>        </div>        <div class="grid-menu">            <div class="menu-item" onclick="startQuiz('free')"><i>🎁</i><span>Bepul Test</span></div>            <div class="menu-item premium-box" onclick="startQuiz('premium')">
-                <i>💎</i>
-                <span id="premium-title">Premium (1000)</span>
-                <div id="premium-time-box" style="font-size: 11px; color: #5d4037; font-weight: 600; margin-top: 4px; display: none; line-height: 1.3;">
-                    <div id="premium-start-time"></div>
-                    <div id="premium-duration"></div>
-                </div>
-            </div>            <div class="menu-item" onclick="navigate('statistics.html', 'Statistika...')"><i>📊</i><span>Statistika</span></div>            <div class="menu-item" onclick="navigate('leaderboard.html', 'Liderlar...')"><i>🏆</i><span>Liderlar</span></div>            <div class="menu-item" style="grid-column: span 2; background: rgba(0, 136, 204, 0.2); border-color: #0088cc;" onclick="contactSupport()">                <i style="color: #00d2ff;">✈️</i><span>Telegram Admin</span>            </div>        </div>    </div>    <div id="profileModal" class="modal">        <div class="modal-content">            <div class="profile-avatar-big" id="modal-initials">?</div>            <div id="user-id-display" style="background: rgba(255, 215, 0, 0.2); color: #ffd700; padding: 5px 15px; border-radius: 10px; font-weight: 800; display: inline-block; margin-bottom: 20px; border: 1px solid #ffd700;">ID: yuklanmoqda...</div>                        <input type="text" id="input-name" style="width: 100%; padding: 15px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; color: white; margin-bottom: 20px; text-align: center; font-weight: 600; outline: none;" placeholder="Ismingiz">                        <button class="btn-main" onclick="updateName()">SAQLASH 📂</button>                        <div style="display: flex; gap: 10px; margin-bottom: 10px;">                <button class="btn-main" style="background: rgba(255,255,255,0.1);" onclick="navigate('results.html', 'Tarix yuklanmoqda...')">📜 Tarix</button>                <button class="btn-main" style="background: rgba(255,255,255,0.1);" onclick="navigate('payments.html', 'To\'lovlar yuklanmoqda...')">💸 To'lovlar</button>            </div>                        <button class="btn-main" style="background: transparent; border: 1px solid #ff4b2b; color: #ff4b2b;" onclick="toggleExitModal(true)">CHIQISH 🚪</button>                        <p onclick="toggleModal(false)" style="margin-top:15px; cursor:pointer; font-size:12px; opacity:0.5; text-transform: uppercase; letter-spacing: 1px;">Yopish</p>        </div>    </div>    <div id="exitModal" class="modal" style="z-index: 3000;">        <div class="modal-content">            <i style="font-size: 50px; display: block; margin-bottom: 15px;">🚪</i>            <h2 style="margin-bottom: 10px;">Chiqish</h2>            <p style="opacity: 0.8; margin-bottom: 25px; font-size: 14px;">Haqiqatan ham tizimdan chiqmoqchimisiz?</p>            <div style="display: flex; gap: 10px;">                <button class="btn-main btn-exit-no" onclick="toggleExitModal(false)">YO'Q</button>                <button class="btn-main btn-exit-yes" id="confirm-logout-btn">HA, CHIQISH</button>            </div>        </div>    </div>    <div id="toast"></div>    <script>        const container = document.getElementById('bubble-container');        for (let i = 0; i < 15; i++) {            const b = document.createElement('div');            b.className = 'bubble';            const size = Math.random() * 20 + 5 + 'px';            b.style.width = size; b.style.height = size;            b.style.left = Math.random() * 100 + '%';            b.style.setProperty('--d', Math.random() * 5 + 3 + 's');            b.style.animationDelay = Math.random() * 5 + 's';            container.appendChild(b);        }        window.toggleModal = (s) => document.getElementById('profileModal').style.display = s ? 'flex' : 'none';        window.toggleExitModal = (s) => document.getElementById('exitModal').style.display = s ? 'flex' : 'none';        window.showToast = (txt) => {             const t = document.getElementById('toast');             t.innerText = txt; t.classList.add('show');             setTimeout(() => t.classList.remove('show'), 2500);         };    </script>    <script type="module">        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";        import { getFirestore, doc, onSnapshot, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";        const firebaseConfig = {            apiKey: "AIzaSyA2G8cD0JezEKXRCtKLYiZL0bzDyTp06Vs",            authDomain: "quiz-app-3692d.firebaseapp.com",            projectId: "quiz-app-3692d",            storageBucket: "quiz-app-3692d.firebasestorage.app",            messagingSenderId: "526836020845",            appId: "1:526836020845:android:3ea991380c104c75e8b164"        };        const app = initializeApp(firebaseConfig);        const auth = getAuth(app);        const db = getFirestore(app);        let userBalance = 0;        
-        let liveTimerInterval = null;
-        let isQuizActive = false;
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dr. Rahmonov - Crystal Water</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            background: linear-gradient(180deg, #005c97 0%, #363795 100%); 
+            color: white; 
+            overflow-x: hidden; 
+            min-height: 100vh;
+            position: relative;
+        }
 
-        function generateID() {            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';            let res = '';            for (let i = 0; i < 6; i++) res += chars.charAt(Math.floor(Math.random() * chars.length));            return res;        }        onAuthStateChanged(auth, async (user) => {            if (user) {                const userRef = doc(db, "users", user.uid);                                onSnapshot(userRef, async (snap) => {                    let data = snap.exists() ? snap.data() : {};                                        if (!data.studentID) {                        data.studentID = generateID();                        await setDoc(userRef, { studentID: data.studentID }, { merge: true });                    }                    userBalance = data.balance || 0;                    const fio = data.fio || "Foydalanuvchi";                                        document.getElementById('user-balance').innerText = userBalance.toLocaleString() + " so'm";                    document.getElementById('top-name').innerText = fio;                    document.getElementById('top-initials').innerText = fio[0].toUpperCase();                    document.getElementById('modal-initials').innerText = fio[0].toUpperCase();                    document.getElementById('user-id-display').innerText = "ID: " + data.studentID;                    document.getElementById('input-name').value = data.fio || "";                    const unreadCount = data.unreadNotifications || 0;                    const badge = document.getElementById('notif-badge');                    if(unreadCount > 0) {                        badge.innerText = unreadCount > 9 ? "9+" : unreadCount;                        badge.style.display = 'flex';                    } else {                        badge.style.display = 'none';                    }                });
+        /* --- SUV EFFEKTLARI --- */
+        .water-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: url('https://www.transparenttextures.com/patterns/cubes.png'); opacity: 0.1; pointer-events: none; z-index: 1; }
+        .light-rays { position: fixed; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 50% 0%, rgba(255,255,255,0.15) 0%, transparent 50%); animation: rays 10s ease-in-out infinite alternate; z-index: 0; pointer-events: none; }
+        @keyframes rays { from { transform: rotate(-5deg); } to { transform: rotate(5deg); } }
 
-                // ADMIN VAQT REJIMINI TEKSHIRISH (PREMIUM TUGLAR UCHUN)
-                onSnapshot(doc(db, "premium_admin", "settings"), (snapshot) => {
-                    if (liveTimerInterval) clearInterval(liveTimerInterval);
+        .bubbles { position: fixed; bottom: -20px; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+        .bubble { position: absolute; bottom: -50px; background: rgba(255, 255, 255, 0.2); border-radius: 50%; animation: rise var(--d) infinite ease-in; box-shadow: inset 0 0 5px rgba(255,255,255,0.3); }
+        @keyframes rise { 0% { transform: translateY(0) scale(1); opacity: 0; } 50% { opacity: 0.5; } 100% { transform: translateY(-110vh) scale(1.5); opacity: 0; } }
+
+        /* --- HEADER --- */
+        .header { position: fixed; top: 0; left: 0; width: 100%; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        
+        .bell-container { position: relative; cursor: pointer; }
+        .bell-btn { font-size: 24px; animation: pulse-glow 2s infinite; }
+        .notif-badge { 
+            position: absolute; top: -5px; right: -5px; background: #ff4b2b; 
+            color: white; font-size: 10px; font-weight: 800; min-width: 18px; 
+            height: 18px; border-radius: 50%; display: none; align-items: center; 
+            justify-content: center; border: 2px solid #014371;
+        }
+
+        @keyframes pulse-glow { 0%, 100% { filter: drop-shadow(0 0 2px #ffd700); } 50% { filter: drop-shadow(0 0 10px #ffd700); } }
+
+        .top-profile-container { display: flex; align-items: center; gap: 10px; background: rgba(255, 255, 255, 0.15); padding: 5px 12px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; }
+
+        /* --- MAIN CONTENT --- */
+        .main-content { position: relative; z-index: 10; padding: 100px 20px 30px; max-width: 600px; margin: 0 auto; text-align: center; }
+        .balance-card { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); padding: 30px 25px; border-radius: 30px; margin-bottom: 25px; text-align: left; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .btn-refill { display: inline-block; margin-top: 10px; background: #00d2ff; padding: 8px 18px; border-radius: 12px; font-size: 13px; font-weight: 700; text-decoration: none; color: #fff; }
+        .btn-withdraw { display: inline-block; margin-top: 10px; background: #f59e0b; padding: 8px 18px; border-radius: 12px; font-size: 13px; font-weight: 700; text-decoration: none; color: #fff; border: 1px solid rgba(255, 255, 255, 0.2); transition: 0.2s; }
+        .btn-withdraw:active { background: rgba(255, 255, 255, 0.3); }
+
+        /* --- MENU --- */
+        .grid-menu { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        .menu-item { background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.1); padding: 25px 15px; border-radius: 25px; cursor: pointer; transition: 0.3s; backdrop-filter: blur(5px); }
+        .menu-item:active { transform: scale(0.95); }
+        .menu-item i { font-size: 32px; display: block; margin-bottom: 10px; font-style: normal; }
+
+        .premium-box { background: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728) !important; border: none !important; position: relative; overflow: hidden; box-shadow: 0 5px 20px rgba(184, 134, 11, 0.4) !important; }
+        .premium-box span, .premium-box i { color: #5d4037 !important; font-weight: 800 !important; }
+        .premium-box::after { content: ''; position: absolute; top: -50%; left: -150%; width: 200%; height: 200%; background: linear-gradient(45deg, transparent, rgba(255,255,255,0.4), transparent); transform: rotate(45deg); animation: shine 3s infinite; }
+        @keyframes shine { 0% { left: -150%; } 100% { left: 150%; } }
+
+        /* --- MODALLAR --- */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(15px); }
+        .modal-content { 
+            background: linear-gradient(135deg, #021d33 0%, #014371 100%); 
+            padding: 30px; border-radius: 40px; width: 90%; max-width: 380px; 
+            text-align: center; border: 1px solid rgba(255,255,255,0.2); 
+            position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+        .profile-avatar-big { 
+            width: 80px; height: 80px; background: #00d2ff; border-radius: 50%; 
+            margin: -70px auto 15px; display: flex; align-items: center; 
+            justify-content: center; font-size: 32px; font-weight: 800; 
+            border: 5px solid #021d33; box-shadow: 0 5px 15px rgba(0,210,255,0.3);
+        }
+        .btn-main { width: 100%; padding: 16px; background: #00d2ff; border: none; border-radius: 15px; color: #fff; font-weight: 800; cursor: pointer; margin-bottom: 10px; transition: 0.3s; }
+        .btn-main:active { transform: scale(0.98); }
+        
+        #toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: #fff; color: #005c97; padding: 15px 30px; border-radius: 50px; transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 3000; font-weight: 700; box-shadow: 0 10px 30px rgba(0,0,0,0.3); text-align: center; width: max-content; max-width: 90%; }
+        #toast.show { bottom: 40px; }
+
+        /* EXIT MODAL STYLE */
+        .btn-exit-no { background: rgba(255,255,255,0.1); color: white; }
+        .btn-exit-yes { background: #ff4b2b; color: white; }
+    </style>
+</head>
+<body>
+
+    <div class="light-rays"></div>
+    <div class="water-overlay"></div>
+    <div class="bubbles" id="bubble-container"></div>
+
+    <header class="header">
+        <div class="bell-container" id="bell-trigger">
+            <div class="bell-btn">🔔</div>
+            <div id="notif-badge" class="notif-badge">0</div>
+        </div>
+        <div class="top-profile-container" onclick="toggleModal(true)">
+            <span id="top-name" style="font-weight: 600; font-size: 14px;">Yuklanmoqda...</span>
+            <div style="width: 32px; height: 32px; background: #00d2ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #fff;" id="top-initials">⏳️</div>
+        </div>
+    </header>
+
+    <div class="main-content">
+        <div class="balance-card">
+            <h3 style="font-size: 12px; text-transform: uppercase; opacity: 0.7; letter-spacing: 1px;">Balansim</h3>
+            <h1 id="user-balance">0 so'm</h1>
+            <a href="billing.html" onclick="showToast('Hamyon bo\'limi yuklanmoqda...')" class="btn-refill">To'ldirish 💳</a>
+            <a href="withdraw.html" onclick="showToast('Pul yechib olish bo\'limi...')" class="btn-withdraw">Chiqarish 💸</a>
+        </div>
+
+        <div class="grid-menu">
+            <div class="menu-item" onclick="startQuiz('free')"><i>🎁</i><span>Bepul Test</span></div>
+            <div class="menu-item premium-box" onclick="startQuiz('premium')"><i>💎</i><span>Premium (1000)</span></div>
+            <div class="menu-item" onclick="navigate('statistics.html', 'Statistika...')"><i>📊</i><span>Statistika</span></div>
+            <div class="menu-item" onclick="navigate('leaderboard.html', 'Liderlar...')"><i>🏆</i><span>Liderlar</span></div>
+            <div class="menu-item" style="grid-column: span 2; background: rgba(0, 136, 204, 0.2); border-color: #0088cc;" onclick="contactSupport()">
+                <i style="color: #00d2ff;">✈️</i><span>Telegram Admin</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="profileModal" class="modal">
+        <div class="modal-content">
+            <div class="profile-avatar-big" id="modal-initials">?</div>
+            <div id="user-id-display" style="background: rgba(255, 215, 0, 0.2); color: #ffd700; padding: 5px 15px; border-radius: 10px; font-weight: 800; display: inline-block; margin-bottom: 20px; border: 1px solid #ffd700;">ID: yuklanmoqda...</div>
+            
+            <input type="text" id="input-name" style="width: 100%; padding: 15px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; color: white; margin-bottom: 20px; text-align: center; font-weight: 600; outline: none;" placeholder="Ismingiz">
+            
+            <button class="btn-main" onclick="updateName()">SAQLASH 📂</button>
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                <button class="btn-main" style="background: rgba(255,255,255,0.1);" onclick="navigate('results.html', 'Tarix yuklanmoqda...')">📜 Tarix</button>
+                <button class="btn-main" style="background: rgba(255,255,255,0.1);" onclick="navigate('payments.html', 'To\'lovlar yuklanmoqda...')">💸 To'lovlar</button>
+            </div>
+            
+            <button class="btn-main" style="background: transparent; border: 1px solid #ff4b2b; color: #ff4b2b;" onclick="toggleExitModal(true)">CHIQISH 🚪</button>
+            
+            <p onclick="toggleModal(false)" style="margin-top:15px; cursor:pointer; font-size:12px; opacity:0.5; text-transform: uppercase; letter-spacing: 1px;">Yopish</p>
+        </div>
+    </div>
+
+    <div id="exitModal" class="modal" style="z-index: 3000;">
+        <div class="modal-content">
+            <i style="font-size: 50px; display: block; margin-bottom: 15px;">🚪</i>
+            <h2 style="margin-bottom: 10px;">Chiqish</h2>
+            <p style="opacity: 0.8; margin-bottom: 25px; font-size: 14px;">Haqiqatan ham tizimdan chiqmoqchimisiz?</p>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-main btn-exit-no" onclick="toggleExitModal(false)">YO'Q</button>
+                <button class="btn-main btn-exit-yes" id="confirm-logout-btn">HA, CHIQISH</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast"></div>
+
+    <script>
+        const container = document.getElementById('bubble-container');
+        for (let i = 0; i < 15; i++) {
+            const b = document.createElement('div');
+            b.className = 'bubble';
+            const size = Math.random() * 20 + 5 + 'px';
+            b.style.width = size; b.style.height = size;
+            b.style.left = Math.random() * 100 + '%';
+            b.style.setProperty('--d', Math.random() * 5 + 3 + 's');
+            b.style.animationDelay = Math.random() * 5 + 's';
+            container.appendChild(b);
+        }
+        window.toggleModal = (s) => document.getElementById('profileModal').style.display = s ? 'flex' : 'none';
+        window.toggleExitModal = (s) => document.getElementById('exitModal').style.display = s ? 'flex' : 'none';
+        window.showToast = (txt) => { 
+            const t = document.getElementById('toast'); 
+            t.innerText = txt; t.classList.add('show'); 
+            setTimeout(() => t.classList.remove('show'), 2500); 
+        };
+    </script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, onSnapshot, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyA2G8cD0JezEKXRCtKLYiZL0bzDyTp06Vs",
+            authDomain: "quiz-app-3692d.firebaseapp.com",
+            projectId: "quiz-app-3692d",
+            storageBucket: "quiz-app-3692d.firebasestorage.app",
+            messagingSenderId: "526836020845",
+            appId: "1:526836020845:android:3ea991380c104c75e8b164"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let userBalance = 0;
+
+        function generateID() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let res = '';
+            for (let i = 0; i < 6; i++) res += chars.charAt(Math.floor(Math.random() * chars.length));
+            return res;
+        }
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const userRef = doc(db, "users", user.uid);
+                
+                onSnapshot(userRef, async (snap) => {
+                    let data = snap.exists() ? snap.data() : {};
                     
-                    const titleEl = document.getElementById('premium-title');
-                    const timeBoxEl = document.getElementById('premium-time-box');
-                    const startEl = document.getElementById('premium-start-time');
-                    const durationEl = document.getElementById('premium-duration');
+                    if (!data.studentID) {
+                        data.studentID = generateID();
+                        await setDoc(userRef, { studentID: data.studentID }, { merge: true });
+                    }
 
-                    if (snapshot.exists()) {
-                        const settings = snapshot.data();
-                        
-                        // Admin vaqt kiritganligini tekshirish (masalan: startTime: "2026-06-04T16:00", durationMinutes: 45)
-                        if (settings.startTime && settings.durationMinutes) {
-                            timeBoxEl.style.display = "block";
-                            
-                            const runTimer = () => {
-                                const now = new Date().getTime();
-                                const startTime = new Date(settings.startTime).getTime();
-                                const durationMs = parseInt(settings.durationMinutes) * 60 * 1000;
-                                const endTime = startTime + durationMs;
+                    userBalance = data.balance || 0;
+                    const fio = data.fio || "Foydalanuvchi";
+                    
+                    document.getElementById('user-balance').innerText = userBalance.toLocaleString() + " so'm";
+                    document.getElementById('top-name').innerText = fio;
+                    document.getElementById('top-initials').innerText = fio[0].toUpperCase();
+                    document.getElementById('modal-initials').innerText = fio[0].toUpperCase();
+                    document.getElementById('user-id-display').innerText = "ID: " + data.studentID;
+                    document.getElementById('input-name').value = data.fio || "";
 
-                                // Kirish vaqtini chiroyli formatda chiqarish (boshlanish vaqti)
-                                const options = { hour: '2-digit', minute: '2-digit' };
-                                const formattedStart = new Date(settings.startTime).toLocaleTimeString('uz-UZ', options);
-                                startEl.innerHTML = "🕒 Kirish: " + formattedStart;
-
-                                if (now < startTime) {
-                                    // 1. Vaqt qo'yilgan lekin hali boshlanmagan holat
-                                    isQuizActive = false;
-                                    titleEl.innerText = "Premium (1000)";
-                                    
-                                    const diff = startTime - now;
-                                    const h = Math.floor(diff / (1000 * 60 * 60));
-                                    const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                                    const s = Math.floor((diff % (1000 * 60)) / 1000);
-                                    durationEl.innerHTML = `⌛ Kutish: ${h > 0 ? h + 's ' : ''}${m}m ${s}s`;
-                                } else if (now >= startTime && now <= endTime) {
-                                    // 2. Test ayni vaqtda jonli davom etayotgan holat
-                                    isQuizActive = true;
-                                    titleEl.innerText = "Premium (1000)";
-
-                                    const diff = endTime - now;
-                                    const m = Math.floor(diff / (1000 * 60));
-                                    const s = Math.floor((diff % (1000 * 60)) / 1000);
-                                    durationEl.innerHTML = `<span style="color: #ff4b2b;">⏳ Qoldi: ${m}m ${s}s</span>`;
-                                } else {
-                                    // 3. Admin qo'ygan vaqt butunlay tugagan holat -> Asl holiga qaytadi
-                                    isQuizActive = false;
-                                    titleEl.innerText = "Premium (1000)";
-                                    timeBoxEl.style.display = "none";
-                                    clearInterval(liveTimerInterval);
-                                }
-                            };
-
-                            runTimer();
-                            liveTimerInterval = setInterval(runTimer, 1000);
-                        } else {
-                            // Admin vaqt qo'ymagan bo'lsa -> Asl holicha qoladi
-                            isQuizActive = true; 
-                            titleEl.innerText = "Premium (1000)";
-                            timeBoxEl.style.display = "none";
-                        }
+                    const unreadCount = data.unreadNotifications || 0;
+                    const badge = document.getElementById('notif-badge');
+                    if(unreadCount > 0) {
+                        badge.innerText = unreadCount > 9 ? "9+" : unreadCount;
+                        badge.style.display = 'flex';
                     } else {
-                        // Hujjat mavjud bo'lmasa -> Asl holicha qoladi
-                        isQuizActive = true;
-                        titleEl.innerText = "Premium (1000)";
-                        timeBoxEl.style.display = "none";
+                        badge.style.display = 'none';
                     }
                 });
 
-                document.getElementById('bell-trigger').onclick = async () => {                    showToast("Xabarnomalar yuklanmoqda...");                    await updateDoc(userRef, { unreadNotifications: 0 });                    setTimeout(() => location.href = 'messages.html', 800);                };                // Haqiqiy chiqish funksiyasi                document.getElementById('confirm-logout-btn').onclick = () => {                    toggleExitModal(false);                    showToast("Chiqish amalga oshirilmoqda... 👋");                    setTimeout(() => {                        signOut(auth).then(() => location.replace("index.html"));                    }, 1500);                };            } else {                 location.replace("index.html");             }        });        window.updateName = async () => {            const name = document.getElementById('input-name').value;            if(!name) return showToast("Ismni kiriting! ✍️");            await updateDoc(doc(db, "users", auth.currentUser.uid), { fio: name });            showToast("Muvaffaqiyatli saqlandi! ✅");            toggleModal(false);        };        window.startQuiz = async (type) => {            if(type === 'premium') {                if(userBalance < 1000) {                    showToast("Mablag' yetarli emas! 💳");                    setTimeout(() => location.href = 'billing.html', 1500);                } else {                    
-                    // Vaqt nazoratiga qarab kirishni cheklash yoki ruxsat berish
-                    const timeBoxEl = document.getElementById('premium-time-box');
-                    if (timeBoxEl.style.display !== "none" && !isQuizActive) {
-                        showToast("Ushbu test hali boshlanmadi! Iltimos, kirish vaqtini kuting. ⏳");
-                    } else {
-                        showToast("Premium test boshlanmoqda... 💎");
-                        setTimeout(() => location.href = 'premium-quiz.html', 1000);
-                    }
-                }            } else {                 showToast("Bepul test yuklanmoqda... 🎁");                setTimeout(() => location.href = 'quiz.html', 800);             }        };        window.navigate = (url, msg) => { showToast(msg); setTimeout(() => location.href = url, 800); };        window.contactSupport = () => { showToast("Telegramga o'tilmoqda..."); setTimeout(() => window.open("https://t.me/dr_rahmonov_admin", "_blank"), 500); };    </script></body></html>
+                document.getElementById('bell-trigger').onclick = async () => {
+                    showToast("Xabarnomalar yuklanmoqda...");
+                    await updateDoc(userRef, { unreadNotifications: 0 });
+                    setTimeout(() => location.href = 'messages.html', 800);
+                };
+
+                // Haqiqiy chiqish funksiyasi
+                document.getElementById('confirm-logout-btn').onclick = () => {
+                    toggleExitModal(false);
+                    showToast("Chiqish amalga oshirilmoqda... 👋");
+                    setTimeout(() => {
+                        signOut(auth).then(() => location.replace("index.html"));
+                    }, 1500);
+                };
+
+            } else { 
+                location.replace("index.html"); 
+            }
+        });
+
+        window.updateName = async () => {
+            const name = document.getElementById('input-name').value;
+            if(!name) return showToast("Ismni kiriting! ✍️");
+            await updateDoc(doc(db, "users", auth.currentUser.uid), { fio: name });
+            showToast("Muvaffaqiyatli saqlandi! ✅");
+            toggleModal(false);
+        };
+
+        window.startQuiz = async (type) => {
+            if(type === 'premium') {
+                if(userBalance < 1000) {
+                    showToast("Mablag' yetarli emas! 💳");
+                    setTimeout(() => location.href = 'billing.html', 1500);
+                } else {
+                    showToast("Premium test boshlanmoqda... 💎");
+                    setTimeout(() => location.href = 'premium-quiz.html', 1000);
+                }
+            } else { 
+                showToast("Bepul test yuklanmoqda... 🎁");
+                setTimeout(() => location.href = 'quiz.html', 800); 
+            }
+        };
+
+        window.navigate = (url, msg) => { showToast(msg); setTimeout(() => location.href = url, 800); };
+        window.contactSupport = () => { showToast("Telegramga o'tilmoqda..."); setTimeout(() => window.open("https://t.me/dr_rahmonov_admin", "_blank"), 500); };
+    </script>
+</body>
+  </html>
