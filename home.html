@@ -249,16 +249,15 @@
                 onSnapshot(adminSettingsRef, (adminSnap) => {
                     if (timerInterval) clearInterval(timerInterval);
 
-                    // Agar vaqtli rejim yoqilmagan bo'lsa (yoki ACTIVE holatda bo'lmasa) -> Standart doimiy rejim
                     if (!adminSnap.exists() || adminSnap.data().status !== "ACTIVE") {
                         resetPremiumButton();
                         return;
                     }
 
                     const settings = adminSnap.data();
-                    const startTime = settings.startTime;       // Imtihon e'lon qilingan/boshlanadigan vaqt (Timestamp ms)
-                    const entryEndTime = settings.entryEndTime; // Kirish tugaydigan vaqt (Timestamp ms)
-                    const quizEndTime = settings.quizEndTime;   // Test to'liq yakunlanadigan vaqt (Timestamp ms)
+                    const startTime = settings.startTime;       
+                    const entryEndTime = settings.entryEndTime; 
+                    const quizEndTime = settings.quizEndTime;   
 
                     if (!startTime || !entryEndTime || !quizEndTime) {
                         resetPremiumButton();
@@ -268,32 +267,38 @@
                     const updateCountdown = () => {
                         const now = Date.now();
 
-                        // 1. Imtihon hali boshlanmadi (Boshlanish vaqti ko'rsatiladi)
+                        // 1. Imtihon hali boshlanmadi (Boshlanish vaqti ko'rsatiladi + Sekund qo'shildi)
                         if (now < startTime) {
                             currentQuizState = "upcoming";
-                            const dateObj = new Date(startTime);
-                            const hours = dateObj.getHours().toString().padStart(2, '0');
-                            const minutes = dateObj.getMinutes().toString().padStart(2, '0');
+                            const diff = startTime - now;
+                            const hr = Math.floor(diff / 3600000);
+                            const min = Math.floor((diff % 3600000) / 60000);
+                            const sec = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
+                            
                             document.getElementById('premium-btn-text').innerText = "Premium Imtihon";
-                            document.getElementById('premium-timer-sub').innerText = `Boshlanish vaqti: ${hours}:${minutes}`;
+                            document.getElementById('premium-timer-sub').innerText = `Boshlanishiga: ${hr}:${min}:${sec}`;
                         } 
-                        // 2. Kirish vaqti ochiq (Foydalanuvchi testga kira oladigan oltin palla)
+                        // 2. Kirish vaqti ochiq (premium-main.html sahifasiga yo'naltiruvchi oltin palla)
                         else if (now >= startTime && now < entryEndTime) {
                             currentQuizState = "entry";
                             const diff = entryEndTime - now;
-                            const min = Math.floor(diff / 60000);
+                            const hr = Math.floor(diff / 3600000);
+                            const min = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
                             const sec = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
+                            
                             document.getElementById('premium-btn-text').innerText = "KIRISH OCHIQ 💎";
-                            document.getElementById('premium-timer-sub').innerText = `Kirish tugashiga: ${min}:${sec}`;
+                            document.getElementById('premium-timer-sub').innerText = `Kirish tugashiga: ${hr > 0 ? hr + ':' : ''}${min}:${sec}`;
                         } 
-                        // 3. Kirish yopildi, lekin ichkaridagilar testni ishlayapti (Davomiylik holati)
+                        // 3. Kirish yopildi, lekin test jarayoni ketmoqda (Davomiylik holati)
                         else if (now >= entryEndTime && now < quizEndTime) {
                             currentQuizState = "active_running";
                             const diff = quizEndTime - now;
-                            const min = Math.floor(diff / 60000);
+                            const hr = Math.floor(diff / 3600000);
+                            const min = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
                             const sec = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
+                            
                             document.getElementById('premium-btn-text').innerText = "TEST JARAYONI ⏳";
-                            document.getElementById('premium-timer-sub').innerText = `Tugashiga: ${min}:${sec}`;
+                            document.getElementById('premium-timer-sub').innerText = `Tugashiga: ${hr > 0 ? hr + ':' : ''}${min}:${sec}`;
                         } 
                         // 4. Vaqt to'liq tugagach, avtomatik asil holiga qaytadi
                         else {
@@ -325,42 +330,38 @@
             }
         });
 
-        // Tugmani dastlabki holatiga qaytaruvchi funksiya
         function resetPremiumButton() {
             currentQuizState = "standard";
             document.getElementById('premium-btn-text').innerText = "Premium (1000)";
             document.getElementById('premium-timer-sub').innerText = "";
         }
 
-        // --- PREMIUM TUGMA BOSILGANDA ISHLOVCHI KOD ---
+        // --- PREMIUM TUGMA BOSILGANDA TO'G'RI HTML GA YO'NALTIRISH ---
         window.handlePremiumClick = () => {
-            // Imtihon vaqti kelmagan bo'lsa
             if (currentQuizState === "upcoming") {
                 showToast("⚠️ Ushbu imtihon hali boshlanmadi!");
                 return;
             }
-            // Kirish tugagan bo'lsa (faqat test jarayoni ketayotgan bo'lsa)
             if (currentQuizState === "active_running") {
                 showToast("❌ Kirish vaqti tugagan, hozir test o'tkazilyapti!");
                 return;
             }
 
-            // Balans tekshiruvi
             if (userBalance < 1000) {
                 showToast("Mablag' yetarli emas! 💳");
                 setTimeout(() => location.href = 'billing.html', 1500);
                 return;
             }
 
-            // --- REJIMGA QARAB HAR XIL HTMLGA YO'NALTIRISH ---
+            // Shartlarga muvofiq manzillar almashtirildi:
             if (currentQuizState === "entry") {
-                // Vaqt qo'yilganda kiradigan maxsus imtihon sahifasi
+                // Vaqt qo'yilgan maxsus imtihon sahifasiga yo'llanma
                 showToast("Premium imtihon boshlanmoqda... 💎");
-                setTimeout(() => location.href = 'premium-quiz.html', 1000);
-            } else {
-                // Vaqt belgilanmagan oddiy doimiy premium sahifasi
-                showToast("Premium test yuklanmoqda... 💎");
                 setTimeout(() => location.href = 'premium-main.html', 1000);
+            } else {
+                // Vaqt belgilanmagan oddiy doimiy premium sahifasiga yo'llanma
+                showToast("Premium test yuklanmoqda... 💎");
+                setTimeout(() => location.href = 'premium-quiz.html', 1000);
             }
         };
 
@@ -372,7 +373,6 @@
             toggleModal(false);
         };
 
-        // --- BEPUL TEST (O'Z HOLICHA QOLDIRILDI) ---
         window.startQuiz = async (type) => {
             if(type === 'free') {
                 showToast("Bepul test yuklanmoqda... 🎁");
