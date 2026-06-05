@@ -293,7 +293,7 @@
                             const sec = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0'); // Sekund ham qo'shildi dinamika uchun
                             
                             document.getElementById('premium-btn-text').innerText = "KIRISH OCHIQ 💎";
-                            document.getElementById('premium-timer-sub').innerText = `Kirish tugashiga: ${hr}:${min}:${sec}`;
+                            document.getElementById('premium-timer-sub').innerText = `Kirish tugashiga: ${min}:${sec}`;
                         } 
                         // 3. Imtihon ketmoqda (Yangi talaba kiritilmaydi)
                         else if (now >= entryEndTime && now < quizEndTime) {
@@ -338,13 +338,13 @@
 
         function resetPremiumButton() {
             currentQuizState = "standard";
-            document.getElementById('premium-btn-text').innerText = "Premium (2000)";
+            document.getElementById('premium-btn-text').innerText = "Premium";
             document.getElementById('premium-timer-sub').innerText = "";
         }
 
         window.handlePremiumClick = async () => {
             if (currentQuizState === "upcoming") {
-                showToast("⚠️ Tizim: Imtihon hali boshlanmadi!");
+                showToast("⏳️ Imtihon hali boshlanmadi kutib turing!");
                 return;
             }
             if (currentQuizState === "active_running") {
