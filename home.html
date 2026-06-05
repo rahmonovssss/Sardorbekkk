@@ -202,7 +202,7 @@
         const db = getFirestore(app);
 
         let userBalance = 0;
-        let currentQuizState = "standard"; // standard, upcoming, entry, active_running
+        let currentQuizState = "standard"; 
         let timerInterval = null;
 
         function generateID() {
@@ -244,8 +244,12 @@
                     }
                 });
 
-                // --- REAL-TIME REJIMDA ADMIN VAQT SETTINGSLARINI TEKSHIRISH ---
-                const adminSettingsRef = doc(db, "premium_admin", "settings");
+                /* 
+                  === O'ZGARTIRILGAN QISM ===
+                  Siz o'rnatgan "global_time_settings" hujjatidan vaqtni jonli ravishda o'qiymiz.
+                  Endi savol bormi-yo'qmi, vaqt qo'yilgan zahoti Premium tugma hisoblashni boshlaydi!
+                */
+                const adminSettingsRef = doc(db, "premium_admin", "global_time_settings");
                 onSnapshot(adminSettingsRef, (adminSnap) => {
                     if (timerInterval) clearInterval(timerInterval);
 
@@ -267,7 +271,7 @@
                     const updateCountdown = () => {
                         const now = Date.now();
 
-                        // 1. Imtihon hali boshlanmadi (Boshlanish vaqti ko'rsatiladi + Sekund qo'shildi)
+                        // 1. Imtihon boshlanishini kutish holati
                         if (now < startTime) {
                             currentQuizState = "upcoming";
                             const diff = startTime - now;
@@ -278,7 +282,7 @@
                             document.getElementById('premium-btn-text').innerText = "Premium Imtihon";
                             document.getElementById('premium-timer-sub').innerText = `Boshlanishiga: ${hr}:${min}:${sec}`;
                         } 
-                        // 2. Kirish vaqti ochiq (premium-main.html sahifasiga yo'naltiruvchi oltin palla)
+                        // 2. Imtihon eshiklari ochiq holati (Kirish ochiq)
                         else if (now >= startTime && now < entryEndTime) {
                             currentQuizState = "entry";
                             const diff = entryEndTime - now;
@@ -289,7 +293,7 @@
                             document.getElementById('premium-btn-text').innerText = "KIRISH OCHIQ 💎";
                             document.getElementById('premium-timer-sub').innerText = `Kirish tugashiga: ${hr > 0 ? hr + ':' : ''}${min}:${sec}`;
                         } 
-                        // 3. Kirish yopildi, lekin test jarayoni ketmoqda (Davomiylik holati)
+                        // 3. Imtihon ketmoqda (Yangi odam kiritilmaydi)
                         else if (now >= entryEndTime && now < quizEndTime) {
                             currentQuizState = "active_running";
                             const diff = quizEndTime - now;
@@ -300,7 +304,7 @@
                             document.getElementById('premium-btn-text').innerText = "TEST JARAYONI ⏳";
                             document.getElementById('premium-timer-sub').innerText = `Tugashiga: ${hr > 0 ? hr + ':' : ''}${min}:${sec}`;
                         } 
-                        // 4. Vaqt to'liq tugagach, avtomatik asil holiga qaytadi
+                        // 4. Belgilangan vaqt tugadi
                         else {
                             resetPremiumButton();
                             clearInterval(timerInterval);
@@ -336,7 +340,6 @@
             document.getElementById('premium-timer-sub').innerText = "";
         }
 
-        // --- PREMIUM TUGMA BOSILGANDA TO'G'RI HTML GA YO'NALTIRISH ---
         window.handlePremiumClick = () => {
             if (currentQuizState === "upcoming") {
                 showToast("⚠️ Ushbu imtihon hali boshlanmadi!");
@@ -353,13 +356,10 @@
                 return;
             }
 
-            // Shartlarga muvofiq manzillar almashtirildi:
             if (currentQuizState === "entry") {
-                // Vaqt qo'yilgan maxsus imtihon sahifasiga yo'llanma
                 showToast("Premium imtihon boshlanmoqda... 💎");
                 setTimeout(() => location.href = 'premium-main.html', 1000);
             } else {
-                // Vaqt belgilanmagan oddiy doimiy premium sahifasiga yo'llanma
                 showToast("Premium test yuklanmoqda... 💎");
                 setTimeout(() => location.href = 'premium-quiz.html', 1000);
             }
