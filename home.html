@@ -217,7 +217,8 @@
                 const userRef = doc(db, "users", user.uid);
                 
                 onSnapshot(userRef, async (snap) => {
-                    let data = snap.exists() ? snap.data() : {};
+                    if (!snap.exists()) return;
+                    let data = snap.data();
                     
                     if (!data.studentID) {
                         data.studentID = generateID();
@@ -244,10 +245,13 @@
                     }
                 });
 
-                // === GLOBAL VAQT SOZLAMALARI JONLI TEKSHIRUVI (FAQAT SOAT VA DAQIQA) ===
+                // === GLOBAL VAQT SOZLAMALARI JONLI TEKSHIRUVI ===
                 const adminSettingsRef = doc(db, "premium_admin", "global_time_settings");
                 onSnapshot(adminSettingsRef, (adminSnap) => {
-                    if (timerInterval) clearInterval(timerInterval);
+                    if (timerInterval) {
+                        clearInterval(timerInterval);
+                        timerInterval = null;
+                    }
 
                     if (!adminSnap.exists() || adminSnap.data().status !== "ACTIVE") {
                         resetPremiumButton();
@@ -255,16 +259,17 @@
                     }
 
                     const settings = adminSnap.data();
-                    const startTime = settings.startTime;       
-                    const entryEndTime = settings.entryEndTime; 
-                    const quizEndTime = settings.quizEndTime;   
+                    
+                    // Vaqtlarni xavfsiz Number (Timestamp) formatiga o'tkazish
+                    const startTime = Number(settings.startTime);       
+                    const entryEndTime = Number(settings.entryEndTime); 
+                    const quizEndTime = Number(settings.quizEndTime);   
 
                     if (!startTime || !entryEndTime || !quizEndTime) {
                         resetPremiumButton();
                         return;
                     }
 
-                    // Admin belgilagan boshlanish vaqtidan soat va daqiqani ajratib olish (Sekundsiz)
                     const startClock = new Date(startTime);
                     const startHours = startClock.getHours().toString().padStart(2, '0');
                     const startMinutes = startClock.getMinutes().toString().padStart(2, '0');
@@ -273,21 +278,22 @@
                     const updateCountdown = () => {
                         const now = Date.now();
 
-                        // 1. Imtihon boshlanishini kutish holati (Sekundlar olib tashlandi, masalan: 09:30)
+                        // 1. Imtihon boshlanishini kutish holati
                         if (now < startTime) {
                             currentQuizState = "upcoming";
                             document.getElementById('premium-btn-text').innerText = "Premium Imtihon";
                             document.getElementById('premium-timer-sub').innerText = `Boshlanish vaqti: ${exactStartTimeString}`;
                         } 
-                        // 2. Imtihon eshiklari ochiq holati (Kirish ochiq qolgan vaqti — sekundsiz ko'rsatiladi)
+                        // 2. Imtihon eshiklari ochiq holati (Kirish ochiq)
                         else if (now >= startTime && now < entryEndTime) {
                             currentQuizState = "entry";
                             const diff = entryEndTime - now;
                             const hr = Math.floor(diff / 3600000).toString().padStart(2, '0');
                             const min = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
+                            const sec = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0'); // Sekund ham qo'shildi dinamika uchun
                             
                             document.getElementById('premium-btn-text').innerText = "KIRISH OCHIQ 💎";
-                            document.getElementById('premium-timer-sub').innerText = `Kirish tugashiga: ${hr}:${min}`;
+                            document.getElementById('premium-timer-sub').innerText = `Kirish tugashiga: ${hr}:${min}:${sec}`;
                         } 
                         // 3. Imtihon ketmoqda (Yangi talaba kiritilmaydi)
                         else if (now >= entryEndTime && now < quizEndTime) {
@@ -295,14 +301,15 @@
                             const diff = quizEndTime - now;
                             const hr = Math.floor(diff / 3600000).toString().padStart(2, '0');
                             const min = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
+                            const sec = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
                             
                             document.getElementById('premium-btn-text').innerText = "TEST JARAYONI ⏳";
-                            document.getElementById('premium-timer-sub').innerText = `Tugashiga: ${hr}:${min}`;
+                            document.getElementById('premium-timer-sub').innerText = `Tugashiga: ${hr}:${min}:${sec}`;
                         } 
                         // 4. Belgilangan umumiy vaqt tugadi
                         else {
                             resetPremiumButton();
-                            clearInterval(timerInterval);
+                            if (timerInterval) clearInterval(timerInterval);
                         }
                     };
 
