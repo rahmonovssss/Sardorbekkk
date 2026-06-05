@@ -244,11 +244,7 @@
                     }
                 });
 
-                /* 
-                  === O'ZGARTIRILGAN QISM ===
-                  Siz o'rnatgan "global_time_settings" hujjatidan vaqtni jonli ravishda o'qiymiz.
-                  Endi savol bormi-yo'qmi, vaqt qo'yilgan zahoti Premium tugma hisoblashni boshlaydi!
-                */
+                // === GLOBAL VAQT SOZLAMALARINI JONLI TEKSHIRISH (SEKUND FORMATI TUZATILDI) ===
                 const adminSettingsRef = doc(db, "premium_admin", "global_time_settings");
                 onSnapshot(adminSettingsRef, (adminSnap) => {
                     if (timerInterval) clearInterval(timerInterval);
@@ -271,12 +267,12 @@
                     const updateCountdown = () => {
                         const now = Date.now();
 
-                        // 1. Imtihon boshlanishini kutish holati
+                        // 1. Imtihon boshlanishini kutish holati (00:00:00 formatida sekundli taymer)
                         if (now < startTime) {
                             currentQuizState = "upcoming";
                             const diff = startTime - now;
-                            const hr = Math.floor(diff / 3600000);
-                            const min = Math.floor((diff % 3600000) / 60000);
+                            const hr = Math.floor(diff / 3600000).toString().padStart(2, '0');
+                            const min = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
                             const sec = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
                             
                             document.getElementById('premium-btn-text').innerText = "Premium Imtihon";
@@ -286,23 +282,23 @@
                         else if (now >= startTime && now < entryEndTime) {
                             currentQuizState = "entry";
                             const diff = entryEndTime - now;
-                            const hr = Math.floor(diff / 3600000);
+                            const hr = Math.floor(diff / 3600000).toString().padStart(2, '0');
                             const min = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
                             const sec = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
                             
                             document.getElementById('premium-btn-text').innerText = "KIRISH OCHIQ 💎";
-                            document.getElementById('premium-timer-sub').innerText = `Kirish tugashiga: ${hr > 0 ? hr + ':' : ''}${min}:${sec}`;
+                            document.getElementById('premium-timer-sub').innerText = `Kirish tugashiga: ${hr}:${min}:${sec}`;
                         } 
                         // 3. Imtihon ketmoqda (Yangi odam kiritilmaydi)
                         else if (now >= entryEndTime && now < quizEndTime) {
                             currentQuizState = "active_running";
                             const diff = quizEndTime - now;
-                            const hr = Math.floor(diff / 3600000);
+                            const hr = Math.floor(diff / 3600000).toString().padStart(2, '0');
                             const min = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
                             const sec = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
                             
                             document.getElementById('premium-btn-text').innerText = "TEST JARAYONI ⏳";
-                            document.getElementById('premium-timer-sub').innerText = `Tugashiga: ${hr > 0 ? hr + ':' : ''}${min}:${sec}`;
+                            document.getElementById('premium-timer-sub').innerText = `Tugashiga: ${hr}:${min}:${sec}`;
                         } 
                         // 4. Belgilangan vaqt tugadi
                         else {
@@ -342,11 +338,11 @@
 
         window.handlePremiumClick = () => {
             if (currentQuizState === "upcoming") {
-                showToast("⚠️ Ushbu imtihon hali boshlanmadi!");
+                showToast("⚠️ Tizim: Imtihon hali boshlanmadi!");
                 return;
             }
             if (currentQuizState === "active_running") {
-                showToast("❌ Kirish vaqti tugagan, hozir test o'tkazilyapti!");
+                showToast("❌ Kechikdingiz! Kirish vaqti tugagan.");
                 return;
             }
 
