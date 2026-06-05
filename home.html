@@ -117,7 +117,7 @@
             <div class="menu-item" onclick="startQuiz('free')"><i>🎁</i><span>Bepul Test</span></div>
             <div class="menu-item premium-box" onclick="handlePremiumClick()">
                 <i>💎</i>
-                <span id="premium-btn-text">Premium (1000)</span>
+                <span id="premium-btn-text">Premium (2000)</span>
                 <span id="premium-timer-sub" class="premium-time-info"></span>
             </div>
             <div class="menu-item" onclick="navigate('statistics.html', 'Statistika...')"><i>📊</i><span>Statistika</span></div>
@@ -338,11 +338,11 @@
 
         function resetPremiumButton() {
             currentQuizState = "standard";
-            document.getElementById('premium-btn-text').innerText = "Premium (1000)";
+            document.getElementById('premium-btn-text').innerText = "Premium (2000)";
             document.getElementById('premium-timer-sub').innerText = "";
         }
 
-        window.handlePremiumClick = () => {
+        window.handlePremiumClick = async () => {
             if (currentQuizState === "upcoming") {
                 showToast("⚠️ Tizim: Imtihon hali boshlanmadi!");
                 return;
@@ -352,18 +352,30 @@
                 return;
             }
 
-            if (userBalance < 1000) {
+            // Narxni holatga qarab aniqlash (entry bo'lsa 5000, aks holda ya'ni standard bo'lsa 2000)
+            const cost = (currentQuizState === "entry") ? 5000 : 2000;
+
+            if (userBalance < cost) {
                 showToast("Mablag' yetarli emas! 💳");
                 setTimeout(() => location.href = 'billing.html', 1500);
                 return;
             }
 
-            if (currentQuizState === "entry") {
-                showToast("Premium imtihon boshlanmoqda... 💎");
-                setTimeout(() => location.href = 'premium-main.html', 1000);
-            } else {
-                showToast("Premium test yuklanmoqda... 💎");
-                setTimeout(() => location.href = 'premium-quiz.html', 1000);
+            try {
+                // Balansdan tegishli mablag'ni chegirish mantig'i
+                const userRef = doc(db, "users", auth.currentUser.uid);
+                await updateDoc(userRef, { balance: userBalance - cost });
+
+                if (currentQuizState === "entry") {
+                    showToast("Premium imtihon boshlanmoqda... 💎");
+                    setTimeout(() => location.href = 'premium-main.html', 1000);
+                } else {
+                    showToast("Premium test yuklanmoqda... 💎");
+                    setTimeout(() => location.href = 'premium-quiz.html', 1000);
+                }
+            } catch (error) {
+                showToast("⚠️ Xatolik yuz berdi. Qayta urinib ko'ring.");
+                console.error("Payment error:", error);
             }
         };
 
