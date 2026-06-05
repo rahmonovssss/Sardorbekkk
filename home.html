@@ -244,7 +244,7 @@
                     }
                 });
 
-                // === GLOBAL VAQT SOZLAMALARI JONLI TEKSHIRUVI (ANIQ SOAT FORMATI) ===
+                // === GLOBAL VAQT SOZLAMALARI JONLI TEKSHIRUVI (FAQAT SOAT VA DAQIQA) ===
                 const adminSettingsRef = doc(db, "premium_admin", "global_time_settings");
                 onSnapshot(adminSettingsRef, (adminSnap) => {
                     if (timerInterval) clearInterval(timerInterval);
@@ -264,45 +264,42 @@
                         return;
                     }
 
-                    // Admin tomonidan sozlangan boshlanish vaqtini o'qib, aniq soat ko'rinishiga keltiramiz
+                    // Admin belgilagan boshlanish vaqtidan soat va daqiqani ajratib olish (Sekundsiz)
                     const startClock = new Date(startTime);
                     const startHours = startClock.getHours().toString().padStart(2, '0');
                     const startMinutes = startClock.getMinutes().toString().padStart(2, '0');
-                    const startSeconds = startClock.getSeconds().toString().padStart(2, '0');
-                    const exactStartTimeString = `${startHours}:${startMinutes}:${startSeconds}`;
+                    const exactStartTimeString = `${startHours}:${startMinutes}`;
 
                     const updateCountdown = () => {
                         const now = Date.now();
 
-                        // 1. Imtihon boshlanishini kutish holati (Siz aytganingizdek aniq soat: 09:30:00 bo'lib turadi)
+                        // 1. Imtihon boshlanishini kutish holati (Sekundlar olib tashlandi, masalan: 09:30)
                         if (now < startTime) {
                             currentQuizState = "upcoming";
                             document.getElementById('premium-btn-text').innerText = "Premium Imtihon";
                             document.getElementById('premium-timer-sub').innerText = `Boshlanish vaqti: ${exactStartTimeString}`;
                         } 
-                        // 2. Imtihon eshiklari ochiq holati (Kirish ochiq taymeri)
+                        // 2. Imtihon eshiklari ochiq holati (Kirish ochiq qolgan vaqti — sekundsiz ko'rsatiladi)
                         else if (now >= startTime && now < entryEndTime) {
                             currentQuizState = "entry";
                             const diff = entryEndTime - now;
                             const hr = Math.floor(diff / 3600000).toString().padStart(2, '0');
                             const min = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
-                            const sec = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
                             
                             document.getElementById('premium-btn-text').innerText = "KIRISH OCHIQ 💎";
-                            document.getElementById('premium-timer-sub').innerText = `Kirish tugashiga: ${hr}:${min}:${sec}`;
+                            document.getElementById('premium-timer-sub').innerText = `Kirish tugashiga: ${hr}:${min}`;
                         } 
-                        // 3. Imtihon ketmoqda (Yangi odam kiritilmaydi)
+                        // 3. Imtihon ketmoqda (Yangi talaba kiritilmaydi)
                         else if (now >= entryEndTime && now < quizEndTime) {
                             currentQuizState = "active_running";
                             const diff = quizEndTime - now;
                             const hr = Math.floor(diff / 3600000).toString().padStart(2, '0');
                             const min = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
-                            const sec = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
                             
                             document.getElementById('premium-btn-text').innerText = "TEST JARAYONI ⏳";
-                            document.getElementById('premium-timer-sub').innerText = `Tugashiga: ${hr}:${min}:${sec}`;
+                            document.getElementById('premium-timer-sub').innerText = `Tugashiga: ${hr}:${min}`;
                         } 
-                        // 4. Belgilangan vaqt tugadi
+                        // 4. Belgilangan umumiy vaqt tugadi
                         else {
                             resetPremiumButton();
                             clearInterval(timerInterval);
