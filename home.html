@@ -204,6 +204,7 @@
         let userBalance = 0;
         let currentQuizState = "standard"; 
         let timerInterval = null;
+        let isProcessing = false; // 🚨 INTERNET SEKIN BO'LGANDA BIR NECHA BOR BOSILISHNI OLDINI OLISH UCHUN BLOKOVKA
 
         function generateID() {
             const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -343,6 +344,9 @@
         }
 
         window.handlePremiumClick = async () => {
+            // 🚨 Agar jarayon bajarilayotgan bo'lsa, keyingi bosishlarni bloklaymiz
+            if (isProcessing) return;
+
             if (currentQuizState === "upcoming") {
                 showToast("⏳️ Imtihon hali boshlanmadi kutib turing!");
                 return;
@@ -362,18 +366,29 @@
             }
 
             try {
+                // 🚨 Jarayon boshlanganligini belgilaymiz va tugmani muzlatamiz
+                isProcessing = true;
+
                 // Balansdan tegishli mablag'ni chegirish mantig'i
                 const userRef = doc(db, "users", auth.currentUser.uid);
                 await updateDoc(userRef, { balance: userBalance - cost });
 
                 if (currentQuizState === "entry") {
                     showToast("Premium imtihon boshlanmoqda... 💎");
-                    setTimeout(() => location.href = 'premium-main.html', 1000);
+                    setTimeout(() => {
+                        isProcessing = false; // Sahifa o'zgarishidan oldin tozalash
+                        location.href = 'premium-main.html';
+                    }, 1000);
                 } else {
                     showToast("Premium test yuklanmoqda... 💎");
-                    setTimeout(() => location.href = 'premium-quiz.html', 1000);
+                    setTimeout(() => {
+                        isProcessing = false; // Sahifa o'zgarishidan oldin tozalash
+                        location.href = 'premium-quiz.html';
+                    }, 1000);
                 }
             } catch (error) {
+                // Xatolik yuz bersa blokirovkani ochamiz, foydalanuvchi qayta urina olishi uchun
+                isProcessing = false;
                 showToast("⚠️ Xatolik yuz berdi. Qayta urinib ko'ring.");
                 console.error("Payment error:", error);
             }
@@ -382,7 +397,7 @@
         window.updateName = async () => {
             const name = document.getElementById('input-name').value;
             if(!name) return showToast("Ismni kiriting! ✍️");
-            await updateDoc(doc(db, "users", auth.currentUser.uid), { fio: name });
+            await updateDoc(doc(doc(db, "users", auth.currentUser.uid), { fio: name }));
             showToast("Muvaffaqiyatli saqlandi! ✅");
             toggleModal(false);
         };
