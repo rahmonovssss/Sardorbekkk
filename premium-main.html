@@ -205,7 +205,37 @@
                     const q = query(collection(db, "premium_admin"), where("subject", "==", item.subject), where("type", "==", item.type), limit(item.count));
                     const snap = await getDocs(q);
                     let questions = [];
-                    snap.forEach(doc => questions.push({...doc.data(), id: doc.id, ball: item.ball}));
+                    snap.forEach(doc => {
+                        let data = doc.data();
+                        
+                        // JAVOBLARNI (VARIANTLARNI) ARALASHTIRISH MANTIQI
+                        if (data.options) {
+                            // To'g'ri javob matnini aniqlab olamiz
+                            const correctText = data.options[data.correctAnswer];
+                            
+                            // Mavjud variantlar kalitlarini massivga olamiz (masalan: ['A', 'B', 'C', 'D'])
+                            let keys = Object.keys(data.options);
+                            // Variantlar matnlarini massivga olib aralashtiramiz
+                            let values = keys.map(k => data.options[k]);
+                            values = shuffleArray(values);
+                            
+                            // Yangi aralashgan variantlar obyektini quramiz va yangi to'g'ri kalitni aniqlaymiz
+                            let newOptions = {};
+                            let newCorrectAnswer = data.correctAnswer;
+                            
+                            keys.forEach((key, index) => {
+                                newOptions[key] = values[index];
+                                if (values[index] === correctText) {
+                                    newCorrectAnswer = key; // Matni to'g'ri kelgan yangi harfni to'g'ri javob qilamiz
+                                }
+                            });
+                            
+                            data.options = newOptions;
+                            data.correctAnswer = newCorrectAnswer;
+                        }
+
+                        questions.push({...data, id: doc.id, ball: item.ball});
+                    });
                     
                     // FAN ICHIDAGI SAVOLLARNI TASODIFIY ARALASHTIRISH 
                     allExamData[item.name] = shuffleArray(questions);
