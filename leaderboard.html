@@ -42,7 +42,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, query, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2G8cD0JezEKXRCtKLYiZL0bzDyTp06Vs",
@@ -56,65 +56,65 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        let globalCachedUsers = {};
-
-        async function loadUsers() {
-            try {
-                const usersSnap = await getDocs(collection(db, "users"));
-                usersSnap.forEach(uDoc => {
-                    globalCachedUsers[uDoc.id] = uDoc.data().studentID || "---";
+        onSnapshot(collection(db, "premium_results"), (resSnapshot) => {
+            onSnapshot(collection(db, "users"), (userSnapshot) => {
+                
+                let usersMap = {};
+                userSnapshot.forEach(doc => {
+                    usersMap[doc.id] = doc.data();
                 });
-            } catch (err) { console.error(err); }
-        }
 
-        onSnapshot(collection(db, "premium_results"), async (snapshot) => {
-            await loadUsers();
-            
-            const uniqueResults = {};
-            snapshot.forEach((doc) => {
-                const res = doc.data();
-                if (!uniqueResults[res.studentID] || uniqueResults[res.studentID].totalScore < res.totalScore) {
-                    uniqueResults[res.studentID] = res;
-                }
-            });
+                const uniqueResults = {};
+                resSnapshot.forEach((doc) => {
+                    const res = doc.data();
+                    if (!uniqueResults[res.studentID] || uniqueResults[res.studentID].totalScore < res.totalScore) {
+                        uniqueResults[res.studentID] = res;
+                    }
+                });
 
-            const top20 = Object.values(uniqueResults)
-                .sort((a, b) => b.totalScore - a.totalScore)
-                .slice(0, 20);
+                const top20 = Object.values(uniqueResults)
+                    .sort((a, b) => b.totalScore - a.totalScore)
+                    .slice(0, 20);
 
-            const podium = document.getElementById('podium-container');
-            const list = document.getElementById('leader-board');
-            podium.innerHTML = "";
-            list.innerHTML = "";
+                const podium = document.getElementById('podium-container');
+                const list = document.getElementById('leader-board');
+                podium.innerHTML = "";
+                list.innerHTML = "";
 
-            top20.forEach((user, index) => {
-                const rank = index + 1;
-                const pointsFormatted = Number(user.totalScore || 0).toFixed(1);
-                const studentID = globalCachedUsers[user.studentID] || "---";
-                const nameParts = user.studentName.split(' ').map(part => `<span>${part}</span>`).join('');
+                top20.forEach((user, index) => {
+                    const rank = index + 1;
+                    const pointsFormatted = Number(user.totalScore || 0).toFixed(1);
+                    
+                    const userData = usersMap[user.studentID] || {};
+                    // 'fio' maydonini ishlatamiz
+                    const currentName = userData.fio || user.studentName;
+                    const currentID = userData.studentID || "---";
+                    
+                    const nameParts = currentName.split(' ').map(part => `<span>${part}</span>`).join('');
 
-                if (rank <= 3) {
-                    const crowns = ['👑', '🥈', '🥉'];
-                    const colors = ['#f59e0b', '#a1a1aa', '#b45309'];
-                    podium.innerHTML += `
-                        <div class="podium-user">
-                            <div class="crown">${crowns[rank-1]}</div>
-                            <div class="podium-avatar" style="background:${colors[rank-1]}">${rank}</div>
-                            <div class="podium-name">${nameParts}</div>
-                            <div class="podium-id">ID: ${studentID}</div>
-                            <div class="podium-pts">${pointsFormatted} ball</div>
-                        </div>`;
-                } else {
-                    list.innerHTML += `
-                        <div class="leader-row">
-                            <div class="rank">${rank}</div>
-                            <div class="user-info">
-                                <span class="name">${user.studentName}</span>
-                                <span class="id-badge">ID: ${studentID}</span>
-                            </div>
-                            <div class="pts">${pointsFormatted} ball</div>
-                        </div>`;
-                }
+                    if (rank <= 3) {
+                        const crowns = ['👑', '🥈', '🥉'];
+                        const colors = ['#f59e0b', '#a1a1aa', '#b45309'];
+                        podium.innerHTML += `
+                            <div class="podium-user">
+                                <div class="crown">${crowns[rank-1]}</div>
+                                <div class="podium-avatar" style="background:${colors[rank-1]}">${rank}</div>
+                                <div class="podium-name">${nameParts}</div>
+                                <div class="podium-id">ID: ${currentID}</div>
+                                <div class="podium-pts">${pointsFormatted} ball</div>
+                            </div>`;
+                    } else {
+                        list.innerHTML += `
+                            <div class="leader-row">
+                                <div class="rank">${rank}</div>
+                                <div class="user-info">
+                                    <span class="name">${currentName}</span>
+                                    <span class="id-badge">ID: ${currentID}</span>
+                                </div>
+                                <div class="pts">${pointsFormatted} ball</div>
+                            </div>`;
+                    }
+                });
             });
         });
     </script>
