@@ -7,6 +7,12 @@
     <style>
         body { background: #0f2027; color: white; font-family: sans-serif; margin: 0; padding: 0; }
         
+        /* Toast dizayni */
+        #toast { visibility: hidden; min-width: 250px; margin-left: -125px; background-color: #00d2ff; color: #000; text-align: center; border-radius: 10px; padding: 16px; position: fixed; z-index: 10; left: 50%; bottom: 30px; font-weight: bold; }
+        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
+        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+
         .header-top { padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.2); }
         .btn-exit { background: rgba(255,255,255,0.1); color: white; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-size: 14px; font-weight: bold; backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.2); }
         
@@ -31,6 +37,8 @@
 </head>
 <body>
 
+<div id="toast"></div>
+
 <div class="header-top">
     <button class="btn-exit" onclick="window.location.href='home.html'">⬅ Orqaga</button>
     <div class="top-info">
@@ -46,7 +54,7 @@
             <div class="card-num" id="cardNumber">9860 1901 0862 1023</div>
         </div>
         
-        <div id="copy-msg">Raqam nusxalandi. Endi skrinshotni yuklang.</div>
+        <div id="copy-msg">Raqam nusxalandi.Summani yozing va Endi skrinshotni yuklang.👇</div>
 
         <input type="number" id="amt" class="input-box" placeholder="Summani kiriting">
         <input type="file" id="file" accept="image/*" style="display:none;">
@@ -57,6 +65,13 @@
 </div>
 
 <script>
+    function showToast(text) {
+        const toast = document.getElementById("toast");
+        toast.innerText = text;
+        toast.className = "show";
+        setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+    }
+
     function copyCard() {
         const text = document.getElementById('cardNumber').innerText;
         navigator.clipboard.writeText(text.replace(/\s/g, ''));
@@ -106,7 +121,7 @@
     document.getElementById('sendBtn').onclick = async () => {
         const sum = document.getElementById('amt').value;
         const photo = document.getElementById('file').files[0];
-        if(!sum || !photo) return alert("Hamma joyni to'ldiring!");
+        if(!sum || !photo) return showToast("Iltimos, barcha maydonlarni to'ldiring!");
 
         const btn = document.getElementById('sendBtn');
         btn.disabled = true;
@@ -133,10 +148,10 @@
                 body: fd
             });
 
-            alert("To'lov yuborildi!");
-            window.location.href = "home.html";
+            showToast("To'lov yuborildi!🎉");
+            setTimeout(() => { window.location.href = "home.html"; }, 2000);
         } catch (err) {
-            alert("Xato: " + err.message);
+            showToast("Xatolik yuz berdi!");
             btn.disabled = false;
         }
     };
