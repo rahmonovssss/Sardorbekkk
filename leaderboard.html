@@ -21,11 +21,16 @@
 
         .leader-list { background: #1e293b; border-radius: 24px; padding: 10px; border: 1px solid rgba(255,255,255,0.05); }
         .leader-row { display: flex; align-items: center; padding: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .rank { width: 35px; font-weight: 700; font-size: 15px; color: #94a3b8; }
+        .rank { width: 35px; font-weight: 700; font-size: 15px; }
         .user-info { flex-grow: 1; }
         .user-info .name { font-size: 14px; font-weight: 600; color: #fff; display: block; }
         .user-info .id-badge { font-size: 11px; color: #64748b; }
         .pts { font-weight: 700; font-size: 14px; color: #38bdf8; }
+
+        /* Ranglar */
+        .rank-1-3 { color: #f1f5f9; }
+        .rank-4-10 { color: #34d399 !important; } /* Yashil */
+        .rank-11-20 { color: #fbbf24 !important; } /* Sariq */
     </style>
 </head>
 <body>
@@ -74,7 +79,7 @@
                 });
             });
 
-            // Ball bo'yicha katta-kichik tartiblash
+            // Ball bo'yicha saralash
             users.sort((a, b) => b.points - a.points);
             const top20 = users.slice(0, 20);
 
@@ -96,9 +101,11 @@
                             <span class="podium-pts">${pointsFormatted} ball</span>
                         </div>`;
                 } else {
+                    // 4-10 yashil, 11-20 sariq rangda
+                    const rankClass = rank <= 10 ? 'rank-4-10' : 'rank-11-20';
                     list.innerHTML += `
                         <div class="leader-row">
-                            <div class="rank">#${rank}</div>
+                            <div class="rank ${rankClass}">#${rank}</div>
                             <div class="user-info">
                                 <span class="name">${user.name}</span>
                                 <span class="id-badge">ID: ${user.id}</span>
