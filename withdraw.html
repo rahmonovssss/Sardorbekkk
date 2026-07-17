@@ -32,14 +32,12 @@
         .input-group label { display: block; font-size: 11px; text-transform: uppercase; opacity: 0.8; margin-bottom: 6px; font-weight: 700; color: #00d2ff; }
         .input-group input, .input-group select { width: 100%; padding: 15px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; color: white; font-weight: 600; outline: none; font-size: 16px; }
         
-        /* QIZIL RANG EFFEKTI */
         .input-error { border-color: #ff416c !important; color: #ff416c !important; }
 
         .btn-submit { width: 100%; padding: 16px; background: linear-gradient(135deg, #ff4b2b 0%, #ff416c 100%); border: none; border-radius: 16px; color: #fff; font-weight: 800; cursor: pointer; font-size: 15px; box-shadow: 0 5px 20px rgba(255,75,43,0.4); }
 
         .channel-card { background: linear-gradient(135deg, rgba(0,136,204,0.15) 0%, rgba(0,210,255,0.05) 100%); border: 1px solid rgba(0,136,204,0.3); padding: 20px; border-radius: 25px; text-align: center; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 10px; }
         
-        /* TOAST STYLE */
         #toast { visibility: hidden; min-width: 250px; background-color: #fff; color: #005c97; text-align: center; border-radius: 50px; padding: 16px; position: fixed; z-index: 3000; left: 50%; bottom: 30px; transform: translateX(-50%); font-weight: 700; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 40px; opacity: 1;} }
@@ -78,7 +76,7 @@
 
             <div class="input-group">
                 <label>Karta egasining ismi</label>
-                <input type="text" id="card-holder" placeholder="F.I.O">
+                <input type="text" id="card-holder" placeholder="F.I.O" oninput="validateName(this)">
             </div>
 
             <div class="input-group">
@@ -98,7 +96,7 @@
 
     <script>
         const cardInput = document.getElementById('card-number');
-        const amountInput = document.getElementById('withdraw-amount');
+        const cardSelect = document.getElementById('card-type');
         const toast = document.getElementById('toast');
 
         function showToast(txt) {
@@ -107,31 +105,36 @@
             setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
+        function validateName(el) {
+            el.value = el.value.replace(/[^A-Za-zА-Яа-яЁёЎўҚқҒғҲҳ \s]/g, '').replace(/\s+/g, ' ');
+            const parts = el.value.trim().split(' ');
+            if (parts.length > 3) el.value = parts.slice(0, 3).join(' ');
+        }
+
         function validateAmount(el) {
             el.value = el.value.replace(/[^0-9]/g, '');
-            if (el.value !== "" && parseInt(el.value) < 10000) {
-                el.classList.add('input-error');
-            } else {
-                el.classList.remove('input-error');
-            }
+            el.classList.toggle('input-error', el.value !== "" && parseInt(el.value) < 10000);
         }
 
         function handleCardTypeChange() {
-            cardInput.value = (document.getElementById('card-type').value === 'Uzcard') ? '8600 ' : '9860 ';
-            cardInput.focus();
+            cardInput.value = (cardSelect.value === 'Uzcard') ? '8600 ' : '9860 ';
         }
+
+        cardInput.addEventListener('keydown', (e) => {
+            const prefix = cardInput.value.substring(0, 5);
+            if (e.key === 'Backspace' && cardInput.selectionStart <= 5) e.preventDefault();
+        });
 
         cardInput.addEventListener('input', (e) => {
             let val = e.target.value.replace(/[^0-9]/g, '');
+            if (val.length > 16) val = val.substring(0, 16);
             let fmt = '';
             for (let i = 0; i < val.length; i++) {
                 if (i > 0 && i % 4 === 0) fmt += ' ';
                 fmt += val[i];
             }
-            e.target.value = fmt;
-            
-            if (val.length === 16) cardInput.classList.remove('input-error');
-            else cardInput.classList.add('input-error');
+            cardInput.value = fmt;
+            cardInput.classList.toggle('input-error', val.length !== 16);
         });
 
         window.addEventListener('DOMContentLoaded', () => { cardInput.value = '8600 '; });
@@ -155,19 +158,14 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        let currentBalance = 0;
-        let userFio = "";
-        let studentID = "";
-
         auth.onAuthStateChanged((user) => {
             if (!user) return window.location.replace("index.html");
             const userRef = doc(db, "users", user.uid);
+            let currentBalance = 0;
+
             onSnapshot(userRef, (snap) => {
                 if (snap.exists()) {
-                    const data = snap.data();
-                    currentBalance = Number(data.balance || 0);
-                    userFio = data.fio || "Foydalanuvchi";
-                    studentID = data.studentID || "Yo'q";
+                    currentBalance = Number(snap.data().balance || 0);
                     document.getElementById('current-balance').innerText = currentBalance.toLocaleString() + " so'm";
                 }
             });
@@ -178,7 +176,7 @@
                 const amt = parseInt(document.getElementById('withdraw-amount').value);
 
                 if (!cardNum || cardNum.length !== 16 || !holder || !amt || amt < 10000 || amt > currentBalance) {
-                    showToast("Barcha ma'lumotlarni to'liq va to'g'ri kiriting!");
+                    showToast("Barcha ma'lumotlarni to'liq kiritganingizga ishonch hosil qiling!");
                     return;
                 }
 
@@ -187,7 +185,7 @@
                     await updateDoc(userRef, { balance: currentBalance - amt });
                     await addDoc(collection(db, "withdraw_requests"), {
                         uid: user.uid,
-                        userFio,
+                        userFio: holder,
                         cardNumber: document.getElementById('card-number').value,
                         amount: amt,
                         status: "Kutilmoqda",
