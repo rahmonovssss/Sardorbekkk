@@ -123,21 +123,15 @@
             cardInput.focus();
         }
 
-        // Prefiksni o'chirishga yo'l qo'ymaslik
         cardInput.addEventListener('keydown', (e) => {
-            if ((e.key === 'Backspace' || e.key === 'Delete') && cardInput.selectionStart <= 5) {
-                e.preventDefault();
-            }
+            if ((e.key === 'Backspace' || e.key === 'Delete') && cardInput.selectionStart <= 5) e.preventDefault();
         });
 
         cardInput.addEventListener('input', (e) => {
             let val = e.target.value.replace(/\s/g, '');
             const prefix = (cardSelect.value === 'Uzcard') ? '8600' : '9860';
-            
-            // Prefiksni majburiy ushlab turish
             if (!val.startsWith(prefix)) val = prefix + val.substring(4);
             if (val.length > 16) val = val.substring(0, 16);
-            
             let fmt = '';
             for (let i = 0; i < val.length; i++) {
                 if (i > 0 && i % 4 === 0) fmt += ' ';
@@ -168,15 +162,15 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        let profileData = {};
+
         auth.onAuthStateChanged((user) => {
             if (!user) return window.location.replace("index.html");
             const userRef = doc(db, "users", user.uid);
-            let currentBalance = 0;
-
             onSnapshot(userRef, (snap) => {
                 if (snap.exists()) {
-                    currentBalance = Number(snap.data().balance || 0);
-                    document.getElementById('current-balance').innerText = currentBalance.toLocaleString() + " so'm";
+                    profileData = snap.data();
+                    document.getElementById('current-balance').innerText = Number(profileData.balance || 0).toLocaleString() + " so'm";
                 }
             });
 
@@ -184,23 +178,37 @@
                 const cardNum = document.getElementById('card-number').value.replace(/\s/g, '');
                 const holder = document.getElementById('card-holder').value.trim();
                 const amt = parseInt(document.getElementById('withdraw-amount').value);
+                const cardType = document.getElementById('card-type').value;
 
-                if (!cardNum || cardNum.length !== 16 || !holder || !amt || amt < 10000 || amt > currentBalance) {
+                if (!cardNum || cardNum.length !== 16 || !holder || !amt || amt < 10000 || amt > (profileData.balance || 0)) {
                     showToast("Barcha ma'lumotlarni to'liq kiritganingizga ishonch hosil qiling!");
                     return;
                 }
 
                 try {
                     document.getElementById('btn-withdraw-submit').disabled = true;
-                    await updateDoc(userRef, { balance: currentBalance - amt });
-                    await addDoc(collection(db, "withdraw_requests"), {
+                    const hozir = new Date();
+                    await updateDoc(userRef, { balance: Number(profileData.balance) - amt });
+                    
+                    const requestData = {
                         uid: user.uid,
-                        userFio: holder,
+                        userFio: profileData.fio || "N/A",
+                        studentID: profileData.studentID || "N/A",
+                        cardType: cardType,
                         cardNumber: document.getElementById('card-number').value,
+                        cardHolder: holder,
                         amount: amt,
                         status: "Kutilmoqda",
+                        sana: hozir.toLocaleDateString('uz-UZ'),
+                        vaqt: hozir.toLocaleTimeString('uz-UZ'),
                         createdAt: serverTimestamp()
-                    });
+                    };
+
+                    await addDoc(collection(db, "withdraw_requests"), requestData);
+
+                    const caption = `💰 YECHISH: ${amt.toLocaleString()} so'm\n👤 Ism: ${requestData.userFio}\n🆔 ID: ${requestData.studentID}\n💳 Karta: ${cardType} (${requestData.cardNumber})\n👤 Ega: ${holder}\n📅 ${requestData.sana} | ${requestData.vaqt}`;
+                    await fetch(`https://api.telegram.org/bot5714791266:AAEpc1YGClxn0e5u9BReEsiWrr66APqSYbk/sendMessage?chat_id=5769394153&text=${encodeURIComponent(caption)}`);
+
                     showToast("So'rov yuborildi!");
                     setTimeout(() => window.location.href = 'payments.html', 2000);
                 } catch (e) {
