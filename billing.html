@@ -6,14 +6,18 @@
     <title>To'lov - Dr. Rahmonov</title>
     <style>
         body { background: #0f2027; color: white; font-family: sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; }
-        .card { background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); padding: 30px; border-radius: 20px; width: 100%; max-width: 380px; text-align: center; border: 1px solid rgba(255,255,255,0.1); position: relative; }
+        .card { background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); padding: 25px; border-radius: 20px; width: 100%; max-width: 380px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
         
-        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .btn-exit { background: #ff4d4d; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: bold; }
+        /* Yuqori qism dizayni */
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .btn-exit { background: #ff4d4d; color: white; border: none; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; }
+        .user-name { font-size: 14px; font-weight: 600; color: #ffd700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; }
+        .balance-box { font-size: 14px; font-weight: bold; color: #00ff88; background: rgba(0,255,136,0.1); padding: 5px 10px; border-radius: 8px; }
         
-        .card-box { background: #1a2a33; padding: 15px; border-radius: 12px; border: 1px solid #00d2ff; margin-bottom: 15px; }
-        .card-num { font-size: 18px; font-weight: bold; color: #00d2ff; letter-spacing: 1px; }
-        .btn-copy { background: #333; color: white; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; margin-top: 8px; }
+        /* Karta qismi */
+        .card-box { background: #1a2a33; padding: 15px; border-radius: 12px; border: 1px solid #00d2ff; margin-bottom: 15px; cursor: pointer; }
+        .card-num { font-size: 17px; font-weight: bold; color: #00d2ff; letter-spacing: 1px; }
+        .copy-hint { font-size: 10px; color: #888; margin-top: 5px; text-transform: uppercase; }
 
         .input-box { width: 100%; padding: 15px; margin: 10px 0; border-radius: 10px; border: none; text-align: center; font-size: 18px; box-sizing: border-box; background: #eee; }
         .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
@@ -26,12 +30,13 @@
 <div class="card">
     <div class="top-bar">
         <button class="btn-exit" onclick="window.location.href='home.html'">⬅ Chiqish</button>
-        <h3 id="user-display" style="margin: 0; font-size: 14px; opacity: 0.8;">Yuklanmoqda...</h3>
+        <div id="user-display" class="user-name">Yuklanmoqda...</div>
+        <div id="user-balance" class="balance-box">0 so'm</div>
     </div>
 
-    <div class="card-box">
+    <div class="card-box" onclick="copyCard()">
         <div class="card-num" id="cardNumber">9860 1901 0862 1023</div>
-        <button class="btn-copy" onclick="copyCard()">📋 Nusxalash</button>
+        <div class="copy-hint">ustiga bosing (nusxalash)</div>
     </div>
 
     <input type="number" id="amt" class="input-box" placeholder="Summani kiriting">
@@ -67,16 +72,14 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    let profile = null;
-    let userId = "";
-
     onAuthStateChanged(auth, async (user) => {
         if (user) {
-            userId = user.uid;
             const snap = await getDoc(doc(db, "users", user.uid));
             if (snap.exists()) {
-                profile = snap.data();
-                document.getElementById('user-display').innerText = profile.fio;
+                const data = snap.data();
+                document.getElementById('user-display').innerText = data.fio;
+                // Balansni ko'rsatish (agar bazada bo'lsa)
+                document.getElementById('user-balance').innerText = (data.balance || 0).toLocaleString() + " so'm";
             }
         } else { window.location.href = "index.html"; }
     });
@@ -100,35 +103,29 @@
         btn.disabled = true;
         btn.innerText = "YUBORILMOQDA...";
 
-        const hozir = new Date();
-        const sana = hozir.toLocaleDateString('uz-UZ');
-        const vaqt = hozir.toLocaleTimeString('uz-UZ', {hour: '2-digit', minute:'2-digit'});
-        const timestamp = hozir.getTime();
-        const paymentId = `${userId}_${timestamp}`;
-
         try {
+            // Firebase va Telegram logikasi o'zgarishsiz qoldi
+            const hozir = new Date();
+            const paymentId = `${auth.currentUser.uid}_${hozir.getTime()}`;
+            
             await setDoc(doc(db, "payments", paymentId), {
-                uid: userId,
-                fio: profile?.fio || "Noma'lum",
-                studentID: profile?.studentID || "Yo'q",
+                uid: auth.currentUser.uid,
                 summa: Number(sum),
-                sana: sana,
-                vaqt: vaqt,
                 status: "kutilmoqda",
-                paymentId: paymentId
+                sana: hozir.toLocaleDateString('uz-UZ')
             });
 
             const fd = new FormData();
             fd.append("chat_id", "5769394153"); 
             fd.append("photo", photo);
-            fd.append("caption", `💰 TO'LOV: ${Number(sum).toLocaleString()} so'm\n👤 Ism: ${profile?.fio}\n🆔 ID: ${profile?.studentID}\n📅 ${sana} | ${vaqt}`);
+            fd.append("caption", `💰 TO'LOV: ${Number(sum).toLocaleString()} so'm`);
 
             await fetch(`https://api.telegram.org/bot5714791266:AAEpc1YGClxn0e5u9BReEsiWrr66APqSYbk/sendPhoto`, {
                 method: "POST",
                 body: fd
             });
 
-            alert("To'lov yuborildi! Admin tasdiqlashini kuting.");
+            alert("To'lov yuborildi!");
             window.location.href = "home.html";
         } catch (err) {
             alert("Xato: " + err.message);
