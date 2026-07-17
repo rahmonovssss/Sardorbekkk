@@ -5,21 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>To'lov - Dr. Rahmonov</title>
     <style>
-        body { background: #0f2027; color: white; font-family: sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; }
+        body { background: #0f2027; color: white; font-family: sans-serif; margin: 0; padding: 0; }
+        
+        .header-top { padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.2); }
+        .btn-exit { background: rgba(255,255,255,0.1); color: white; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-size: 14px; font-weight: bold; backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.2); }
+        
+        .top-info { text-align: right; }
+        .user-name { font-size: 13px; color: #ffd700; font-weight: 600; }
+        .balance-box { font-size: 14px; font-weight: bold; color: #00ff88; }
+
+        .container { display: flex; align-items: center; justify-content: center; min-height: 80vh; padding: 20px; }
         .card { background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); padding: 25px; border-radius: 20px; width: 100%; max-width: 380px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
         
-        /* Yuqori qism dizayni */
-        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-        .btn-exit { background: #ff4d4d; color: white; border: none; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; }
-        .user-name { font-size: 14px; font-weight: 600; color: #ffd700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; }
-        .balance-box { font-size: 14px; font-weight: bold; color: #00ff88; background: rgba(0,255,136,0.1); padding: 5px 10px; border-radius: 8px; }
-        
-        /* Karta qismi */
         .card-box { background: #1a2a33; padding: 15px; border-radius: 12px; border: 1px solid #00d2ff; margin-bottom: 15px; cursor: pointer; }
+        .card-owner { font-size: 12px; color: #aaa; margin-bottom: 5px; }
         .card-num { font-size: 17px; font-weight: bold; color: #00d2ff; letter-spacing: 1px; }
-        .copy-hint { font-size: 10px; color: #888; margin-top: 5px; text-transform: uppercase; }
+        
+        #copy-msg { font-size: 12px; color: #00d2ff; margin-bottom: 15px; display: none; font-weight: bold; }
 
-        .input-box { width: 100%; padding: 15px; margin: 10px 0; border-radius: 10px; border: none; text-align: center; font-size: 18px; box-sizing: border-box; background: #eee; }
+        .input-box { width: 100%; padding: 15px; margin: 10px 0; border-radius: 10px; border: none; text-align: center; font-size: 18px; box-sizing: border-box; background: #eee; color: #000; }
         .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .btn-send { background: #00d2ff; color: #000; }
         #preview { width: 100%; margin-top: 15px; border-radius: 10px; display: none; max-height: 200px; object-fit: contain; }
@@ -27,30 +31,36 @@
 </head>
 <body>
 
-<div class="card">
-    <div class="top-bar">
-        <button class="btn-exit" onclick="window.location.href='home.html'">⬅ Chiqish</button>
+<div class="header-top">
+    <button class="btn-exit" onclick="window.location.href='home.html'">⬅ Orqaga</button>
+    <div class="top-info">
         <div id="user-display" class="user-name">Yuklanmoqda...</div>
         <div id="user-balance" class="balance-box">0 so'm</div>
     </div>
+</div>
 
-    <div class="card-box" onclick="copyCard()">
-        <div class="card-num" id="cardNumber">9860 1901 0862 1023</div>
-        <div class="copy-hint">ustiga bosing (nusxalash)</div>
+<div class="container">
+    <div class="card">
+        <div class="card-box" onclick="copyCard()">
+            <div class="card-owner">Davlatov Asadbek</div>
+            <div class="card-num" id="cardNumber">9860 1901 0862 1023</div>
+        </div>
+        
+        <div id="copy-msg">Raqam nusxalandi. Endi skrinshotni yuklang.</div>
+
+        <input type="number" id="amt" class="input-box" placeholder="Summani kiriting">
+        <input type="file" id="file" accept="image/*" style="display:none;">
+        <button class="btn" style="background:#444; color:white;" onclick="document.getElementById('file').click()">📸 CHEKNI TANLASH</button>
+        <img id="preview">
+        <button class="btn btn-send" id="sendBtn">TASDIQLASHGA YUBORISH</button>
     </div>
-
-    <input type="number" id="amt" class="input-box" placeholder="Summani kiriting">
-    <input type="file" id="file" accept="image/*" style="display:none;">
-    <button class="btn" style="background:#444; color:white;" onclick="document.getElementById('file').click()">📸 CHEKNI TANLASH</button>
-    <img id="preview">
-    <button class="btn btn-send" id="sendBtn">TASDIQLASHGA YUBORISH</button>
 </div>
 
 <script>
     function copyCard() {
         const text = document.getElementById('cardNumber').innerText;
         navigator.clipboard.writeText(text.replace(/\s/g, ''));
-        alert("Karta raqami nusxalandi!");
+        document.getElementById('copy-msg').style.display = 'block';
     }
 </script>
 
@@ -78,7 +88,6 @@
             if (snap.exists()) {
                 const data = snap.data();
                 document.getElementById('user-display').innerText = data.fio;
-                // Balansni ko'rsatish (agar bazada bo'lsa)
                 document.getElementById('user-balance').innerText = (data.balance || 0).toLocaleString() + " so'm";
             }
         } else { window.location.href = "index.html"; }
@@ -104,7 +113,6 @@
         btn.innerText = "YUBORILMOQDA...";
 
         try {
-            // Firebase va Telegram logikasi o'zgarishsiz qoldi
             const hozir = new Date();
             const paymentId = `${auth.currentUser.uid}_${hozir.getTime()}`;
             
