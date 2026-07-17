@@ -15,21 +15,17 @@
 
         .podium { display: flex; justify-content: center; align-items: flex-end; gap: 10px; margin: 30px 0 20px 0; }
         .podium-user { display: flex; flex-direction: column; align-items: center; width: 30%; position: relative; }
-        .podium-avatar { width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; position: relative; box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
-        .podium-name { font-size: 12px; font-weight: 600; margin-top: 8px; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .podium-pts { font-size: 10px; color: #38bdf8; }
+        .podium-avatar { width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; position: relative; box-shadow: 0 8px 20px rgba(0,0,0,0.4); font-size: 20px; }
+        .podium-name { font-size: 11px; font-weight: 600; margin-top: 8px; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
+        .podium-pts { font-size: 11px; font-weight: 700; color: #38bdf8; }
 
         .leader-list { background: #1e293b; border-radius: 24px; padding: 10px; border: 1px solid rgba(255,255,255,0.05); }
-        .leader-row { display: flex; align-items: center; padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .rank { width: 30px; font-weight: 700; font-size: 14px; color: #94a3b8; }
+        .leader-row { display: flex; align-items: center; padding: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .rank { width: 35px; font-weight: 700; font-size: 15px; color: #94a3b8; }
         .user-info { flex-grow: 1; }
-        .user-info .name { font-size: 14px; font-weight: 500; color: #f8fafc; }
-        .user-info .id-badge { font-size: 10px; color: #64748b; }
+        .user-info .name { font-size: 14px; font-weight: 600; color: #fff; display: block; }
+        .user-info .id-badge { font-size: 11px; color: #64748b; }
         .pts { font-weight: 700; font-size: 14px; color: #38bdf8; }
-
-        .rank-1-3 { color: #f59e0b !important; }
-        .rank-4-10 { color: #34d399 !important; }
-        .rank-11-20 { color: #fbbf24 !important; }
     </style>
 </head>
 <body>
@@ -40,9 +36,7 @@
     </div>
 
     <div class="podium" id="podium-container"></div>
-    <div class="leader-list" id="leader-board">
-        <div id="loader">Liderlar yuklanmoqda...</div>
-    </div>
+    <div class="leader-list" id="leader-board"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -62,15 +56,17 @@
 
         onSnapshot(collection(db, "users"), (snapshot) => {
             let users = [];
-            snapshot.forEach((docSnap) => {
-                const data = docSnap.data();
-                // Har bir subject ichidagi 'score'larni qo'shib jami ballni hisoblaymiz
+            snapshot.forEach((doc) => {
+                const data = doc.data();
                 let totalScore = 0;
+                
+                // Rasmga ko'ra 'subjects' map ichidagi 'score'larni yig'amiz
                 if (data.subjects) {
-                    Object.values(data.subjects).forEach(sub => {
-                        if (sub.score) totalScore += Number(sub.score);
-                    });
+                    for (let key in data.subjects) {
+                        totalScore += Number(data.subjects[key].score || 0);
+                    }
                 }
+                
                 users.push({
                     name: data.studentName || "Nomsiz",
                     id: data.studentID || "ID yo'q",
@@ -78,7 +74,7 @@
                 });
             });
 
-            // Ball bo'yicha saralash
+            // Ball bo'yicha katta-kichik tartiblash
             users.sort((a, b) => b.points - a.points);
             const top20 = users.slice(0, 20);
 
@@ -89,24 +85,25 @@
 
             top20.forEach((user, index) => {
                 const rank = index + 1;
+                const pointsFormatted = user.points.toFixed(1);
+
                 if (rank <= 3) {
                     const colors = ['#f59e0b', '#94a3b8', '#b45309'];
                     podium.innerHTML += `
                         <div class="podium-user">
-                            <div class="podium-avatar" style="background:${colors[rank-1]}">${user.name[0] || '?'}</div>
+                            <div class="podium-avatar" style="background:${colors[rank-1]}">${user.name.charAt(0)}</div>
                             <span class="podium-name">${user.name}</span>
-                            <span class="podium-pts">${user.points.toFixed(1)}</span>
+                            <span class="podium-pts">${pointsFormatted} ball</span>
                         </div>`;
                 } else {
-                    const rankClass = rank <= 10 ? 'rank-4-10' : 'rank-11-20';
                     list.innerHTML += `
                         <div class="leader-row">
-                            <div class="rank ${rankClass}">#${rank}</div>
+                            <div class="rank">#${rank}</div>
                             <div class="user-info">
                                 <span class="name">${user.name}</span>
                                 <span class="id-badge">ID: ${user.id}</span>
                             </div>
-                            <div class="pts">${user.points.toFixed(1)} pts</div>
+                            <div class="pts">${pointsFormatted} ball</div>
                         </div>`;
                 }
             });
