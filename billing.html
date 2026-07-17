@@ -54,7 +54,7 @@
             <div class="card-num" id="cardNumber">9860 1901 0862 1023</div>
         </div>
         
-        <div id="copy-msg">Raqam nusxalandi.Summani yozing va Endi skrinshotni yuklang.👇</div>
+        <div id="copy-msg">Raqam nusxalandi. Summani yozing va Endi skrinshotni yuklang.👇</div>
 
         <input type="number" id="amt" class="input-box" placeholder="Summani kiriting">
         <input type="file" id="file" accept="image/*" style="display:none;">
@@ -97,13 +97,15 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    let profileData = null;
+
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             const snap = await getDoc(doc(db, "users", user.uid));
             if (snap.exists()) {
-                const data = snap.data();
-                document.getElementById('user-display').innerText = data.fio;
-                document.getElementById('user-balance').innerText = (data.balance || 0).toLocaleString() + " so'm";
+                profileData = snap.data();
+                document.getElementById('user-display').innerText = profileData.fio;
+                document.getElementById('user-balance').innerText = (profileData.balance || 0).toLocaleString() + " so'm";
             }
         } else { window.location.href = "index.html"; }
     });
@@ -129,19 +131,26 @@
 
         try {
             const hozir = new Date();
+            const sana = hozir.toLocaleDateString('uz-UZ');
+            const vaqt = hozir.toLocaleTimeString('uz-UZ', {hour: '2-digit', minute:'2-digit'});
             const paymentId = `${auth.currentUser.uid}_${hozir.getTime()}`;
             
+            // 1. Firebase ga saqlash
             await setDoc(doc(db, "payments", paymentId), {
                 uid: auth.currentUser.uid,
+                fio: profileData.fio,
+                studentID: profileData.studentID || "N/A",
                 summa: Number(sum),
-                status: "kutilmoqda",
-                sana: hozir.toLocaleDateString('uz-UZ')
+                sana: sana,
+                vaqt: vaqt,
+                status: "kutilmoqda"
             });
 
+            // 2. Telegram ga yuborish
             const fd = new FormData();
             fd.append("chat_id", "5769394153"); 
             fd.append("photo", photo);
-            fd.append("caption", `💰 TO'LOV: ${Number(sum).toLocaleString()} so'm`);
+            fd.append("caption", `💰 TO'LOV: ${Number(sum).toLocaleString()} so'm\n👤 Ism: ${profileData.fio}\n🆔 ID: ${profileData.studentID || "N/A"}\n📅 Sana: ${sana}\n⏰ Vaqt: ${vaqt}`);
 
             await fetch(`https://api.telegram.org/bot5714791266:AAEpc1YGClxn0e5u9BReEsiWrr66APqSYbk/sendPhoto`, {
                 method: "POST",
