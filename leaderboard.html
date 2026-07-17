@@ -13,14 +13,12 @@
         .back-btn { text-decoration: none; font-size: 20px; color: #f1f5f9; background: #1e293b; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 1px solid rgba(255,255,255,0.05); }
         .header h2 { font-size: 20px; font-weight: 600; flex-grow: 1; text-align: center; margin-right: 42px; }
 
-        /* Podium */
         .podium { display: flex; justify-content: center; align-items: flex-end; gap: 10px; margin: 30px 0 20px 0; }
         .podium-user { display: flex; flex-direction: column; align-items: center; width: 30%; position: relative; }
         .podium-avatar { width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; position: relative; box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
         .podium-name { font-size: 12px; font-weight: 600; margin-top: 8px; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .podium-pts { font-size: 10px; color: #38bdf8; }
 
-        /* Ro'yxat */
         .leader-list { background: #1e293b; border-radius: 24px; padding: 10px; border: 1px solid rgba(255,255,255,0.05); }
         .leader-row { display: flex; align-items: center; padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .rank { width: 30px; font-weight: 700; font-size: 14px; color: #94a3b8; }
@@ -29,9 +27,9 @@
         .user-info .id-badge { font-size: 10px; color: #64748b; }
         .pts { font-weight: 700; font-size: 14px; color: #38bdf8; }
 
-        /* Ranglar guruhi */
-        .rank-4-10 { color: #34d399 !important; } /* Yashilroq */
-        .rank-11-20 { color: #fbbf24 !important; } /* Sariqroq */
+        .rank-1-3 { color: #f59e0b !important; }
+        .rank-4-10 { color: #34d399 !important; }
+        .rank-11-20 { color: #fbbf24 !important; }
     </style>
 </head>
 <body>
@@ -48,7 +46,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, query, orderBy, limit, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2G8cD0JezEKXRCtKLYiZL0bzDyTp06Vs",
@@ -61,42 +59,56 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const q = query(collection(db, "users"), orderBy("points", "desc"), limit(20));
 
-        onSnapshot(q, (snapshot) => {
+        onSnapshot(collection(db, "users"), (snapshot) => {
+            let users = [];
+            snapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+                // Har bir subject ichidagi 'score'larni qo'shib jami ballni hisoblaymiz
+                let totalScore = 0;
+                if (data.subjects) {
+                    Object.values(data.subjects).forEach(sub => {
+                        if (sub.score) totalScore += Number(sub.score);
+                    });
+                }
+                users.push({
+                    name: data.studentName || "Nomsiz",
+                    id: data.studentID || "ID yo'q",
+                    points: totalScore
+                });
+            });
+
+            // Ball bo'yicha saralash
+            users.sort((a, b) => b.points - a.points);
+            const top20 = users.slice(0, 20);
+
             const podium = document.getElementById('podium-container');
             const list = document.getElementById('leader-board');
             podium.innerHTML = "";
             list.innerHTML = "";
 
-            let index = 1;
-            snapshot.forEach((docSnap) => {
-                const data = docSnap.data();
-                const name = data.fio || "Nomsiz";
-                const id = data.studentID || "ID yo'q";
-                const pts = Number(data.points || 0);
-
-                if (index <= 3) {
+            top20.forEach((user, index) => {
+                const rank = index + 1;
+                if (rank <= 3) {
                     const colors = ['#f59e0b', '#94a3b8', '#b45309'];
                     podium.innerHTML += `
                         <div class="podium-user">
-                            <div class="podium-avatar" style="background:${colors[index-1]}">${name[0]}</div>
-                            <span class="podium-name">${name}</span>
-                            <span class="podium-pts">${pts}</span>
+                            <div class="podium-avatar" style="background:${colors[rank-1]}">${user.name[0] || '?'}</div>
+                            <span class="podium-name">${user.name}</span>
+                            <span class="podium-pts">${user.points.toFixed(1)}</span>
                         </div>`;
                 } else {
-                    const rankClass = index <= 10 ? 'rank-4-10' : 'rank-11-20';
+                    const rankClass = rank <= 10 ? 'rank-4-10' : 'rank-11-20';
                     list.innerHTML += `
                         <div class="leader-row">
-                            <div class="rank ${rankClass}">#${index}</div>
+                            <div class="rank ${rankClass}">#${rank}</div>
                             <div class="user-info">
-                                <span class="name">${name}</span>
-                                <span class="id-badge">ID: ${id}</span>
+                                <span class="name">${user.name}</span>
+                                <span class="id-badge">ID: ${user.id}</span>
                             </div>
-                            <div class="pts">${pts} pts</div>
+                            <div class="pts">${user.points.toFixed(1)} pts</div>
                         </div>`;
                 }
-                index++;
             });
         });
     </script>
