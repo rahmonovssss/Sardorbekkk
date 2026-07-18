@@ -80,7 +80,7 @@
             } catch (e) { console.error(e); }
             loadAnalytics();
         } else {
-            window.location.replace('login.html');
+            window.location.replace('home.html);
         }
     });
 
@@ -134,7 +134,7 @@
     window.logout = function() {
         signOut(auth).then(() => {
             localStorage.clear();
-            window.location.replace('login.html');
+            window.location.replace('home.html);
         });
     }
 </script>
