@@ -9,7 +9,6 @@
         body { background: #0d0f14; color: #ffffff; font-family: 'Outfit', sans-serif; padding: 20px; margin: 0; }
         .container { max-width: 420px; margin: auto; }
         
-        /* Yuqori qism */
         .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .exit-btn { background: #ff3e3e; color: white; border: none; padding: 8px 15px; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: 600; }
         
@@ -64,34 +63,36 @@
 
         const results = JSON.parse(rawData);
         const stats = {};
-        let currentTotalScore = 0;
+        let currentTotalBall = 0;
 
         results.forEach(item => {
-            if (!stats[item.subject]) stats[item.subject] = { correct: 0, total: 0, score: 0 };
+            if (!stats[item.subject]) stats[item.subject] = { correct: 0, total: 0 };
             stats[item.subject].total += 1;
-            if (item.isCorrect) {
-                stats[item.subject].correct += 1;
-                stats[item.subject].score += item.ball;
-            }
-            currentTotalScore += item.ball;
+            if (item.isCorrect) stats[item.subject].correct += 1;
+            currentTotalBall += item.ball;
         });
 
-        // Umumiy natija uchun trend hisoblash
-        let prevTotalScore = parseFloat(localStorage.getItem('prevTotalScore')) || currentTotalScore;
-        let totalTrend = ((currentTotalScore - prevTotalScore) / (prevTotalScore || 1)) * 100;
+        // Umumiy ball trendi
+        let lastTotal = parseFloat(localStorage.getItem('last_total')) || currentTotalBall;
+        let diffTotal = currentTotalBall - lastTotal;
+        let trendTotal = lastTotal !== 0 ? (diffTotal / lastTotal) * 100 : 0;
         
-        document.getElementById('total-val').innerText = currentTotalScore.toFixed(1);
-        const badge = document.getElementById('trend-badge');
-        badge.innerText = `${totalTrend >= 0 ? '+' : ''}${totalTrend.toFixed(1)}% ${totalTrend >= 0 ? 'o\'sish' : 'pasayish'}`;
-        badge.className = `trend-badge ${totalTrend >= 0 ? 'up' : 'down'}`;
+        document.getElementById('total-val').innerText = currentTotalBall.toFixed(1);
+        const totalBadge = document.getElementById('trend-badge');
+        totalBadge.innerText = `${trendTotal >= 0 ? '+' : ''}${trendTotal.toFixed(1)}% o'zgarish`;
+        totalBadge.className = `trend-badge ${trendTotal >= 0 ? 'up' : 'down'}`;
+        localStorage.setItem('last_total', currentTotalBall);
 
         const listContainer = document.getElementById('analytics-list');
+        const lastStats = JSON.parse(localStorage.getItem('last_stats')) || {};
+
         for (let sub in stats) {
             const data = stats[sub];
-            const currentPercent = (data.correct / data.total) * 100;
-            let prevPercent = parseFloat(localStorage.getItem('stats_' + sub)) || currentPercent;
-            let subTrend = currentPercent - prevPercent;
-            
+            const currentPercent = Math.round((data.correct / data.total) * 100);
+            const prevPercent = lastStats[sub] || currentPercent;
+            const diff = currentPercent - prevPercent;
+            lastStats[sub] = currentPercent;
+
             const card = document.createElement('div');
             card.className = 'subject-card';
             card.innerHTML = `
@@ -100,23 +101,19 @@
                     <p>${data.correct} ta to'g'ri / ${data.total} ta</p>
                 </div>
                 <div class="score-display">
-                    <div class="score-val">${currentPercent.toFixed(0)}%</div>
-                    <div class="score-diff" style="color: ${subTrend >= 0 ? '#00ff9d' : '#ff3e3e'};">
-                        ${subTrend >= 0 ? '+' : ''}${subTrend.toFixed(1)}%
+                    <div class="score-val">${currentPercent}%</div>
+                    <div class="score-diff" style="color: ${diff >= 0 ? '#00ff9d' : '#ff3e3e'};">
+                        ${diff >= 0 ? '▲' : '▼'} ${Math.abs(diff)}%
                     </div>
                 </div>
             `;
             listContainer.appendChild(card);
-            
-            // Yangi natijalarni saqlash
-            localStorage.setItem('stats_' + sub, currentPercent);
         }
-        
-        localStorage.setItem('prevTotalScore', currentTotalScore);
+        localStorage.setItem('last_stats', JSON.stringify(lastStats));
     }
 
     function logout() {
-        window.location.href = 'home.html';
+        window.location.replace('home.html');
     }
 
     window.onload = loadAnalytics;
