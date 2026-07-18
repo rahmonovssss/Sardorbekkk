@@ -3,107 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Milliy Sertifikat Tayyorgarlik</title>
+    <title>Milliy Sertifikat</title>
     <style>
         :root {
-            --primary: #6366f1;
-            --secondary: #a855f7;
+            --primary: #4f46e5;
             --bg: #0f172a;
             --card-bg: #1e293b;
             --text: #f8fafc;
         }
 
         body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
             margin: 0;
+            padding: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            background-color: var(--bg);
+            font-family: 'Segoe UI', Roboto, sans-serif;
         }
 
-        .container {
+        .card {
             background: var(--card-bg);
             padding: 2rem;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            border-radius: 25px;
+            width: 320px;
             text-align: center;
-            max-width: 450px;
-            width: 90%;
-            border: 1px solid #334155;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
-        h1 {
-            font-size: 1.8rem;
-            margin-bottom: 1rem;
-            background: linear-gradient(to right, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+        h1 { color: var(--text); font-size: 1.5rem; margin-bottom: 1rem; }
+        p { color: #94a3b8; font-size: 0.9rem; margin-bottom: 2rem; }
 
-        .features {
-            text-align: left;
-            margin: 20px 0;
-            list-style: none;
-            padding: 0;
-        }
-
-        .features li {
-            margin-bottom: 12px;
-            padding-left: 30px;
-            position: relative;
-        }
-
-        .features li::before {
-            content: '✅';
-            position: absolute;
-            left: 0;
-        }
-
-        .cta-button {
+        /* Professional tugma dizayni */
+        .btn {
             display: inline-block;
-            margin-top: 20px;
-            padding: 15px 30px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            width: 100%;
+            padding: 15px;
+            background: var(--primary);
             color: white;
             text-decoration: none;
-            border-radius: 12px;
-            font-weight: bold;
-            transition: transform 0.2s, box-shadow 0.2s;
+            border-radius: 15px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
         }
 
-        .cta-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.4);
+        /* Bosilganda effekt */
+        .btn:active {
+            transform: scale(0.95);
+            background: #4338ca;
         }
 
-        .footer-note {
-            margin-top: 25px;
-            font-size: 0.9rem;
-            color: #94a3b8;
-            font-style: italic;
+        /* Ripple animatsiyasi */
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255,255,255,0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%);
+            transform-origin: 50% 50%;
+        }
+
+        .btn:focus:not(:active)::after {
+            animation: ripple 1s ease-out;
+        }
+
+        @keyframes ripple {
+            0% { transform: scale(0, 0); opacity: 0.5; }
+            100% { transform: scale(40, 40); opacity: 0; }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>🎓 Milliy Sertifikat</h1>
-    <p>Imtihonga puxta tayyorlaning!</p>
-
-    <ul class="features">
-        <li>Barcha fanlardan sifatli testlar</li>
-        <li>Haqiqiy imtihon formatidagi savollar</li>
-        <li>Natijalarni avtomatik hisoblash</li>
-        <li>Bilimingizni sinab, o'sishni kuzatish</li>
-    </ul>
-
-    <a href="https://t.me/milliysertifikat07_bot" class="cta-button">🚀 Botga o'tish</a>
-
-    <p class="footer-note">Bilim — muvaffaqiyat kaliti! 🔥</p>
-</div>
+    <div class="card">
+        <h1>🎓 Milliy Sertifikat</h1>
+        <p>Imtihonga puxta tayyorlaning va o'z ustingizda ishlang!</p>
+        
+        <!-- Link yashirilgan holda tugma ko'rinishida -->
+        <a href="https://t.me/milliysertifikat07_bot" class="btn" onclick="this.blur()">
+            Botga kirish
+        </a>
+    </div>
 
 </body>
 </html>
