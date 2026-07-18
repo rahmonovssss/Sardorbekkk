@@ -36,7 +36,6 @@
     <div class="header-bar">
         <button class="exit-btn" onclick="logout()">Chiqish</button>
         <div style="text-align: right;">
-            <!-- FIO va ID shu yerda ko'rinadi -->
             <h4 id="display-fio" style="margin:0; font-size:14px;">User</h4>
             <p id="display-id" style="margin:0; font-size:10px; color:#888;">ID: ---</p>
         </div>
@@ -53,13 +52,23 @@
 </div>
 
 <script>
-    function loadAnalytics() {
-        // ID va FIO ni localStorage dan olib ekranga chiqarish
-        const fio = localStorage.getItem('userFio') || 'Foydalanuvchi';
-        const studentId = localStorage.getItem('studentID') || '---';
-        
-        document.getElementById('display-fio').innerText = fio;
-        document.getElementById('display-id').innerText = "ID: " + studentId;
+    async function loadAnalytics() {
+        // Firebase'dan foydalanuvchi ma'lumotlarini olish
+        try {
+            const usersSnap = await getDocs(collection(db, "users"));
+            // Masalan, hozirgi kirgan user ID sini localStorage'dan olamiz
+            const currentUid = localStorage.getItem('currentUserID'); 
+            
+            usersSnap.forEach(uDoc => {
+                if (uDoc.id === currentUid) {
+                    const uData = uDoc.data();
+                    document.getElementById('display-fio').innerText = uData.fio || "Ism belgilanmagan";
+                    document.getElementById('display-id').innerText = "ID: " + (uData.studentID || "Yo'q");
+                }
+            });
+        } catch (err) {
+            console.error("Foydalanuvchilarni yuklashda xatolik:", err);
+        }
 
         const rawData = localStorage.getItem('premiumResult') || localStorage.getItem('freeResult');
         if (!rawData) return;
@@ -116,7 +125,6 @@
     }
 
     function logout() {
-        // Chiqishni bosganda home.html sahifasiga yo'naltirish
         window.location.href = 'home.html';
     }
 
