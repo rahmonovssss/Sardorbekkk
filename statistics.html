@@ -8,6 +8,11 @@
         
         body { background: #0d0f14; color: #ffffff; font-family: 'Outfit', sans-serif; padding: 20px; margin: 0; }
         .container { max-width: 420px; margin: auto; }
+        
+        /* Yuqori qism */
+        .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .exit-btn { background: #ff3e3e; color: white; border: none; padding: 8px 15px; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: 600; }
+        
         .main-card { background: #161921; padding: 30px; border-radius: 30px; text-align: center; margin-bottom: 25px; border: 1px solid rgba(255,255,255,0.05); }
         .emoji-big { font-size: 50px; margin-bottom: 10px; }
         .label { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 2px; }
@@ -15,9 +20,11 @@
         .trend-badge { font-size: 14px; padding: 6px 16px; border-radius: 12px; font-weight: 600; }
         .up { color: #00ff9d; background: rgba(0, 255, 157, 0.1); }
         .down { color: #ff3e3e; background: rgba(255, 62, 62, 0.1); }
+        
         .subject-card { background: #161921; padding: 20px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.05); }
         .subject-info h4 { margin: 0; font-size: 16px; }
         .subject-info p { margin: 4px 0 0 0; font-size: 12px; color: #888; }
+        
         .score-display { text-align: right; }
         .score-val { font-size: 18px; font-weight: 700; color: #00d2ff; }
         .score-diff { font-size: 12px; font-weight: 600; }
@@ -26,14 +33,17 @@
 <body>
 
 <div class="container">
-    <div style="margin-bottom: 25px;">
-        <h2 style="font-size: 24px; margin: 0;">Analytics</h2>
-        <p style="color: #666; font-size: 14px;">Dr. Rahmonov, shaxsiy natijalaringiz</p>
+    <div class="header-bar">
+        <button class="exit-btn" onclick="window.location.href='home.html'">Chiqish</button>
+        <div style="text-align: right;">
+            <h4 id="display-fio" style="margin:0; font-size:14px;">User</h4>
+            <p id="display-id" style="margin:0; font-size:10px; color:#888;">ID: ---</p>
+        </div>
     </div>
 
     <div class="main-card">
         <div class="emoji-big">🔥</div>
-        <div class="label" id="user-id-display">ID: Yuklanmoqda...</div>
+        <div class="label">Umumiy Ball</div>
         <div class="value" id="total-val">0.0</div>
         <span class="trend-badge" id="trend-badge">0% o'zgarish</span>
     </div>
@@ -43,14 +53,15 @@
 
 <script>
     function loadAnalytics() {
-        const userId = localStorage.getItem('userId') || 'Sardorbek';
-        document.getElementById('user-id-display').innerText = "ID: " + userId;
+        // ID va FIO ni olish
+        const fio = localStorage.getItem('userFio') || 'Foydalanuvchi';
+        const studentId = localStorage.getItem('studentID') || '---';
+        
+        document.getElementById('display-fio').innerText = fio;
+        document.getElementById('display-id').innerText = "ID: " + studentId;
 
         const rawData = localStorage.getItem('premiumResult') || localStorage.getItem('freeResult');
-        if (!rawData) {
-            document.getElementById('analytics-list').innerHTML = "<p style='text-align:center; color:#888;'>Hozircha natijalar mavjud emas.</p>";
-            return;
-        }
+        if (!rawData) return;
 
         const results = JSON.parse(rawData);
         const stats = {};
@@ -66,24 +77,14 @@
             currentTotalBall += item.ball;
         });
 
-        // Eng yuqori ballni saqlash va solishtirish
-        let bestTotalScore = parseFloat(localStorage.getItem('bestTotalScore')) || 0;
-        let trend = 0;
-        
-        if (bestTotalScore > 0) {
-            trend = ((currentTotalBall - bestTotalScore) / bestTotalScore) * 100;
-        }
-
-        if (currentTotalBall > bestTotalScore) {
-            bestTotalScore = currentTotalBall;
-            localStorage.setItem('bestTotalScore', bestTotalScore);
-        }
-
-        // Umumiy UI yangilash
+        // Umumiy ball trendi
+        let bestTotal = parseFloat(localStorage.getItem('bestTotalScore')) || 0;
+        let trend = bestTotal > 0 ? ((currentTotalBall - bestTotal) / bestTotal) * 100 : 0;
         document.getElementById('total-val').innerText = currentTotalBall.toFixed(1);
         const badge = document.getElementById('trend-badge');
-        badge.innerText = trend >= 0 ? `+${trend.toFixed(1)}% o'sish` : `${trend.toFixed(1)}% pasayish`;
+        badge.innerText = `${trend >= 0 ? '+' : ''}${trend.toFixed(1)}% o'sish`;
         badge.className = `trend-badge ${trend >= 0 ? 'up' : 'down'}`;
+        if(currentTotalBall > bestTotal) localStorage.setItem('bestTotalScore', currentTotalBall);
 
         const listContainer = document.getElementById('analytics-list');
         listContainer.innerHTML = "";
@@ -91,16 +92,24 @@
         for (let sub in stats) {
             const data = stats[sub];
             const percent = Math.round((data.correct / data.total) * 100);
+            
+            // Har bir fan uchun oldingi foizni olish va solishtirish
+            let prevPercent = parseFloat(localStorage.getItem('stats_' + sub)) || percent;
+            let diff = percent - prevPercent;
+            localStorage.setItem('stats_' + sub, percent);
+
             const card = document.createElement('div');
             card.className = 'subject-card';
             card.innerHTML = `
                 <div class="subject-info">
-                    <h4>${sub}</h4>
+                    <h4>${sub} ${percent >= 80 ? '🚀' : '📈'}</h4>
                     <p>${data.correct} ta to'g'ri / ${data.total} ta</p>
                 </div>
                 <div class="score-display">
                     <div class="score-val">${percent}%</div>
-                    <div class="score-diff" style="color: #00d2ff;">${data.score.toFixed(1)} ball</div>
+                    <div class="score-diff" style="color: ${diff >= 0 ? '#00ff9d' : '#ff3e3e'};">
+                        ${diff >= 0 ? '+' : ''}${diff}% ${diff >= 0 ? '↑' : '↓'}
+                    </div>
                 </div>
             `;
             listContainer.appendChild(card);
