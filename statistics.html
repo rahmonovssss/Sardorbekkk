@@ -53,7 +53,6 @@
 
 <script>
     function loadAnalytics() {
-        // Firebase bazasidan kelgan FIO va ID ni olish
         const fio = localStorage.getItem('userFio') || 'Foydalanuvchi';
         const studentId = localStorage.getItem('studentID') || '---';
         
@@ -65,7 +64,7 @@
 
         const results = JSON.parse(rawData);
         const stats = {};
-        let currentTotalBall = 0;
+        let currentTotalScore = 0;
 
         results.forEach(item => {
             if (!stats[item.subject]) stats[item.subject] = { correct: 0, total: 0, score: 0 };
@@ -74,47 +73,50 @@
                 stats[item.subject].correct += 1;
                 stats[item.subject].score += item.ball;
             }
-            currentTotalBall += item.ball;
+            currentTotalScore += item.ball;
         });
 
-        // Umumiy ball trendi
-        let bestTotal = parseFloat(localStorage.getItem('bestTotalScore')) || 0;
-        let trend = bestTotal > 0 ? ((currentTotalBall - bestTotal) / bestTotal) * 100 : 0;
-        document.getElementById('total-val').innerText = currentTotalBall.toFixed(1);
+        // Umumiy natija uchun trend hisoblash
+        let prevTotalScore = parseFloat(localStorage.getItem('prevTotalScore')) || currentTotalScore;
+        let totalTrend = ((currentTotalScore - prevTotalScore) / (prevTotalScore || 1)) * 100;
+        
+        document.getElementById('total-val').innerText = currentTotalScore.toFixed(1);
         const badge = document.getElementById('trend-badge');
-        badge.innerText = `${trend >= 0 ? '+' : ''}${trend.toFixed(1)}% ${trend >= 0 ? 'o\'sish' : 'pasayish'}`;
-        badge.className = `trend-badge ${trend >= 0 ? 'up' : 'down'}`;
-        if(currentTotalBall > bestTotal) localStorage.setItem('bestTotalScore', currentTotalBall);
+        badge.innerText = `${totalTrend >= 0 ? '+' : ''}${totalTrend.toFixed(1)}% ${totalTrend >= 0 ? 'o\'sish' : 'pasayish'}`;
+        badge.className = `trend-badge ${totalTrend >= 0 ? 'up' : 'down'}`;
 
         const listContainer = document.getElementById('analytics-list');
         for (let sub in stats) {
             const data = stats[sub];
-            const percent = Math.round((data.correct / data.total) * 100);
-            let prevPercent = parseFloat(localStorage.getItem('stats_' + sub)) || percent;
-            let diff = percent - prevPercent;
-            localStorage.setItem('stats_' + sub, percent);
-
+            const currentPercent = (data.correct / data.total) * 100;
+            let prevPercent = parseFloat(localStorage.getItem('stats_' + sub)) || currentPercent;
+            let subTrend = currentPercent - prevPercent;
+            
             const card = document.createElement('div');
             card.className = 'subject-card';
             card.innerHTML = `
                 <div class="subject-info">
-                    <h4>${sub} ${percent >= 80 ? '🚀' : '📈'}</h4>
+                    <h4>${sub} ${currentPercent >= 80 ? '🚀' : '📈'}</h4>
                     <p>${data.correct} ta to'g'ri / ${data.total} ta</p>
                 </div>
                 <div class="score-display">
-                    <div class="score-val">${percent}%</div>
-                    <div class="score-diff" style="color: ${diff >= 0 ? '#00ff9d' : '#ff3e3e'};">
-                        ${data.score.toFixed(1)} ball
+                    <div class="score-val">${currentPercent.toFixed(0)}%</div>
+                    <div class="score-diff" style="color: ${subTrend >= 0 ? '#00ff9d' : '#ff3e3e'};">
+                        ${subTrend >= 0 ? '+' : ''}${subTrend.toFixed(1)}%
                     </div>
                 </div>
             `;
             listContainer.appendChild(card);
+            
+            // Yangi natijalarni saqlash
+            localStorage.setItem('stats_' + sub, currentPercent);
         }
+        
+        localStorage.setItem('prevTotalScore', currentTotalScore);
     }
 
     function logout() {
-        localStorage.clear();
-        window.location.replace('login.html');
+        window.location.href = 'home.html';
     }
 
     window.onload = loadAnalytics;
