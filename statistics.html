@@ -9,7 +9,6 @@
         body { background: #0d0f14; color: #ffffff; font-family: 'Outfit', sans-serif; padding: 20px; margin: 0; }
         .container { max-width: 420px; margin: auto; }
         
-        /* Tugmalar bosilganda soya ko'rinmasligi uchun: */
         button { outline: none !important; box-shadow: none !important; }
         
         .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
@@ -68,9 +67,6 @@
     const db = getFirestore(app);
     const auth = getAuth(app);
 
-    // Flag yordamida logout paytida redirectni to'xtatamiz
-    let isLoggingOut = false;
-
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             try {
@@ -83,9 +79,7 @@
             } catch (e) { console.error(e); }
             loadAnalytics();
         } else {
-            if (!isLoggingOut) {
-                window.location.replace('login.html');
-            }
+            window.location.replace('login.html');
         }
     });
 
@@ -137,10 +131,8 @@
     }
 
     window.logout = function() {
-        isLoggingOut = true; // Avtomatik redirectni to'xtatamiz
         signOut(auth).then(() => {
-            localStorage.clear();
-            window.location.replace('home.html'); // Endi home.html ga o'tadi
+            window.location.replace('home.html');
         });
     }
 </script>
