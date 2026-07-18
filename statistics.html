@@ -6,47 +6,18 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
         
-        body { 
-            background: #0d0f14; 
-            color: #ffffff; 
-            font-family: 'Outfit', sans-serif;
-            padding: 20px;
-            margin: 0;
-        }
-
+        body { background: #0d0f14; color: #ffffff; font-family: 'Outfit', sans-serif; padding: 20px; margin: 0; }
         .container { max-width: 420px; margin: auto; }
-
-        /* Asosiy karta */
-        .main-card {
-            background: #161921;
-            padding: 30px;
-            border-radius: 30px;
-            text-align: center;
-            margin-bottom: 25px;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-
+        .main-card { background: #161921; padding: 30px; border-radius: 30px; text-align: center; margin-bottom: 25px; border: 1px solid rgba(255,255,255,0.05); }
         .emoji-big { font-size: 50px; margin-bottom: 10px; }
         .label { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 2px; }
         .value { font-size: 52px; font-weight: 700; color: #fff; margin: 10px 0; }
         .trend-badge { font-size: 14px; padding: 6px 16px; border-radius: 12px; font-weight: 600; }
         .up { color: #00ff9d; background: rgba(0, 255, 157, 0.1); }
-
-        /* Fanlar ro'yxati */
-        .subject-card {
-            background: #161921;
-            padding: 20px;
-            border-radius: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-
+        .down { color: #ff3e3e; background: rgba(255, 62, 62, 0.1); }
+        .subject-card { background: #161921; padding: 20px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.05); }
         .subject-info h4 { margin: 0; font-size: 16px; }
         .subject-info p { margin: 4px 0 0 0; font-size: 12px; color: #888; }
-        
         .score-display { text-align: right; }
         .score-val { font-size: 18px; font-weight: 700; color: #00d2ff; }
         .score-diff { font-size: 12px; font-weight: 600; }
@@ -60,27 +31,22 @@
         <p style="color: #666; font-size: 14px;">Dr. Rahmonov, shaxsiy natijalaringiz</p>
     </div>
 
-    <!-- Umumiy Karta -->
     <div class="main-card">
         <div class="emoji-big">🔥</div>
-        <div class="label">Sizning Umumiy Ballingiz</div>
+        <div class="label" id="user-id-display">ID: Yuklanmoqda...</div>
         <div class="value" id="total-val">0.0</div>
-        <span class="trend-badge up" id="user-id-display">ID: Yuklanmoqda...</span>
+        <span class="trend-badge" id="trend-badge">0% o'zgarish</span>
     </div>
 
-    <!-- Fanlar Analizi dinamik yuklanadi -->
     <div id="analytics-list"></div>
 </div>
 
 <script>
     function loadAnalytics() {
-        // 1. Foydalanuvchi ID sini localStorage dan olish
-        const userId = localStorage.getItem('userId') || 'Nomaʼlum';
+        const userId = localStorage.getItem('userId') || 'Sardorbek';
         document.getElementById('user-id-display').innerText = "ID: " + userId;
 
-        // 2. Natijalarni olish (Premium yoki Bepul)
         const rawData = localStorage.getItem('premiumResult') || localStorage.getItem('freeResult');
-        
         if (!rawData) {
             document.getElementById('analytics-list').innerHTML = "<p style='text-align:center; color:#888;'>Hozircha natijalar mavjud emas.</p>";
             return;
@@ -88,31 +54,43 @@
 
         const results = JSON.parse(rawData);
         const stats = {};
-        let totalBall = 0;
+        let currentTotalBall = 0;
 
-        // 3. Ma'lumotlarni guruhlash va hisoblash
         results.forEach(item => {
-            if (!stats[item.subject]) {
-                stats[item.subject] = { correct: 0, total: 0, score: 0 };
-            }
+            if (!stats[item.subject]) stats[item.subject] = { correct: 0, total: 0, score: 0 };
             stats[item.subject].total += 1;
             if (item.isCorrect) {
                 stats[item.subject].correct += 1;
                 stats[item.subject].score += item.ball;
             }
-            totalBall += item.ball;
+            currentTotalBall += item.ball;
         });
 
-        document.getElementById('total-val').innerText = totalBall.toFixed(1);
+        // Eng yuqori ballni saqlash va solishtirish
+        let bestTotalScore = parseFloat(localStorage.getItem('bestTotalScore')) || 0;
+        let trend = 0;
+        
+        if (bestTotalScore > 0) {
+            trend = ((currentTotalBall - bestTotalScore) / bestTotalScore) * 100;
+        }
 
-        // 4. Kartalarni ekranga chiqarish
+        if (currentTotalBall > bestTotalScore) {
+            bestTotalScore = currentTotalBall;
+            localStorage.setItem('bestTotalScore', bestTotalScore);
+        }
+
+        // Umumiy UI yangilash
+        document.getElementById('total-val').innerText = currentTotalBall.toFixed(1);
+        const badge = document.getElementById('trend-badge');
+        badge.innerText = trend >= 0 ? `+${trend.toFixed(1)}% o'sish` : `${trend.toFixed(1)}% pasayish`;
+        badge.className = `trend-badge ${trend >= 0 ? 'up' : 'down'}`;
+
         const listContainer = document.getElementById('analytics-list');
-        listContainer.innerHTML = ""; // Tozalash
+        listContainer.innerHTML = "";
 
         for (let sub in stats) {
             const data = stats[sub];
             const percent = Math.round((data.correct / data.total) * 100);
-            
             const card = document.createElement('div');
             card.className = 'subject-card';
             card.innerHTML = `
@@ -122,16 +100,13 @@
                 </div>
                 <div class="score-display">
                     <div class="score-val">${percent}%</div>
-                    <div class="score-diff" style="color: ${percent >= 50 ? '#00ff9d' : '#ff3e3e'};">
-                        ${data.score.toFixed(1)} ball
-                    </div>
+                    <div class="score-diff" style="color: #00d2ff;">${data.score.toFixed(1)} ball</div>
                 </div>
             `;
             listContainer.appendChild(card);
         }
     }
 
-    // Sahifa yuklanganda ishlash
     window.onload = loadAnalytics;
 </script>
 
