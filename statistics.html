@@ -53,7 +53,7 @@
 
 <script>
     function loadAnalytics() {
-        // localStorage dan foydalanuvchi ma'lumotlarini olish
+        // ID va FIO ni olish
         const fio = localStorage.getItem('userFio') || 'Foydalanuvchi';
         const studentId = localStorage.getItem('studentID') || '---';
         
@@ -93,7 +93,7 @@
             const data = stats[sub];
             const percent = Math.round((data.correct / data.total) * 100);
             
-            // Fanlar uchun oldingi natijani saqlash va taqqoslash
+            // Har bir fan uchun oldingi foizni olish va solishtirish
             let prevPercent = parseFloat(localStorage.getItem('stats_' + sub)) || percent;
             let diff = percent - prevPercent;
             localStorage.setItem('stats_' + sub, percent);
