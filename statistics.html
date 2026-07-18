@@ -9,8 +9,12 @@
         body { background: #0d0f14; color: #ffffff; font-family: 'Outfit', sans-serif; padding: 20px; margin: 0; }
         .container { max-width: 420px; margin: auto; }
         
+        /* Tugmalar bosilganda soya ko'rinmasligi uchun: */
+        button { outline: none !important; box-shadow: none !important; }
+        
         .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .exit-btn { background: #ff3e3e; color: white; border: none; padding: 8px 15px; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: 600; }
+        .exit-btn:active { background: #d32f2f; }
         
         .main-card { background: #161921; padding: 30px; border-radius: 30px; text-align: center; margin-bottom: 25px; border: 1px solid rgba(255,255,255,0.05); }
         .emoji-big { font-size: 50px; margin-bottom: 10px; }
@@ -58,29 +62,29 @@
     const firebaseConfig = {
         apiKey: "AIzaSyA2G8cD0JezEKXRCtKLYiZL0bzDyTp06Vs",
         projectId: "quiz-app-3692d",
-        // Boshqa konfiguratsiyalaringiz...
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
 
-    // Foydalanuvchini bazadan yuklash funksiyasi
     onAuthStateChanged(auth, async (user) => {
         if (user) {
-            const userDoc = await getDoc(doc(db, "users", user.uid));
-            if (userDoc.exists()) {
-                const data = userDoc.data();
-                document.getElementById('display-fio').innerText = data.fio || "Foydalanuvchi";
-                document.getElementById('display-id').innerText = "ID: " + (data.studentID || "---");
-            }
+            try {
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (userDoc.exists()) {
+                    const data = userDoc.data();
+                    document.getElementById('display-fio').innerText = data.fio || "Foydalanuvchi";
+                    document.getElementById('display-id').innerText = "ID: " + (data.studentID || "---");
+                }
+            } catch (e) { console.error(e); }
+            loadAnalytics();
         } else {
             window.location.replace('login.html');
         }
     });
 
-    // Siz so'ragan qolgan qismlar (Analytics qismi o'zgarishsiz qoldirildi)
-    function loadAnalytics() {
+    window.loadAnalytics = function() {
         const rawData = localStorage.getItem('premiumResult') || localStorage.getItem('freeResult');
         if (!rawData) return;
 
@@ -107,6 +111,7 @@
         if(currentTotalBall > bestTotal) localStorage.setItem('bestTotalScore', currentTotalBall);
 
         const listContainer = document.getElementById('analytics-list');
+        listContainer.innerHTML = "";
         for (let sub in stats) {
             const data = stats[sub];
             const percent = Math.round((data.correct / data.total) * 100);
@@ -129,11 +134,9 @@
     window.logout = function() {
         signOut(auth).then(() => {
             localStorage.clear();
-            window.location.replace('home.html);
+            window.location.replace('login.html');
         });
     }
-
-    window.onload = loadAnalytics;
 </script>
 
 </body>
