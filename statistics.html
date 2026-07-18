@@ -34,7 +34,7 @@
 
 <div class="container">
     <div class="header-bar">
-        <button class="exit-btn" onclick="window.location.href='home.html'">Chiqish</button>
+        <button class="exit-btn" onclick="logout()">Chiqish</button>
         <div style="text-align: right;">
             <h4 id="display-fio" style="margin:0; font-size:14px;">User</h4>
             <p id="display-id" style="margin:0; font-size:10px; color:#888;">ID: ---</p>
@@ -53,7 +53,7 @@
 
 <script>
     function loadAnalytics() {
-        // localStorage dan foydalanuvchi ma'lumotlarini olish
+        // Firebase bazasidan kelgan FIO va ID ni olish
         const fio = localStorage.getItem('userFio') || 'Foydalanuvchi';
         const studentId = localStorage.getItem('studentID') || '---';
         
@@ -82,18 +82,14 @@
         let trend = bestTotal > 0 ? ((currentTotalBall - bestTotal) / bestTotal) * 100 : 0;
         document.getElementById('total-val').innerText = currentTotalBall.toFixed(1);
         const badge = document.getElementById('trend-badge');
-        badge.innerText = `${trend >= 0 ? '+' : ''}${trend.toFixed(1)}% o'sish`;
+        badge.innerText = `${trend >= 0 ? '+' : ''}${trend.toFixed(1)}% ${trend >= 0 ? 'o\'sish' : 'pasayish'}`;
         badge.className = `trend-badge ${trend >= 0 ? 'up' : 'down'}`;
         if(currentTotalBall > bestTotal) localStorage.setItem('bestTotalScore', currentTotalBall);
 
         const listContainer = document.getElementById('analytics-list');
-        listContainer.innerHTML = "";
-
         for (let sub in stats) {
             const data = stats[sub];
             const percent = Math.round((data.correct / data.total) * 100);
-            
-            // Fanlar uchun oldingi natijani saqlash va taqqoslash
             let prevPercent = parseFloat(localStorage.getItem('stats_' + sub)) || percent;
             let diff = percent - prevPercent;
             localStorage.setItem('stats_' + sub, percent);
@@ -108,12 +104,17 @@
                 <div class="score-display">
                     <div class="score-val">${percent}%</div>
                     <div class="score-diff" style="color: ${diff >= 0 ? '#00ff9d' : '#ff3e3e'};">
-                        ${diff >= 0 ? '+' : ''}${diff}% ${diff >= 0 ? '↑' : '↓'}
+                        ${data.score.toFixed(1)} ball
                     </div>
                 </div>
             `;
             listContainer.appendChild(card);
         }
+    }
+
+    function logout() {
+        localStorage.clear();
+        window.location.replace('login.html');
     }
 
     window.onload = loadAnalytics;
