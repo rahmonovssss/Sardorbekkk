@@ -53,8 +53,8 @@
 
 <script>
     function loadAnalytics() {
-        // ID va FIO ni localStorage dan olib ekranga chiqarish
-        const fio = localStorage.getItem('userFio') || 'Foydalanuvchi';
+        // ID va FIO ni localStorage dan to'g'ridan-to'g'ri tekshirib olish
+        const fio = localStorage.getItem('userFio') || localStorage.getItem('fio') || 'Foydalanuvchi';
         const studentId = localStorage.getItem('studentID') || '---';
         
         document.getElementById('display-fio').innerText = fio;
@@ -74,7 +74,6 @@
             currentTotalBall += item.ball;
         });
 
-        // Umumiy ball trendi hisoblash
         let lastTotal = parseFloat(localStorage.getItem('last_total')) || currentTotalBall;
         let diffTotal = currentTotalBall - lastTotal;
         let trendTotal = lastTotal !== 0 ? (diffTotal / lastTotal) * 100 : 0;
@@ -115,7 +114,6 @@
     }
 
     function logout() {
-        // Chiqishni bosganda home.html sahifasiga yo'naltirish
         window.location.href = 'home.html';
     }
 
