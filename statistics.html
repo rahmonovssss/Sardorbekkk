@@ -36,6 +36,7 @@
     <div class="header-bar">
         <button class="exit-btn" onclick="logout()">Chiqish</button>
         <div style="text-align: right;">
+            <!-- FIO va ID shu yerda ko'rinadi -->
             <h4 id="display-fio" style="margin:0; font-size:14px;">User</h4>
             <p id="display-id" style="margin:0; font-size:10px; color:#888;">ID: ---</p>
         </div>
@@ -53,8 +54,8 @@
 
 <script>
     function loadAnalytics() {
-        // ID va FIO ni localStorage dan to'g'ridan-to'g'ri tekshirib olish
-        const fio = localStorage.getItem('userFio') || localStorage.getItem('fio') || 'Foydalanuvchi';
+        // ID va FIO ni localStorage dan olib ekranga chiqarish
+        const fio = localStorage.getItem('userFio') || 'Foydalanuvchi';
         const studentId = localStorage.getItem('studentID') || '---';
         
         document.getElementById('display-fio').innerText = fio;
@@ -74,6 +75,7 @@
             currentTotalBall += item.ball;
         });
 
+        // Umumiy ball trendi hisoblash
         let lastTotal = parseFloat(localStorage.getItem('last_total')) || currentTotalBall;
         let diffTotal = currentTotalBall - lastTotal;
         let trendTotal = lastTotal !== 0 ? (diffTotal / lastTotal) * 100 : 0;
@@ -114,6 +116,7 @@
     }
 
     function logout() {
+        // Chiqishni bosganda home.html sahifasiga yo'naltirish
         window.location.href = 'home.html';
     }
 
