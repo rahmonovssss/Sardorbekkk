@@ -8,7 +8,6 @@
         
         body { background: #0d0f14; color: #ffffff; font-family: 'Outfit', sans-serif; padding: 20px; margin: 0; }
         .container { max-width: 420px; margin: auto; }
-        
         button { outline: none !important; box-shadow: none !important; }
         
         .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
@@ -66,6 +65,8 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
+    
+    let isLoggingOut = false; // Chiqish jarayonini kuzatish uchun bayroq
 
     onAuthStateChanged(auth, async (user) => {
         if (user) {
@@ -79,7 +80,10 @@
             } catch (e) { console.error(e); }
             loadAnalytics();
         } else {
-            window.location.replace('login.html');
+            // Agar chiqish jarayoni bo'lmasa, login sahifasiga o'tkaz
+            if (!isLoggingOut) {
+                window.location.replace('login.html');
+            }
         }
     });
 
@@ -131,6 +135,8 @@
     }
 
     window.logout = function() {
+        isLoggingOut = true; // Chiqish jarayonini boshlash
+        localStorage.clear();
         signOut(auth).then(() => {
             window.location.replace('home.html');
         });
