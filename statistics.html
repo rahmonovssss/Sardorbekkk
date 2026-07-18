@@ -2,32 +2,138 @@
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Statistika - Dr. Rahmonov</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <title>Dr. Rahmonov | Analytics</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        body { background: #0f2027; color: white; padding: 20px; text-align: center; }
-        .stat-circle { 
-            width: 180px; height: 180px; border-radius: 50%; 
-            background: rgba(255,255,255,0.05); border: 8px solid #00d2ff;
-            margin: 40px auto; display: flex; flex-direction: column; 
-            justify-content: center; box-shadow: 0 0 30px rgba(0, 210, 255, 0.2);
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
+        
+        body { 
+            background: #0d0f14; 
+            color: #ffffff; 
+            font-family: 'Outfit', sans-serif;
+            padding: 20px;
+            margin: 0;
         }
-        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .stat-card { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 25px; border: 1px solid rgba(255,255,255,0.1); }
-        .stat-card h3 { color: #00d2ff; font-size: 24px; }
+
+        .container { max-width: 420px; margin: auto; }
+
+        /* Asosiy karta */
+        .main-card {
+            background: #161921;
+            padding: 30px;
+            border-radius: 30px;
+            text-align: center;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .emoji-big { font-size: 50px; margin-bottom: 10px; }
+        .label { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 2px; }
+        .value { font-size: 52px; font-weight: 700; color: #fff; margin: 10px 0; }
+        .trend-badge { font-size: 14px; padding: 6px 16px; border-radius: 12px; font-weight: 600; }
+        .up { color: #00ff9d; background: rgba(0, 255, 157, 0.1); }
+
+        /* Fanlar ro'yxati */
+        .subject-card {
+            background: #161921;
+            padding: 20px;
+            border-radius: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .subject-info h4 { margin: 0; font-size: 16px; }
+        .subject-info p { margin: 4px 0 0 0; font-size: 12px; color: #888; }
+        
+        .score-display { text-align: right; }
+        .score-val { font-size: 18px; font-weight: 700; color: #00d2ff; }
+        .score-diff { font-size: 12px; font-weight: 600; }
     </style>
 </head>
 <body>
-    <a href="home.html" style="float:left; text-decoration:none; color:#00d2ff;">⬅️ Orqaga</a><br>
-    <div class="stat-circle">
-        <h1 id="total-count">0</h1>
-        <p>Umumiy Test</p>
+
+<div class="container">
+    <div style="margin-bottom: 25px;">
+        <h2 style="font-size: 24px; margin: 0;">Analytics</h2>
+        <p style="color: #666; font-size: 14px;">Dr. Rahmonov, shaxsiy natijalaringiz</p>
     </div>
-    <div class="stat-grid">
-        <div class="stat-card"><p>O'rtacha Ball</p><h3 id="avg-score">0</h3></div>
-        <div class="stat-card"><p>Eng Yuqori</p><h3 id="max-score">0</h3></div>
+
+    <!-- Umumiy Karta -->
+    <div class="main-card">
+        <div class="emoji-big">🔥</div>
+        <div class="label">Sizning Umumiy Ballingiz</div>
+        <div class="value" id="total-val">0.0</div>
+        <span class="trend-badge up" id="user-id-display">ID: Yuklanmoqda...</span>
     </div>
+
+    <!-- Fanlar Analizi dinamik yuklanadi -->
+    <div id="analytics-list"></div>
+</div>
+
+<script>
+    function loadAnalytics() {
+        // 1. Foydalanuvchi ID sini localStorage dan olish
+        const userId = localStorage.getItem('userId') || 'Nomaʼlum';
+        document.getElementById('user-id-display').innerText = "ID: " + userId;
+
+        // 2. Natijalarni olish (Premium yoki Bepul)
+        const rawData = localStorage.getItem('premiumResult') || localStorage.getItem('freeResult');
+        
+        if (!rawData) {
+            document.getElementById('analytics-list').innerHTML = "<p style='text-align:center; color:#888;'>Hozircha natijalar mavjud emas.</p>";
+            return;
+        }
+
+        const results = JSON.parse(rawData);
+        const stats = {};
+        let totalBall = 0;
+
+        // 3. Ma'lumotlarni guruhlash va hisoblash
+        results.forEach(item => {
+            if (!stats[item.subject]) {
+                stats[item.subject] = { correct: 0, total: 0, score: 0 };
+            }
+            stats[item.subject].total += 1;
+            if (item.isCorrect) {
+                stats[item.subject].correct += 1;
+                stats[item.subject].score += item.ball;
+            }
+            totalBall += item.ball;
+        });
+
+        document.getElementById('total-val').innerText = totalBall.toFixed(1);
+
+        // 4. Kartalarni ekranga chiqarish
+        const listContainer = document.getElementById('analytics-list');
+        listContainer.innerHTML = ""; // Tozalash
+
+        for (let sub in stats) {
+            const data = stats[sub];
+            const percent = Math.round((data.correct / data.total) * 100);
+            
+            const card = document.createElement('div');
+            card.className = 'subject-card';
+            card.innerHTML = `
+                <div class="subject-info">
+                    <h4>${sub}</h4>
+                    <p>${data.correct} ta to'g'ri / ${data.total} ta</p>
+                </div>
+                <div class="score-display">
+                    <div class="score-val">${percent}%</div>
+                    <div class="score-diff" style="color: ${percent >= 50 ? '#00ff9d' : '#ff3e3e'};">
+                        ${data.score.toFixed(1)} ball
+                    </div>
+                </div>
+            `;
+            listContainer.appendChild(card);
+        }
+    }
+
+    // Sahifa yuklanganda ishlash
+    window.onload = loadAnalytics;
+</script>
+
 </body>
 </html>
