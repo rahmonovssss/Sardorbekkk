@@ -68,6 +68,9 @@
     const db = getFirestore(app);
     const auth = getAuth(app);
 
+    // Flag yordamida logout paytida redirectni to'xtatamiz
+    let isLoggingOut = false;
+
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             try {
@@ -80,7 +83,9 @@
             } catch (e) { console.error(e); }
             loadAnalytics();
         } else {
-            window.location.replace('login.html');
+            if (!isLoggingOut) {
+                window.location.replace('login.html');
+            }
         }
     });
 
@@ -132,9 +137,10 @@
     }
 
     window.logout = function() {
+        isLoggingOut = true; // Avtomatik redirectni to'xtatamiz
         signOut(auth).then(() => {
             localStorage.clear();
-            window.location.replace('home.html');
+            window.location.replace('home.html'); // Endi home.html ga o'tadi
         });
     }
 </script>
