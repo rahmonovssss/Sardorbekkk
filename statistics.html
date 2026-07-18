@@ -2,117 +2,64 @@
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
-    <title>Dr. Rahmonov | Analytics</title>
+    <title>Foydalanuvchilar ro'yxati</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
-        body { background: #0d0f14; color: #ffffff; font-family: 'Outfit', sans-serif; padding: 20px; margin: 0; }
-        .container { max-width: 420px; margin: auto; }
-        .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .exit-btn { background: #ff3e3e; color: white; border: none; padding: 8px 15px; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: 600; }
-        .main-card { background: #161921; padding: 30px; border-radius: 30px; text-align: center; margin-bottom: 25px; border: 1px solid rgba(255,255,255,0.05); }
-        .emoji-big { font-size: 50px; margin-bottom: 10px; }
-        .label { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 2px; }
-        .value { font-size: 52px; font-weight: 700; color: #fff; margin: 10px 0; }
-        .trend-badge { font-size: 14px; padding: 6px 16px; border-radius: 12px; font-weight: 600; }
-        .up { color: #00ff9d; background: rgba(0, 255, 157, 0.1); }
-        .down { color: #ff3e3e; background: rgba(255, 62, 62, 0.1); }
-        .subject-card { background: #161921; padding: 20px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.05); }
-        .subject-info h4 { margin: 0; font-size: 16px; }
-        .subject-info p { margin: 4px 0 0 0; font-size: 12px; color: #888; }
-        .score-display { text-align: right; }
-        .score-val { font-size: 18px; font-weight: 700; color: #00d2ff; }
-        .score-diff { font-size: 12px; font-weight: 600; }
+        body { font-family: sans-serif; padding: 20px; }
+        .user-item { padding: 10px; border-bottom: 1px solid #ccc; }
+        .id-style { color: #007bff; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="header-bar">
-        <button class="exit-btn" onclick="logout()">Chiqish</button>
-        <div style="text-align: right;">
-            <h4 id="display-fio" style="margin:0; font-size:14px;">Yuklanmoqda...</h4>
-            <p id="display-id" style="margin:0; font-size:10px; color:#888;">ID: ---</p>
-        </div>
-    </div>
+    <h2>Talabalar bazasi</h2>
+    <div id="users-list">Yuklanmoqda...</div>
 
-    <div class="main-card">
-        <div class="emoji-big">🔥</div>
-        <div class="label">Umumiy Ball</div>
-        <div class="value" id="total-val">0.0</div>
-        <span class="trend-badge" id="trend-badge">0% o'zgarish</span>
-    </div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    <div id="analytics-list"></div>
-</div>
+        // Firebase konfiguratsiyangiz
+        const firebaseConfig = {
+            apiKey: "AIzaSyA2G8cD0JezEKXRCtKLYiZL0bzDyTp06Vs",
+            projectId: "quiz-app-3692d",
+            // Boshqa maydonlar...
+        };
 
-<script type="module">
-    // Firebase funksiyalarini import qilish
-    import { doc, getDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
-    import { db } from "./firebase-config.js"; // O'zingizning fayl yo'lingiz
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-    async function init() {
-        const userId = localStorage.getItem('currentUserID');
-        
-        // 1. Foydalanuvchi ma'lumotlarini Firebase'dan olish
-        if (userId) {
+        async function loadUsers() {
+            const listDiv = document.getElementById('users-list');
             try {
-                const userDoc = await getDoc(doc(db, "users", userId));
-                if (userDoc.exists()) {
-                    const data = userDoc.data();
-                    document.getElementById('display-fio').innerText = data.fio || "Ism belgilanmagan";
-                    document.getElementById('display-id').innerText = "ID: " + (data.studentID || "---");
-                }
-            } catch (e) {
-                console.error("Firebase xatosi:", e);
+                // 1. 'users' kolleksiyasidan barcha hujjatlarni olamiz
+                const querySnapshot = await getDocs(collection(db, "users"));
+                
+                let html = "<ul>";
+                
+                // 2. Har bir hujjatni aylanib chiqib, ro'yxatga qo'shamiz
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const fio = data.fio || "Ism kiritilmagan";
+                    const studentID = data.studentID || "ID yo'q";
+
+                    html += `
+                        <li class="user-item">
+                            Ism: <strong>${fio}</strong> | 
+                            ID: <span class="id-style">${studentID}</span>
+                        </li>`;
+                });
+                
+                html += "</ul>";
+                listDiv.innerHTML = html;
+
+            } catch (error) {
+                console.error("Xatolik:", error);
+                listDiv.innerHTML = "Ma'lumotlarni yuklashda xatolik yuz berdi.";
             }
         }
 
-        // 2. Statistikani hisoblash
-        loadAnalytics();
-    }
-
-    function loadAnalytics() {
-        const rawData = localStorage.getItem('premiumResult') || localStorage.getItem('freeResult');
-        if (!rawData) return;
-
-        const results = JSON.parse(rawData);
-        const stats = {};
-        let currentTotalBall = 0;
-
-        results.forEach(item => {
-            if (!stats[item.subject]) stats[item.subject] = { correct: 0, total: 0 };
-            stats[item.subject].total += 1;
-            if (item.isCorrect) stats[item.subject].correct += 1;
-            currentTotalBall += item.ball;
-        });
-
-        document.getElementById('total-val').innerText = currentTotalBall.toFixed(1);
-        
-        const listContainer = document.getElementById('analytics-list');
-        for (let sub in stats) {
-            const data = stats[sub];
-            const currentPercent = Math.round((data.correct / data.total) * 100);
-            
-            const card = document.createElement('div');
-            card.className = 'subject-card';
-            card.innerHTML = `
-                <div class="subject-info">
-                    <h4>${sub}</h4>
-                    <p>${data.correct} ta to'g'ri / ${data.total} ta</p>
-                </div>
-                <div class="score-display">
-                    <div class="score-val">${currentPercent}%</div>
-                </div>
-            `;
-            listContainer.appendChild(card);
-        }
-    }
-
-    window.logout = () => { window.location.href = 'home.html'; };
-    
-    // Ishga tushirish
-    init();
-</script>
-
+        // Sahifa yuklanganda funksiyani chaqiramiz
+        loadUsers();
+    </script>
 </body>
 </html>
