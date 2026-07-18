@@ -2,62 +2,139 @@
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
-    <title>Profil</title>
+    <title>Dr. Rahmonov | Analytics</title>
     <style>
-        .profile-card { border: 1px solid #ddd; padding: 20px; border-radius: 10px; width: 300px; margin: 20px; }
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
+        
+        body { background: #0d0f14; color: #ffffff; font-family: 'Outfit', sans-serif; padding: 20px; margin: 0; }
+        .container { max-width: 420px; margin: auto; }
+        
+        .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .exit-btn { background: #ff3e3e; color: white; border: none; padding: 8px 15px; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: 600; }
+        
+        .main-card { background: #161921; padding: 30px; border-radius: 30px; text-align: center; margin-bottom: 25px; border: 1px solid rgba(255,255,255,0.05); }
+        .emoji-big { font-size: 50px; margin-bottom: 10px; }
+        .label { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 2px; }
+        .value { font-size: 52px; font-weight: 700; color: #fff; margin: 10px 0; }
+        .trend-badge { font-size: 14px; padding: 6px 16px; border-radius: 12px; font-weight: 600; }
+        .up { color: #00ff9d; background: rgba(0, 255, 157, 0.1); }
+        .down { color: #ff3e3e; background: rgba(255, 62, 62, 0.1); }
+        
+        .subject-card { background: #161921; padding: 20px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.05); }
+        .subject-info h4 { margin: 0; font-size: 16px; }
+        .subject-info p { margin: 4px 0 0 0; font-size: 12px; color: #888; }
+        
+        .score-display { text-align: right; }
+        .score-val { font-size: 18px; font-weight: 700; color: #00d2ff; }
+        .score-diff { font-size: 12px; font-weight: 600; }
     </style>
 </head>
 <body>
 
-    <div id="profile-container" class="profile-card">
-        Yuklanmoqda...
+<div class="container">
+    <div class="header-bar">
+        <button class="exit-btn" onclick="logout()">Chiqish</button>
+        <div style="text-align: right;">
+            <h4 id="display-fio" style="margin:0; font-size:14px;">Yuklanmoqda...</h4>
+            <p id="display-id" style="margin:0; font-size:10px; color:#888;">ID: ---</p>
+        </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    <div class="main-card">
+        <div class="emoji-big">🔥</div>
+        <div class="label">Umumiy Ball</div>
+        <div class="value" id="total-val">0.0</div>
+        <span class="trend-badge" id="trend-badge">0% o'zgarish</span>
+    </div>
 
-        const firebaseConfig = {
-            // Konfiguratsiyangiz
-            apiKey: "AIzaSyA2G8cD0JezEKXRCtKLYiZL0bzDyTp06Vs",
-            projectId: "quiz-app-3692d",
-            // ...
-        };
+    <div id="analytics-list"></div>
+</div>
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-        // Tizimga kirgan foydalanuvchini kuzatish
-        onAuthStateChanged(auth, async (user) => {
-            const container = document.getElementById('profile-container');
-            
-            if (user) {
-                // Tizimga kirgan foydalanuvchi bor
-                try {
-                    // Firestore'dan 'users' kolleksiyasidan aynan shu foydalanuvchining (uid) ma'lumotini olamiz
-                    const docRef = doc(db, "users", user.uid);
-                    const docSnap = await getDoc(docRef);
+    const firebaseConfig = {
+        apiKey: "AIzaSyA2G8cD0JezEKXRCtKLYiZL0bzDyTp06Vs",
+        projectId: "quiz-app-3692d",
+        // Boshqa konfiguratsiyalaringiz...
+    };
 
-                    if (docSnap.exists()) {
-                        const userData = docSnap.data();
-                        container.innerHTML = `
-                            <h3>Sizning ma'lumotlaringiz:</h3>
-                            <p>Ism: <strong>${userData.fio || "Noma'lum"}</strong></p>
-                            <p>ID raqam: <strong>${userData.studentID || "Mavjud emas"}</strong></p>
-                        `;
-                    } else {
-                        container.innerHTML = "Foydalanuvchi ma'lumotlari topilmadi.";
-                    }
-                } catch (error) {
-                    container.innerHTML = "Xatolik yuz berdi.";
-                }
-            } else {
-                // Foydalanuvchi tizimga kirmagan
-                container.innerHTML = "Iltimos, tizimga kiring.";
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    // Foydalanuvchini bazadan yuklash funksiyasi
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            const userDoc = await getDoc(doc(db, "users", user.uid));
+            if (userDoc.exists()) {
+                const data = userDoc.data();
+                document.getElementById('display-fio').innerText = data.fio || "Foydalanuvchi";
+                document.getElementById('display-id').innerText = "ID: " + (data.studentID || "---");
             }
+        } else {
+            window.location.replace('login.html');
+        }
+    });
+
+    // Siz so'ragan qolgan qismlar (Analytics qismi o'zgarishsiz qoldirildi)
+    function loadAnalytics() {
+        const rawData = localStorage.getItem('premiumResult') || localStorage.getItem('freeResult');
+        if (!rawData) return;
+
+        const results = JSON.parse(rawData);
+        const stats = {};
+        let currentTotalBall = 0;
+
+        results.forEach(item => {
+            if (!stats[item.subject]) stats[item.subject] = { correct: 0, total: 0, score: 0 };
+            stats[item.subject].total += 1;
+            if (item.isCorrect) {
+                stats[item.subject].correct += 1;
+                stats[item.subject].score += item.ball;
+            }
+            currentTotalBall += item.ball;
         });
-    </script>
+
+        let bestTotal = parseFloat(localStorage.getItem('bestTotalScore')) || 0;
+        let trend = bestTotal > 0 ? ((currentTotalBall - bestTotal) / bestTotal) * 100 : 0;
+        document.getElementById('total-val').innerText = currentTotalBall.toFixed(1);
+        const badge = document.getElementById('trend-badge');
+        badge.innerText = `${trend >= 0 ? '+' : ''}${trend.toFixed(1)}% ${trend >= 0 ? 'o\'sish' : 'pasayish'}`;
+        badge.className = `trend-badge ${trend >= 0 ? 'up' : 'down'}`;
+        if(currentTotalBall > bestTotal) localStorage.setItem('bestTotalScore', currentTotalBall);
+
+        const listContainer = document.getElementById('analytics-list');
+        for (let sub in stats) {
+            const data = stats[sub];
+            const percent = Math.round((data.correct / data.total) * 100);
+            const card = document.createElement('div');
+            card.className = 'subject-card';
+            card.innerHTML = `
+                <div class="subject-info">
+                    <h4>${sub} ${percent >= 80 ? '🚀' : '📈'}</h4>
+                    <p>${data.correct} ta to'g'ri / ${data.total} ta</p>
+                </div>
+                <div class="score-display">
+                    <div class="score-val">${percent}%</div>
+                    <div class="score-diff" style="color: #00ff9d;">${data.score.toFixed(1)} ball</div>
+                </div>
+            `;
+            listContainer.appendChild(card);
+        }
+    }
+
+    window.logout = function() {
+        signOut(auth).then(() => {
+            localStorage.clear();
+            window.location.replace('login.html');
+        });
+    }
+
+    window.onload = loadAnalytics;
+</script>
+
 </body>
 </html>
