@@ -5,14 +5,10 @@
     <title>Dr. Rahmonov | Analytics</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
-        
         body { background: #0d0f14; color: #ffffff; font-family: 'Outfit', sans-serif; padding: 20px; margin: 0; }
         .container { max-width: 420px; margin: auto; }
-        
-        /* Yuqori qism */
         .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .exit-btn { background: #ff3e3e; color: white; border: none; padding: 8px 15px; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: 600; }
-        
         .main-card { background: #161921; padding: 30px; border-radius: 30px; text-align: center; margin-bottom: 25px; border: 1px solid rgba(255,255,255,0.05); }
         .emoji-big { font-size: 50px; margin-bottom: 10px; }
         .label { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 2px; }
@@ -20,11 +16,9 @@
         .trend-badge { font-size: 14px; padding: 6px 16px; border-radius: 12px; font-weight: 600; }
         .up { color: #00ff9d; background: rgba(0, 255, 157, 0.1); }
         .down { color: #ff3e3e; background: rgba(255, 62, 62, 0.1); }
-        
         .subject-card { background: #161921; padding: 20px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.05); }
         .subject-info h4 { margin: 0; font-size: 16px; }
         .subject-info p { margin: 4px 0 0 0; font-size: 12px; color: #888; }
-        
         .score-display { text-align: right; }
         .score-val { font-size: 18px; font-weight: 700; color: #00d2ff; }
         .score-diff { font-size: 12px; font-weight: 600; }
@@ -36,7 +30,7 @@
     <div class="header-bar">
         <button class="exit-btn" onclick="logout()">Chiqish</button>
         <div style="text-align: right;">
-            <h4 id="display-fio" style="margin:0; font-size:14px;">User</h4>
+            <h4 id="display-fio" style="margin:0; font-size:14px;">Yuklanmoqda...</h4>
             <p id="display-id" style="margin:0; font-size:10px; color:#888;">ID: ---</p>
         </div>
     </div>
@@ -51,25 +45,33 @@
     <div id="analytics-list"></div>
 </div>
 
-<script>
-    async function loadAnalytics() {
-        // Firebase'dan foydalanuvchi ma'lumotlarini olish
-        try {
-            const usersSnap = await getDocs(collection(db, "users"));
-            // Masalan, hozirgi kirgan user ID sini localStorage'dan olamiz
-            const currentUid = localStorage.getItem('currentUserID'); 
-            
-            usersSnap.forEach(uDoc => {
-                if (uDoc.id === currentUid) {
-                    const uData = uDoc.data();
-                    document.getElementById('display-fio').innerText = uData.fio || "Ism belgilanmagan";
-                    document.getElementById('display-id').innerText = "ID: " + (uData.studentID || "Yo'q");
+<script type="module">
+    // Firebase funksiyalarini import qilish
+    import { doc, getDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+    import { db } from "./firebase-config.js"; // O'zingizning fayl yo'lingiz
+
+    async function init() {
+        const userId = localStorage.getItem('currentUserID');
+        
+        // 1. Foydalanuvchi ma'lumotlarini Firebase'dan olish
+        if (userId) {
+            try {
+                const userDoc = await getDoc(doc(db, "users", userId));
+                if (userDoc.exists()) {
+                    const data = userDoc.data();
+                    document.getElementById('display-fio').innerText = data.fio || "Ism belgilanmagan";
+                    document.getElementById('display-id').innerText = "ID: " + (data.studentID || "---");
                 }
-            });
-        } catch (err) {
-            console.error("Foydalanuvchilarni yuklashda xatolik:", err);
+            } catch (e) {
+                console.error("Firebase xatosi:", e);
+            }
         }
 
+        // 2. Statistikani hisoblash
+        loadAnalytics();
+    }
+
+    function loadAnalytics() {
         const rawData = localStorage.getItem('premiumResult') || localStorage.getItem('freeResult');
         if (!rawData) return;
 
@@ -84,51 +86,32 @@
             currentTotalBall += item.ball;
         });
 
-        // Umumiy ball trendi hisoblash
-        let lastTotal = parseFloat(localStorage.getItem('last_total')) || currentTotalBall;
-        let diffTotal = currentTotalBall - lastTotal;
-        let trendTotal = lastTotal !== 0 ? (diffTotal / lastTotal) * 100 : 0;
-        
         document.getElementById('total-val').innerText = currentTotalBall.toFixed(1);
-        const totalBadge = document.getElementById('trend-badge');
-        totalBadge.innerText = `${trendTotal >= 0 ? '+' : ''}${trendTotal.toFixed(1)}% o'zgarish`;
-        totalBadge.className = `trend-badge ${trendTotal >= 0 ? 'up' : 'down'}`;
-        localStorage.setItem('last_total', currentTotalBall);
-
+        
         const listContainer = document.getElementById('analytics-list');
-        const lastStats = JSON.parse(localStorage.getItem('last_stats')) || {};
-
         for (let sub in stats) {
             const data = stats[sub];
             const currentPercent = Math.round((data.correct / data.total) * 100);
-            const prevPercent = lastStats[sub] || currentPercent;
-            const diff = currentPercent - prevPercent;
-            lastStats[sub] = currentPercent;
-
+            
             const card = document.createElement('div');
             card.className = 'subject-card';
             card.innerHTML = `
                 <div class="subject-info">
-                    <h4>${sub} ${currentPercent >= 80 ? '🚀' : '📈'}</h4>
+                    <h4>${sub}</h4>
                     <p>${data.correct} ta to'g'ri / ${data.total} ta</p>
                 </div>
                 <div class="score-display">
                     <div class="score-val">${currentPercent}%</div>
-                    <div class="score-diff" style="color: ${diff >= 0 ? '#00ff9d' : '#ff3e3e'};">
-                        ${diff >= 0 ? '▲' : '▼'} ${Math.abs(diff)}%
-                    </div>
                 </div>
             `;
             listContainer.appendChild(card);
         }
-        localStorage.setItem('last_stats', JSON.stringify(lastStats));
     }
 
-    function logout() {
-        window.location.href = 'home.html';
-    }
-
-    window.onload = loadAnalytics;
+    window.logout = () => { window.location.href = 'home.html'; };
+    
+    // Ishga tushirish
+    init();
 </script>
 
 </body>
