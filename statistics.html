@@ -36,7 +36,7 @@
         <button class="exit-btn" onclick="logout()">Chiqish</button>
         <div style="text-align: right;">
             <h4 id="display-fio" style="margin:0; font-size:14px;">Yuklanmoqda...</h4>
-            <p id="display-id" style="margin:0; font-size:10px; color:#888;">ID: ---</p>
+            <p id="display-id" style="margin:0; font-size:10px; color:#888;">ID:Yuklanmoqda...</p>
         </div>
     </div>
 
@@ -129,7 +129,7 @@
     window.logout = function() {
         signOut(auth).then(() => {
             localStorage.clear();
-            window.location.replace('login.html');
+            window.location.replace('home.html);
         });
     }
 
