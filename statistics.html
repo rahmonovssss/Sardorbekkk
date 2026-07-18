@@ -8,6 +8,11 @@
         
         body { background: #0d0f14; color: #ffffff; font-family: 'Outfit', sans-serif; padding: 20px; margin: 0; }
         .container { max-width: 420px; margin: auto; }
+        
+        /* Yuqori qism */
+        .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .exit-btn { background: #ff3e3e; color: white; border: none; padding: 8px 15px; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: 600; }
+        
         .main-card { background: #161921; padding: 30px; border-radius: 30px; text-align: center; margin-bottom: 25px; border: 1px solid rgba(255,255,255,0.05); }
         .emoji-big { font-size: 50px; margin-bottom: 10px; }
         .label { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 2px; }
@@ -15,9 +20,11 @@
         .trend-badge { font-size: 14px; padding: 6px 16px; border-radius: 12px; font-weight: 600; }
         .up { color: #00ff9d; background: rgba(0, 255, 157, 0.1); }
         .down { color: #ff3e3e; background: rgba(255, 62, 62, 0.1); }
+        
         .subject-card { background: #161921; padding: 20px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.05); }
         .subject-info h4 { margin: 0; font-size: 16px; }
         .subject-info p { margin: 4px 0 0 0; font-size: 12px; color: #888; }
+        
         .score-display { text-align: right; }
         .score-val { font-size: 18px; font-weight: 700; color: #00d2ff; }
         .score-diff { font-size: 12px; font-weight: 600; }
@@ -26,16 +33,19 @@
 <body>
 
 <div class="container">
-    <div style="margin-bottom: 25px;">
-        <h2 style="font-size: 24px; margin: 0;" id="user-name">User</h2>
-        <p style="color: #666; font-size: 14px;">Analytics, bugungi natijalar</p>
+    <div class="header-bar">
+        <button class="exit-btn" onclick="logout()">Chiqish</button>
+        <div style="text-align: right;">
+            <h4 id="display-fio" style="margin:0; font-size:14px;">User</h4>
+            <p id="display-id" style="margin:0; font-size:10px; color:#888;">ID: ---</p>
+        </div>
     </div>
 
     <div class="main-card">
         <div class="emoji-big">🔥</div>
-        <div class="label" id="user-id">ID: Yuklanmoqda...</div>
+        <div class="label">Umumiy Ball</div>
         <div class="value" id="total-val">0.0</div>
-        <span class="trend-badge" id="trend-badge">0% o'sish</span>
+        <span class="trend-badge" id="trend-badge">0% o'zgarish</span>
     </div>
 
     <div id="analytics-list"></div>
@@ -43,24 +53,27 @@
 
 <script>
     function loadAnalytics() {
-        const userId = localStorage.getItem('userId') || 'NoID';
-        document.getElementById('user-name').innerText = userId;
-        document.getElementById('user-id').innerText = "ID: " + userId;
+        // Firebase bazasidan kelgan FIO va ID ni olish
+        const fio = localStorage.getItem('userFio') || 'Foydalanuvchi';
+        const studentId = localStorage.getItem('studentID') || '---';
+        
+        document.getElementById('display-fio').innerText = fio;
+        document.getElementById('display-id').innerText = "ID: " + studentId;
 
         const rawData = localStorage.getItem('premiumResult') || localStorage.getItem('freeResult');
-        if (!rawData) {
-            document.getElementById('analytics-list').innerHTML = "<p style='text-align:center; color:#888;'>Natijalar topilmadi.</p>";
-            return;
-        }
+        if (!rawData) return;
 
         const results = JSON.parse(rawData);
         const stats = {};
         let currentTotalBall = 0;
 
         results.forEach(item => {
-            if (!stats[item.subject]) stats[item.subject] = { correct: 0, total: 0 };
+            if (!stats[item.subject]) stats[item.subject] = { correct: 0, total: 0, score: 0 };
             stats[item.subject].total += 1;
-            if (item.isCorrect) stats[item.subject].correct += 1;
+            if (item.isCorrect) {
+                stats[item.subject].correct += 1;
+                stats[item.subject].score += item.ball;
+            }
             currentTotalBall += item.ball;
         });
 
@@ -73,15 +86,10 @@
         badge.className = `trend-badge ${trend >= 0 ? 'up' : 'down'}`;
         if(currentTotalBall > bestTotal) localStorage.setItem('bestTotalScore', currentTotalBall);
 
-        // Fanlar bo'yicha trend
         const listContainer = document.getElementById('analytics-list');
-        listContainer.innerHTML = "";
-
         for (let sub in stats) {
             const data = stats[sub];
             const percent = Math.round((data.correct / data.total) * 100);
-            
-            // Oldingi natijani olish
             let prevPercent = parseFloat(localStorage.getItem('stats_' + sub)) || percent;
             let diff = percent - prevPercent;
             localStorage.setItem('stats_' + sub, percent);
@@ -90,19 +98,25 @@
             card.className = 'subject-card';
             card.innerHTML = `
                 <div class="subject-info">
-                    <h4>${sub} ${percent >= 80 ? '🚀' : percent >= 50 ? '📈' : '⚠️'}</h4>
+                    <h4>${sub} ${percent >= 80 ? '🚀' : '📈'}</h4>
                     <p>${data.correct} ta to'g'ri / ${data.total} ta</p>
                 </div>
                 <div class="score-display">
                     <div class="score-val">${percent}%</div>
                     <div class="score-diff" style="color: ${diff >= 0 ? '#00ff9d' : '#ff3e3e'};">
-                        ${diff >= 0 ? '+' : ''}${diff}% ${diff >= 0 ? '↑' : '↓'}
+                        ${data.score.toFixed(1)} ball
                     </div>
                 </div>
             `;
             listContainer.appendChild(card);
         }
     }
+
+    function logout() {
+        localStorage.clear();
+        window.location.replace('login.html');
+    }
+
     window.onload = loadAnalytics;
 </script>
 
